@@ -1,7 +1,7 @@
 function [Wt,Eloss] = turbine(step,efficiency)
 %TO BE REWRITE CASE OF X IS NOT DEFINE !!!
 
-%EXPANSION Update the state after an expansion of specified isentropic efficiency.
+%TURBINE Update the state after an expansion of specified isentropic efficiency.
 %   This MATLAB function has to be used together with a global variable
 %   called state. Given a certain step of variables [p,T,h,s,x], the
 %   function computes the values of the next step if the transformation is
@@ -11,7 +11,7 @@ function [Wt,Eloss] = turbine(step,efficiency)
 %       input args:
 %           step is an integer corresponding to the index of the state
 %           just before the expansion. The function will thus update the
-%           state related to the index step+1, unless step is last
+%           state related to the index step+1, unless step is the last
 %           index of the cycle.
 %
 %           efficiency is the isentropic efficiency of the turbine.
@@ -21,7 +21,7 @@ function [Wt,Eloss] = turbine(step,efficiency)
 %
 %           Eloss is the exergy loss in the turbine, in [kJ/kg].
 %
-%   [Wt,Eloss] = EXPANSION(step,efficiency)
+%   [Wt,Eloss] = TURBINE(step,efficiency)
 
 global state
 

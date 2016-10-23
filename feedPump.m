@@ -57,6 +57,6 @@ h_s=XSteam('h_ps',state.p(nextStage2),s_S);
  state.T(nextStage)=XSteam('T_ph',state.p(nextStage),state.h(nextStage));
  state.s(nextStage)=XSteam('s_ph',state.p(nextStage),state.h(nextStage));
  Wp = state.h(stage) - state.h(nextStage); % work done by the pump
- Eloss = T0*(state.s(nextStage) - state.s(stage)); % Exergy loss due to irreversibilities in the turbine.
+ Eloss = T0*(state.s(nextStage) - state.s(stage)); % Exergy loss due to irreversibilities in the pump.
 end
 
