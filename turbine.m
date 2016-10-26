@@ -1,6 +1,5 @@
-function [Wt,Eloss] = turbine(step,efficiency)
-%TO BE REWRITE CASE OF X IS NOT DEFINE !!!
-
+function [stateO,Wmov,ExLoss,eta_turbex] = turbine(stateI,Tcond,efficiency)
+%TO BE REWRITTEN IN CASE OF X IS NOT DEFINE !!!
 %TURBINE Update the state after an expansion of specified isentropic efficiency.
 %   This MATLAB function has to be used together with a global variable
 %   called state. Given a certain step of variables [p,T,h,s,x], the
@@ -9,72 +8,77 @@ function [Wt,Eloss] = turbine(step,efficiency)
 %   given as argument. If no efficiency is specified, it is set to 1,
 %   making the expansion isentropic.
 %       input args:
-%           step is an integer corresponding to the index of the state
-%           just before the expansion. The function will thus update the
-%           state related to the index step+1, unless step is the last
-%           index of the cycle.
+%           stateI: structure containing the values of the state variables
+%           before the expansion.
 %
-%           efficiency is the isentropic efficiency of the turbine.
+%           efficiency: isentropic efficiency of the turbine.
 %
 %       output args:
-%           Wt is the work done by the turbine on the fluid, in [kJ/kg].
+%           stateI: structure containing the values of the state variables
+%           after the expansion.
 %
-%           Eloss is the exergy loss in the turbine, in [kJ/kg].
+%           Wmov: Work given by the fluid to the turbine, in [kJ/kg].
 %
-%   [Wt,Eloss] = TURBINE(step,efficiency)
+%           ExLoss: exergetic losses due to irreversibilities of the
+%           turbine.
+%
+%           eta_turbex: exergetic efficiency of the turbine.
+%
+%   [stateO,Wmov,ExLoss,eta_turbex] = TURBINE(stateI,efficiency,Tcond)
 
-global state
-
+%% robustness
 switch nargin % Check for correct inputs, set efficiency to 1 if none is specified.
     case 0
-        msgID = 'EXPANSION:NoStep';
-        msg = 'Initial step must be specified.';
+        msgID = 'TURBINE:NoState';
+        msg = 'Initial state must be specified.';
         baseException = MException(msgID,msg);
         throw(baseException)
     case 1
+        msgID = 'TURBINE:NoTcond';
+        msg = 'Condensation temperature must be specified.';
+        baseException = MException(msgID,msg);
+        throw(baseException)
+    case 2
         efficiency = 1;
 end
 
-% Check if the step is the last one of the cycle, then we have to go to
-% the beginning (first step).
-stepNumber = length(state.p);
-if step < stepNumber
-    nextStep = step + 1;
-else
-    nextStep = 1;
-end
-
+%% State calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % known variables
-T1 = state.T(step);
-p1 = state.p(step);
-p2 = XSteam('psat_T',33);
-state.p(nextStep) = p2;
+Ti = stateI.T;%Tmax
+pI = stateI.p;%steamPressure
+pO = XSteam('psat_T',Tcond); %Attention robustesse !!! Pas vrai si x pas déf.
 
-T0 = 15 + 273.15; % reference temperature for exergy calculation
+% Find sI and hI with tables
+sI = XSteam('s_pT',pI,Ti);
+hI = XSteam('h_pT',pI,Ti);
 
-% Find s3 and h3 with tables
-s1 = XSteam('s_pT',p1,T1);
-h1 = XSteam('h_pT',p1,T1);
-
-% Determine h2 using isentropic efficiency
-s2S = s1;
-s2v = XSteam('sV_p',p2); % saturated vapour entropy (in the tables)
-s2l = XSteam('sL_p',p2); % saturated liquid entropy
-x2S = (s2S - s2l)/(s2v - s2l);
-h2v = XSteam('hV_p',p2); % saturated vapour enthalpy (in the tables)
-h2l = XSteam('hL_p',p2); % saturated liquid enthalpy
-h2S = x2S*h2v + (1-x2S)*h2l;
-Wis = h1 - h2S; % isentropical work
-Wt = efficiency*Wis; % Work done by the expansion
-h2 = h1 - Wt; % the work is the enthalpy variation
-state.h(nextStep) = h2;
+% Determine hOut using isentropic efficiency
+sO_s = sI;
+sO_v = XSteam('sV_p',pO); % saturated vapour entropy (in the tables)
+sO_l = XSteam('sL_p',pO); % saturated liquid entropy
+xO_s = (sO_s - sO_l)/(sO_v - sO_l);
+hO_v = XSteam('hV_p',pO); % saturated vapour enthalpy (in the tables)
+hO_l = XSteam('hL_p',pO); % saturated liquid enthalpy
+hO_s = xO_s*hO_v + (1-xO_s)*hO_l;
+W_s = hO_s - hI; % isentropical work
+Wmov = efficiency*W_s; % Work done by the expansion
+hO = hI + Wmov; % the work is the enthalpy variation
 
 % We find the quality based on h2
-x2 = (h2-h2l)/(h2v - h2l);
-state.x(nextStep) = x2;
-s2 = x2*s2v + (1-x2)*s2l;
-state.s(nextStep) = s2;
+xO = (hO-hO_l)/(hO_v - hO_l);
+sO = xO*sO_v + (1-xO)*sO_l;
 
+stateO.p = pO;
+stateO.T = Tcond;
+stateO.s = sO;
+stateO.h = hO;
+stateO.x = xO;
 
-Eloss = T0*(s2-s1); % Exergy loss due to irreversibilities in the turbine.
+%% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+eI=exergy(stateI);
+eO=exergy(stateO);
+
+eta_turbex=abs(Wmov/(eI-eO));
+
+ExLoss = eO-eI; % Exergy loss due to irreversibilities in the turbine.
 end
