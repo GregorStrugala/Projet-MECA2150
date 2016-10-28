@@ -1,52 +1,53 @@
-function [Qc] = condenser(stage)
+function [stateO,Qc,ExLoss] = condenser(stateI)
 %TO BE REWRITE CASE OF X IS NOT DEFINE !!!
-
-%CONDENSER Update the state after an isobaric and isothermal
+%CONDENSER computes the state variation after an isohtermal ad isobaric
 %condensation.
-%   This MATLAB function has to be used together with a global variable
-%   called state. Given a certain stage of variables [p,T,h,s,x], the
-%   function computes the values of the next stage if the transformation is
-%   an isobaric and isothermal condensation (ie, a phase change).
+%   stateO = CONDENSER(stateI) finds the new values of the state variables
+%   contained in stateI, where stateI is a struct with fields {p,T,x,h,s}.
+%   (Here, only fields p and T are mandatory, since they corresponds to the
+%   two variables used to find the next state.)
+%   The values of the state variable need to be expressed in the units
+%   {bar,°C,-,kJ/kg,kJ/(kg*°C)}.
 %
-%       input args:
-%           stage: integer corresponding to the index of the state
-%           just before the condensation. The function will thus update the
-%           state related to the index stage + 1, unless stage is the last
-%           index of the cycle.
+%   [stateO,Qc] = CONDENSER(stateI) returns the next state AND the heat
+%   extracted at the condenser, in [kJ/kg].
 %
-%       output args:
-%           Qc: heat extracted at the condenser to transform all the
-%           vapour into saturated liquid water.
-%
-%   Qc = CONDENSER(stage)
+%   [stateO,Qc,ExLoss] = CONDENSER(stateI) returns the next state, the heat
+%   extracted at the condenser in [kJ/kg], and the exergy loss, also in
+%   [kJ/kg].
 
-global state
-
+%% robustness %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if nargin==0 % Check for correct inputs.
-    msgID = 'ISOPTCONDENSATION:NoStage';
-    msg = 'Initial stage must be specified.';
+    msgID = 'ISOPTCONDENSATION:NoState';
+    msg = 'Input state must be specified.';
     baseException = MException(msgID,msg);
     throw(baseException)
 end
 
-% Check if the stage is the last one of the cycle, then we have to go to
-% the beginning (first stage).
-stageNumber = length(state.p);
-if stage < stageNumber
-    nextStage = stage + 1;
-else
-    nextStage = 1;
-end
-T2 = state.T(stage); % isothermal transformation
-state.p(nextStage) = state.p(stage); % isobaric transformation
+
+%% State calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+To = stateI.T; % isothermal transformation
+pO = stateI.p; % isobaric transformation
 %state.p(nextStage) = XSteam('psat_T',state.T(stage));
 
 
 % The next state is saturated liquid:
-state.x(nextStage) = 0;
-h2 = XSteam('hL_T',T2);
-Qc = h2 - state.h(stage); % Function output: heat extracted at the condenser
-state.h(nextStage) = h2; % Update state
-state.s(nextStage) = XSteam('sL_T',T2);
+sO = XSteam('sL_T',To);
+hO = XSteam('hL_T',To);
+xO = 0;
+
+stateO.p = pO;
+stateO.T = To;
+stateO.x = xO;
+stateO.h = hO;
+stateO.s = sO;
+
+%% Energetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Qc = hO - stateI.h; % Function output: heat extracted at the condenser
+
+%% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+eI=exergy(stateI);
+eO=exergy(stateO);
+ExLoss = eO-eI; % Exergy loss due to heat transfer in the condenser.
 
 end

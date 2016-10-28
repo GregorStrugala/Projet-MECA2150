@@ -1,32 +1,20 @@
 function [stateO,Wmov,ExLoss,eta_turbex] = turbine(stateI,Tcond,efficiency)
 %TO BE REWRITTEN IN CASE OF X IS NOT DEFINE !!!
-%TURBINE Update the state after an expansion of specified isentropic efficiency.
-%   This MATLAB function has to be used together with a global variable
-%   called state. Given a certain step of variables [p,T,h,s,x], the
-%   function computes the values of the next step if the transformation is
-%   an expansion through a turbine whose isentropic efficiency has to be
-%   given as argument. If no efficiency is specified, it is set to 1,
-%   making the expansion isentropic.
-%       input args:
-%           stateI: structure containing the values of the state variables
-%           before the expansion.
+%TURBINE computes the state variation after an expansion through a turbine.
+%   stateO = TURBINE(stateI,Tcond,efficiency) finds the new values of the
+%   state variables contained in stateI, where stateI is a struct with
+%   fields {p,T,x,h,s}. (Here, only fields p and T are mandatory, since
+%   they corresponds to the two variables used to find the next state.)
+%   The values of the state variable need to be expressed in the units
+%   {bar,°C,-,kJ/kg,kJ/(kg*°C)}. If no efficiency is specified, it is
+%   automoatically set to 1, making the expansion isentropic.
 %
-%           efficiency: isentropic efficiency of the turbine.
-%
-%       output args:
-%           stateI: structure containing the values of the state variables
-%           after the expansion.
-%
-%           Wmov: Work given by the fluid to the turbine, in [kJ/kg].
-%
-%           ExLoss: exergetic losses due to irreversibilities of the
-%           turbine.
-%
-%           eta_turbex: exergetic efficiency of the turbine.
-%
-%   [stateO,Wmov,ExLoss,eta_turbex] = TURBINE(stateI,efficiency,Tcond)
+%   [stateO,Wmov,ExLoss,eta_turbex] = TURBINE(stateI,Tcond,efficiency) also
+%   returns the work provided by the fluid to the turbine (Wmov) in
+%   [kJ/kg], the exergetic loss, and the exergetic efficiency of the
+%   turbine.
 
-%% robustness
+%% robustness %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 switch nargin % Check for correct inputs, set efficiency to 1 if none is specified.
     case 0
         msgID = 'TURBINE:NoState';
@@ -42,7 +30,7 @@ switch nargin % Check for correct inputs, set efficiency to 1 if none is specifi
         efficiency = 1;
 end
 
-%% State calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% State calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % known variables
 Ti = stateI.T;%Tmax
 pI = stateI.p;%steamPressure
@@ -70,11 +58,11 @@ sO = xO*sO_v + (1-xO)*sO_l;
 
 stateO.p = pO;
 stateO.T = Tcond;
-stateO.s = sO;
-stateO.h = hO;
 stateO.x = xO;
+stateO.h = hO;
+stateO.s = sO;
 
-%% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 eI=exergy(stateI);
 eO=exergy(stateO);
 
