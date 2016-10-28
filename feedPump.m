@@ -1,4 +1,4 @@
-function [Wp,Eloss] = feedPump(stage,eta_siP)
+function [stateO,Wop,Exloss] = feedPump(stateI,steamPressure,eta_siP)
 %FEEDPUMP Update the state after a compression of specified isentropic
 %efficiency.
 %   This MATLAB function has to be used together with a global variable
@@ -14,7 +14,7 @@ function [Wp,Eloss] = feedPump(stage,eta_siP)
 %           index of the cycle.
 %
 %           eta_siP: isentropic efficiency of the pump.
-%   
+%
 %   output args:
 %       Wp: work done by the pump on the fluid, in [kJ/kg].
 %
@@ -22,41 +22,63 @@ function [Wp,Eloss] = feedPump(stage,eta_siP)
 %
 %   [Wp,Eloss] = FEEDPUMP(stage,eta_siP)
 
-global state
-% Suffix S : isentropic pump
+% Suffix s : isentropic pump
 % Suffix / : non isentropic pump
 
-% Check if the stage is the last one of the cycle, if so we have to go to
-% the beginning (first step).
-stageNumber = length(state.p);
-if stage == stageNumber
-    nextStage = 1;
-    nextStage2 = nextStage + 1;
-elseif stage == stageNumber-1
-    nextStage = stage + 1;
-    nextStage2 = 1;
-else
-    nextStage = stage + 1;
-    nextStage2 = nextStage + 1;
+%% Robustness %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+switch nargin % Check for correct inputs, set efficiency to 1 if none is specified.
+    case 0
+        msgID = 'FEEDPUMP:NoState';
+        msg = 'Initial state must be specified.';
+        baseException = MException(msgID,msg);
+        throw(baseException)
+    case 1
+        msgID = 'FEEDPUMP:NoSteamPressure';
+        msg = 'steamPressure must be specified.';
+        baseException = MException(msgID,msg);
+        throw(baseException)
+    case 2
+        eta_siP = 1;
 end
 
-T0 = 15 + 273.15; % reference temperature for exergy calculation
+%% State calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-state.x(nextStage)=NaN;
+pI = stateI.p;
+Ti = stateI.T;
+sI=stateI.s;
+hI=stateI.h;
+xI=stateI.x;
 
-%% Isentropic compression %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-s_S=state.s(stage);
-T_s=XSteam('T_ps',state.p(nextStage2),s_S);
-%v=XSteam('v_ps',state.p(stage),state.s(stage));
-h_s=XSteam('h_ps',state.p(nextStage2),s_S);
 
-%% Non isentropic compression %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+T0=15;
+
+xO=NaN;
+
+% Isentropic compression
+sO_s=sI;
+To_s=XSteam('T_ps',steamPressure,sO_s);
+hO_s=XSteam('h_ps',steamPressure,sO_s);
+
+% Non isentropic compression %
 %-> eta_siP = (h2s-h1)/(h2-h1)
- state.h(nextStage)=((h_s-state.h(stage)))/eta_siP+state.h(stage);
- state.p(nextStage)=state.p(nextStage2);%p 110-113 Meca1855
- state.T(nextStage)=XSteam('T_ph',state.p(nextStage),state.h(nextStage));
- state.s(nextStage)=XSteam('s_ph',state.p(nextStage),state.h(nextStage));
- Wp = state.h(stage) - state.h(nextStage); % work done by the pump
- Eloss = T0*(state.s(nextStage) - state.s(stage)); % Exergy loss due to irreversibilities in the pump.
+hO=((hO_s-hI))/eta_siP+hI;
+pO=steamPressure;%p 110-113 Meca1855
+To=XSteam('T_ph',steamPressure,hO);
+sO=XSteam('s_ph',pO,hO);
+
+stateO.p = pO;
+stateO.T = To;
+stateO.s = sO;
+stateO.h = hO;
+stateO.x = xO;
+
+%% Energetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Wop = hO-hI; % work done by the pump, it should be positive
+
+%% Exergetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+eI=exergy(stateI);
+eO=exergy(stateO);
+
+Exloss = T0*(sO - sI); % Exergy loss due to irreversibilities in the pump.
 end
 

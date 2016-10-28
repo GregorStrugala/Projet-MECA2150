@@ -1,4 +1,4 @@
-function [Qh,Eloss] = steamGenerator(stage)
+function [Qh,Eloss] = steamGenerator(stateI,Tmax)
 %STEAMGENERATOR Update the state after an isobaric vaporisation.
 %   This MATLAB function has to be used together with a global variable
 %   called state. Given a certain stage of variables [p,T,h,s,x], the
@@ -18,26 +18,46 @@ function [Qh,Eloss] = steamGenerator(stage)
 %
 %   [Qh,Eloss] = CONDENSER(stage)
 
-global state
 %X est le factor de perte de charge lors de l'apport de chaleur
 
-% Check if the stage is the last one of the cycle, then we have to go to
-% the beginning (first stage).
-stageNumber = length(state.p);
-if stage < stageNumber
-    nextStage = stage + 1;
-else
-    nextStage = 1;
+%% Robustness %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+switch nargin % Check for correct inputs, set efficiency to 1 if none is specified.
+    case 0
+        msgID = 'STEAMGENERATOR:NoState';
+        msg = 'Initial state must be specified.';
+        baseException = MException(msgID,msg);
+        throw(baseException)
+    case 1
+        msgID = 'FEEDPUMP:NoTmax';
+        msg = 'Tmax must be specified.';
+        baseException = MException(msgID,msg);
+        throw(baseException)
+    case 2
+        eta_siP = 1;
 end
 
-T0 = 15 + 273.15; % reference temperature for exergy calculation
+T0 = 15; % reference temperature for exergy calculation [°C]
 
-state.p(nextStage)=state.p(stage);
-state.x(nextStage)=NaN;
-state.h(nextStage)=XSteam('h_pt',state.p(stage),state.T(nextStage));
-state.s(nextStage)=XSteam('s_pt',state.p(stage),state.T(nextStage));
+%% State calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Qh = state.h(nextStage) - state.h(stage); % heat provided at the hot source.
-Eloss = T0*(state.s(nextStage) - state.s(stage)); % Exergy loss due to heat transfer.
+pI = stateI.p;
+Ti = stateI.T;
+sI=stateI.s;
+hI=stateI.h;
+xI=stateI.x;
+
+pO=pI;
+To=Tmax;
+xO=NaN;
+
+hO=XSteam('h_pt',pO,To);
+sO=XSteam('s_pt',pO,To);
+
+
+%% Energetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Qh = hO - hI; % heat provided at the hot source.
+
+%% Exergetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Eloss = T0*(sO - sI); % Exergy loss due to heat transfer.
 end
 
