@@ -1,40 +1,53 @@
-function[]=steamPowerPlant(deltaT, Triver, Tmax, steamPressure)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+function steamPowerPlant(deltaT, Triver, Tmax, steamPressure)
+%STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
+%   STEAMPOWERPLANT(deltaT, Triver, Tmax, steamPressure) displays a table
+%   with the values of the variables p, T, x, h, s at the differents states
+%   of the cycle, along with the work of the cycle Wmcy.
+%   deltaT is the difference of temperature between the cold source and the
+%   condensation temperature of the fluid in the cycle, Triver is the
+%   temperature of the cold source, Tmax is the temperature of the
+%   superheated vapour before it expands, and steamPressure is the pressure
+%   at the same state.
 
- %data
-% Triver=15;%[°C] T cold : river temperature (in degree)
-% Th=525;%[°C] T hot : Max. temperature within the boiler (in degree)
-% pmax=200;%[bar] steam pressure (in bar)
+stateNumber = 4;
+state(stateNumber).p = 0; % preallocation
+state(stateNumber).T = 0;
+state(stateNumber).x = 0;
+state(stateNumber).h = 0;
+state(stateNumber).s = 0;
+for i=1:stateNumber-1
+    state(i).p = 0;
+    state(i).T = 0;
+    state(i).x = 0;
+    state(i).h = 0;
+    state(i).s = 0;
+end
 
-global state;
-% state : 1, 2, 3, 4
-state.p=zeros(1,4);%[bar]
-state.T=zeros(1,4);%[°C]
-state.h=zeros(1,4);%[kJ/kg]
-state.s=zeros(1,4);%[kJ/(kg °C)]
-state.x=zeros(1,4);%[/]
 Tcond=Triver+deltaT;
-%deduced from the datas
-state.p(3)=steamPressure;
-state.T(1)=Tcond;
-state.T(4)=Tcond;
-state.T(3)=Tmax;
-%assumption Rankine cyle : liquid saturated out the condenseur
-state.x(1)=0;
 
-% grace aux hypothese du cycle de Rankine-Hirn
-% state.x(1)=0;
-% state.x(2)=NaN;
-% state.x(3)=NaN;
+% Given parameters
+state(1).T = Tcond;
+state(4).T = state(1).T;
+state(3).p = steamPressure;
+state(3).T = Tmax;
 
-%state.p(1)=XSteam('psat_T',33);
-%state.h(1)=XSteam('hL_p',state.p(1));
-%state.s(1)=XSteam('sL_p',state.p(1))
-turbine(3,0.88);
-condenser(4);
-feedPump(1,0.8)
-steamGenerator(2)
+% We begin the cycle at the state (3)
+[state(4),state(3),Wmov,ExLossT,eta_turbex] = turbine(state(3),Tcond,0.88);
+state(1) = condenser(state(4));
+[state(2),Wop,ExlossP] = feedPump(state(1),steamPressure,0.8);
+% [Qh,Exloss] = steamGenerator(state(2),Tmax)
 
 
+Wmcy = Wmov+Wop; % note: Wmov<0, Wop>0
+
+%eta_cyclen=Wmcy/Qh;
+%eta_gen=mv*(state(3).h-state(2).h)/(mc*LHV);
+% definir une fonction combustion pour def LHV et mc mettre en argument Pe pour le debit de vapeur.
+%mv se trouve avec le rendement mec (eta_mec)
+%eta_mec=Pe/(mc*Wmcy);
+M = (reshape(struct2array(state),5,stateNumber))';
+fprintf('\n')
+disp(array2table(M,'VariableNames',{'p','T','x','h','s'}))
+
+fprintf('Wmcy = %f kJ/kg\n\n',Wmcy)
 end

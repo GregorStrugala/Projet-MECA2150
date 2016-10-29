@@ -1,18 +1,23 @@
-function [stateO,Wmov,ExLoss,eta_turbex] = turbine(stateI,Tcond,efficiency)
+function [stateO,stateI,Wmov,ExLoss,eta_turbex] = turbine(stateI,Tcond,eta_siT)
 %TO BE REWRITTEN IN CASE OF X IS NOT DEFINE !!!
 %TURBINE computes the state variation after an expansion through a turbine.
-%   stateO = TURBINE(stateI,Tcond,efficiency) finds the new values of the
+%   stateO = TURBINE(stateI,Tcond,eta_siT) finds the new values of the
 %   state variables contained in stateI, where stateI is a struct with
 %   fields {p,T,x,h,s}.The values of the state variable need to be
 %   expressed in the units {bar,°C,-,kJ/kg,kJ/(kg*°C)}. (Here, only fields
 %   p and T are mandatory, since they corresponds to the two variables used
 %   to find the next state.)
 %   Tcond is the temperature at which the condensation occurs.
-%   efficiency is the isentropic efficency of the turbine. If no efficiency
+%   eta_siT is the isentropic efficency of the turbine. If no efficiency
 %   is specified, it is automoatically set to 1, making the expansion
 %   isnetropic.
 %
-%   [stateO,Wmov,ExLoss,eta_turbex] = TURBINE(stateI,Tcond,efficiency) also
+%   [stateO,stateI] = TURBINE(stateI,Tcond,eta_siT) also returns the
+%   completed input state. (Fields x, h and s do not need to contain a
+%   value, as they are computed inside the function anyway.) This is useful
+%   to get information about x, h and s at the initial state.
+%
+%   [~,~,Wmov,ExLoss,eta_turbex] = TURBINE(stateI,Tcond,efficiency) also
 %   returns the work provided by the fluid to the turbine (Wmov) in
 %   [kJ/kg], the exergetic loss, and the exergetic efficiency of the
 %   turbine.
@@ -30,7 +35,7 @@ switch nargin % Check for correct inputs, set efficiency to 1 if none is specifi
         baseException = MException(msgID,msg);
         throw(baseException)
     case 2
-        efficiency = 1;
+        eta_siT = 1;
 end
 
 %% State calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -52,7 +57,7 @@ hO_v = XSteam('hV_p',pO); % saturated vapour enthalpy (in the tables)
 hO_l = XSteam('hL_p',pO); % saturated liquid enthalpy
 hO_s = xO_s*hO_v + (1-xO_s)*hO_l;
 W_s = hO_s - hI; % isentropical work
-Wmov = efficiency*W_s; % Work done by the expansion
+Wmov = eta_siT*W_s; % Work done by the expansion
 hO = hI + Wmov; % the work is the enthalpy variation
 
 % We find the quality based on h2
@@ -64,6 +69,10 @@ stateO.T = Tcond;
 stateO.x = xO;
 stateO.h = hO;
 stateO.s = sO;
+
+stateI.x = nan;
+stateI.h = hI;
+stateI.s = sI;
 
 %% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 eI=exergy(stateI);
