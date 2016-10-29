@@ -3,11 +3,14 @@ function [stateO,Wmov,ExLoss,eta_turbex] = turbine(stateI,Tcond,efficiency)
 %TURBINE computes the state variation after an expansion through a turbine.
 %   stateO = TURBINE(stateI,Tcond,efficiency) finds the new values of the
 %   state variables contained in stateI, where stateI is a struct with
-%   fields {p,T,x,h,s}. (Here, only fields p and T are mandatory, since
-%   they corresponds to the two variables used to find the next state.)
-%   The values of the state variable need to be expressed in the units
-%   {bar,°C,-,kJ/kg,kJ/(kg*°C)}. If no efficiency is specified, it is
-%   automoatically set to 1, making the expansion isentropic.
+%   fields {p,T,x,h,s}.The values of the state variable need to be
+%   expressed in the units {bar,°C,-,kJ/kg,kJ/(kg*°C)}. (Here, only fields
+%   p and T are mandatory, since they corresponds to the two variables used
+%   to find the next state.)
+%   Tcond is the temperature at which the condensation occurs.
+%   efficiency is the isentropic efficency of the turbine. If no efficiency
+%   is specified, it is automoatically set to 1, making the expansion
+%   isnetropic.
 %
 %   [stateO,Wmov,ExLoss,eta_turbex] = TURBINE(stateI,Tcond,efficiency) also
 %   returns the work provided by the fluid to the turbine (Wmov) in
