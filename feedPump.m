@@ -1,4 +1,4 @@
-function [stateO,Wop,Exloss] = feedPump(stateI,steamPressure,eta_siP)
+function [stateO,Wop,eO,pumpLoss,Exloss] = feedPump(stateI,steamPressure,eta_siP,pumpEfficiency)
 %FEEDPUMP computes the state variation after a compression.
 %   stateO = FEEDPUMP(stateI,steamPressure,eta_siP) finds the new values of
 %   the state variables contained in stateI, where stateI is a struct with
@@ -67,6 +67,7 @@ stateO.s = sO;
 
 %% Energetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Wop = hO-hI; % work done by the pump, it should be positive
+pumpLoss=Wop*(1-pumpEfficiency)/pumpEfficiency;
 
 %% Exergetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 eI=exergy(stateI);

@@ -1,4 +1,4 @@
-function steamPowerPlant(deltaT, Triver, Tmax, steamPressure)
+function steamPowerPlant(deltaT, Triver, Tmax, steamPressure,Pe)
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
 %   STEAMPOWERPLANT(deltaT, Triver, Tmax, steamPressure) displays a table
 %   with the values of the variables p, T, x, h, s at the differents states
@@ -8,6 +8,8 @@ function steamPowerPlant(deltaT, Triver, Tmax, steamPressure)
 %   temperature of the cold source, Tmax is the temperature of the
 %   superheated vapour before it expands, and steamPressure is the pressure
 %   at the same state.
+
+eta_mec=0.9;
 
 stateNumber = 4;
 state(stateNumber).p = 0; % preallocation
@@ -32,13 +34,16 @@ state(3).p = steamPressure;
 state(3).T = Tmax;
 
 % We begin the cycle at the state (3)
-[state(4),state(3),Wmov,ExLossT,eta_turbex] = turbine(state(3),Tcond,0.88);
-state(1) = condenser(state(4));
-[state(2),Wop,ExlossP] = feedPump(state(1),steamPressure,0.8);
-% [Qh,Exloss] = steamGenerator(state(2),Tmax)
+[state(4),state(3),Wmov,e4,ExLossT,turbineLoss,eta_turbex] = turbine(state(3),Tcond,0.88,0.9);
+[state(1),~,e1,condenserLoss,~] = condenser(state(4));
+[state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,0.8,0.85);
+[Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,0.945);
 
 
 Wmcy = Wmov+Wop; % note: Wmov<0, Wop>0
+
+%determination of the mass flow rate of vapour
+mVapour=Pe/(eta_mec*Wmcy);
 
 %eta_cyclen=Wmcy/Qh;
 %eta_gen=mv*(state(3).h-state(2).h)/(mc*LHV);

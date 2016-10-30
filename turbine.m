@@ -1,4 +1,4 @@
-function [stateO,stateI,Wmov,ExLoss,eta_turbex] = turbine(stateI,Tcond,eta_siT)
+function [stateO,stateI,Wmov,eO,turbineLoss,ExLoss,eta_turbex] = turbine(stateI,Tcond,turbineEfficiency,eta_siT)
 %TO BE REWRITTEN IN CASE OF X IS NOT DEFINE !!!
 %TURBINE computes the state variation after an expansion through a turbine.
 %   stateO = TURBINE(stateI,Tcond,eta_siT) finds the new values of the
@@ -73,7 +73,8 @@ stateO.s = sO;
 stateI.x = nan;
 stateI.h = hI;
 stateI.s = sI;
-
+%% Energetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+turbineLoss=Wmov*(1-turbineEfficiency);
 %% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 eI=exergy(stateI);
 eO=exergy(stateO);
