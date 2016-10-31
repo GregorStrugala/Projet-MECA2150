@@ -1,4 +1,4 @@
-function steamPowerPlant(deltaT, Triver, Tmax, steamPressure,Pe)
+function steamPowerPlant(deltaT, Triver, Tmax, steamPressure, Pe)
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
 %   STEAMPOWERPLANT(deltaT, Triver, Tmax, steamPressure) displays a table
 %   with the values of the variables p, T, x, h, s at the differents states
@@ -55,4 +55,9 @@ fprintf('\n')
 disp(array2table(M,'VariableNames',{'p','T','x','h','s'}))
 
 fprintf('Wmcy = %f kJ/kg\n\n',Wmcy)
+
+figure(1);
+Ts_diagram(state(1),state(2),state(3),state(4),0.8,0.88)
+figure(2);
+hs_diagram(state(1),state(2),state(3),state(4),0.8,0.88)
 end

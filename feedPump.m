@@ -38,9 +38,9 @@ end
 
 pI = stateI.p;
 Ti = stateI.T;
-xI=stateI.x;
-hI=stateI.h;
-sI=stateI.s;
+xI = stateI.x;
+hI = stateI.h;
+sI = stateI.s;
 
 
 T0=15;
