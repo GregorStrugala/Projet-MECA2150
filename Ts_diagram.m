@@ -1,9 +1,11 @@
-function [ ] = Ts_diagram(state1,state2,state3,state4,eta_siP,eta_siT)
+function [ ] = Ts_diagram(state,eta_siP,eta_siT,n)
 %Note : changer les noms des variables, peu coherent
 %mettre commentaires
 %Faire un beau graphe !
 %global state
+
 T=0.1:0.1:373.9459;
+
 %Preallocation
 sv_t=zeros(1,length(T));
 sl_t=zeros(1,length(T));
@@ -21,116 +23,117 @@ end
 figure;
 % diagram T-s
 %plot(sl_t,T,sv_t,T)
-plot([sl_t fliplr(sv_t)], [T fliplr(T)])
+plot([sl_t fliplr(sv_t)], [T fliplr(T)])% no hole
 
-%% feedPumpCompression plot
-%CODE A VERIFIER !!!!! OK VALABLE QUE LORSQUE LE TITRE EST DEFINI CAD
-%LORSQUE L ETAT 4 EST DANS LA CLOCHE --> a modifier
-hold on
-plot(state1.s,state1.T,'o')
-
-%eta_siP=0.8;
-p_pump=state1.p:abs((state2.p-state1.p))*0.1:state2.p;
-hs_pump=zeros(1,length(p_pump));
-h_pump=zeros(1,length(p_pump));
-s_pump=zeros(1,length(p_pump));
-T_pump=zeros(1,length(p_pump));
-for i=1:length(p_pump)
-    if i == 1
-        hs_pump(i)=state1.h;%XSteam('h_ps',p_pump(i),state.s(1));
-        h_pump(i)=state1.h;
-        s_pump(i)=state1.s;
-        T_pump(i)=state1.T;
-        
-    elseif i==length(p_pump)
-        h_pump(i)=state2.h;
-        s_pump(i)=state2.s;
-        T_pump(i)=state2.T;
-    else
-        hs_pump(i)=XSteam('h_ps',p_pump(i),state1.s);
-        h_pump(i)=((hs_pump(i)-state1.h))/eta_siP+state1.h;
-        s_pump(i)=XSteam('s_ph',p_pump(i),h_pump(i));
-        T_pump(i)=XSteam('T_ps',p_pump(i),s_pump(i));
-    end
-end
-hold on
-plot(s_pump,T_pump)
-
-
-%% steamGenerator Plot
-hold on
-plot(state2.s,state2.T,'o')
-
-%part1
-Tsat_Gen=XSteam('Tsat_p',state3.p);
-T_Gen1=state2.T:(Tsat_Gen-state2.T)*0.01:Tsat_Gen-0.01;
-sGen1=zeros(1,length(T_Gen1));
-for i=1:length(T_Gen1)
-    sGen1(i)=XSteam('s_pt',state3.p,T_Gen1(i));
-end
-
-hold on
-plot(sGen1,T_Gen1)
-%part2
-sV_pGen=XSteam('sv_p',state3.p);
-sL_pGen=XSteam('sl_p',state3.p);
-
-hold on
-plot([sL_pGen sV_pGen],[Tsat_Gen Tsat_Gen])
-%part3
-Tsur_Gen2=XSteam('T_ps',state3.p,state3.s);
-T_Gen2=Tsat_Gen:(Tsur_Gen2-Tsat_Gen)*0.01:Tsur_Gen2;
-sGen2=zeros(1,length(T_Gen2));
-
-for i=1:length(T_Gen2)
-    sGen2(i)=XSteam('s_pt',state3.p,T_Gen2(i));
-end
-
-hold on
-plot(sGen2,T_Gen2)
-
-%% Turbine plot
-hold on
-plot(state3.s,state3.T,'o')
-
-%eta_siT=0.6;
-p_turb=state4.p:abs((state3.p-state4.p))*0.0001:state3.p;
-p_turb = fliplr(p_turb);
-hs_turb=zeros(1,length(p_turb));
-h_turb=zeros(1,length(p_turb));
-s_turb=zeros(1,length(p_turb));
-T_turb=zeros(1,length(p_turb));
-for i=1:length(p_turb)
-    if i == 1
-        hs_turb(i)=state4.h;%XSteam('h_ps',p_pump(i),state.s(1));
-        h_turb(i)=state3.h;
-        s_turb(i)=state3.s;
-        T_turb(i)=state3.T;
-        
-    elseif i==length(p_turb)
-        h_turb(i)=state4.h;
-        s_turb(i)=state4.s;
-        T_turb(i)=state4.T;
-    else
-        hs_turb(i)=XSteam('h_ps',p_turb(i),state3.s);
-        h_turb(i)=-((state3.h)-hs_turb(i))*eta_siT+state3.h;
-        s_turb(i)=XSteam('s_ph',p_turb(i),h_turb(i));
-        T_turb(i)=XSteam('T_ps',p_turb(i),s_turb(i));
-    end
-end
-hold on
-plot(s_turb,T_turb)
-
-%% Condenser
-hold on
-plot(state4.s,state4.T,'o')
-
-if isnan(state4.x)
+if n==0 %case without feedHeating
     
-    %To be done
+    %% PLOT : compression in the feed pump
+    %CODE A VERIFIER !!!!! OK VALABLE QUE LORSQUE LE TITRE EST DEFINI CAD
+    %LORSQUE L ETAT 4 EST DANS LA CLOCHE --> a modifier
+    hold on
+    plot(state(1).s,state(1).T,'o')
+    text(state(1).s,state(1).T,'1')
+    
+    [Tcomp,sComp,~]=CompressionExpansionPlot(state(1),state(2),eta_siP,1,0);
+    hold on
+    plot(sComp,Tcomp)
+    
+    
+    %% PLOT : vaporization in the steam generator
+    
+    hold on
+    plot(state(2).s,state(2).T,'o')
+    text(state(2).s,state(2).T,'2')
+    
+    %part1
+    Tsat_Gen=XSteam('Tsat_p',state(3).p);
+    T_Gen1=state(2).T:(Tsat_Gen-state(2).T)*0.01:Tsat_Gen-0.01;
+    sGen1=zeros(1,length(T_Gen1));
+    for i=1:length(T_Gen1)
+        sGen1(i)=XSteam('s_pt',state(3).p,T_Gen1(i));
+    end
+    
+    hold on
+    plot(sGen1,T_Gen1)
+    
+    %part2
+    sV_pGen=XSteam('sv_p',state(3).p);
+    sL_pGen=XSteam('sl_p',state(3).p);
+    
+    hold on
+    plot([sL_pGen sV_pGen],[Tsat_Gen Tsat_Gen])
+    
+    %part3
+    Tsur_Gen2=XSteam('T_ps',state(3).p,state(3).s);
+    T_Gen2=Tsat_Gen:(Tsur_Gen2-Tsat_Gen)*0.01:Tsur_Gen2;
+    sGen2=zeros(1,length(T_Gen2));
+    
+    for i=1:length(T_Gen2)
+        sGen2(i)=XSteam('s_pt',state(3).p,T_Gen2(i));
+    end
+    
+    hold on
+    plot(sGen2,T_Gen2)
+    
+    %% PLOT : Expansion in the turbine
+    hold on
+    plot(state(3).s,state(3).T,'o')
+    text(state(3).s,state(3).T,'3')
+    
+    [T_turb,s_turb,h_turb]=CompressionExpansionPlot(state(3),state(4),eta_siT,0,1);
+    hold on
+    plot(s_turb,T_turb)
+    
+    %% PLOT : condensation in the condenser
+    hold on
+    plot(state(4).s,state(4).T,'o')
+    text(state(4).s,state(4).T,'4')
+    if isnan(state(4).x)
+        
+        %To be done
+    else
+        plot([state(4).s,state(1).s],[state(4).T,state(1).T])
+    end
+    
 else
-    plot([state4.s,state1.s],[state4.T,state1.T])
+    
+    %% feedHeating
+    labels = cellstr( num2str([1:10]') );  %' # labels correspond to their order
+    hold on
+    plot(state(7).s,state(7).T,'o')
+    text(state(7).s,state(7).T,labels(7))
+    hold on
+    plot(state(8).s,state(8).T,'o')
+    text(state(8).s,state(8).T,labels(8))
+    hold on
+    plot(state(9).s,state(9).T,'o')
+    text(state(9).s,state(9).T,labels(9))
+    hold on
+    plot(state(10).s,state(10).T,'o')
+    text(state(10).s,state(10).T,labels(10))
+    hold on
+    plot(state(6).s,state(6).T,'*')
+    text(state(6).s,state(6).T,labels(6))
+    
+    hold on
+    plot(state(5).s,state(5).T,'*')
+    text(state(5).s,state(5).T,labels(5))
+    hold on
+    plot(state(4).s,state(4).T,'*')
+    text(state(4).s,state(4).T,labels(4))
+    
+    hold on
+    plot(state(3).s,state(3).T,'*')
+    text(state(3).s,state(3).T,labels(3))
+    
+    hold on
+    plot(state(2).s,state(2).T,'*')
+    text(state(2).s,state(2).T,labels(2))
+    hold on
+    plot(state(1).s,state(1).T,'*')
+    text(state(1).s,state(1).T,labels(1))
 end
+
 
 end
 

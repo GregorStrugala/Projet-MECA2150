@@ -26,7 +26,19 @@ end
 
 
 %% State calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-To = stateI.T; % isothermal transformation
+pI = stateI.p;
+Ti = stateI.T;
+xI = stateI.x;
+hI = stateI.h;
+sI = stateI.s;
+
+%if isnan(xI)
+To=XSteam('Tsat_p',pI);%more general
+
+%else
+%To = stateI.T; % isothermal transformation
+%end
+
 pO = stateI.p; % isobaric transformation
 %state.p(nextStage) = XSteam('psat_T',state.T(stage));
 
