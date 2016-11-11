@@ -12,7 +12,11 @@ function steamPowerPlant(deltaT, Triver, Tmax, steamPressure, Pe, n)
 
 eta_mec=0.9;
 
-stateNumber = 4+6*n;
+if n==0
+    stateNumber = 4;
+else
+    stateNumber=4+2+4*n;
+end
 state(stateNumber).p = 0; % preallocation
 state(stateNumber).T = 0;
 state(stateNumber).x = 0;
@@ -53,7 +57,7 @@ else
     % We begin the cycle at the state (3)
     [state(4),state(3),Wmov,e4,ExLossT,turbineLoss,eta_turbex] = turbine(state(3),Tcond,0.88,0.9);
     [state(5),~,e1,condenserLoss,~] = condenser(state(4));
-    [state]=feedHeating(state,steamPressure,0.8,0.88); %to do energetic and exergetic analysis
+    [state]=feedHeating(state,steamPressure,0.8,0.88,n); %to do energetic and exergetic analysis
     [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,0.8,0.85);
     [Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,0.945);
     

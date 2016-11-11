@@ -1,4 +1,4 @@
-function[stateO]=valve(stateI,state)
+function[stateO]=valve(stateI,previousFeedHeater)
 %VALVE computes the state variation after a valve expansion (isenthalpic expansion).
 %   stateO = VALVE(stateI,state) finds the new values of
 %   the state variables contained in stateI and state, where stateI (and state) is a struct with
@@ -29,8 +29,8 @@ sI = stateI.s;
 
 
 hO=hI;
-pO=state(4).p;
-To=state(4).T;
+pO=previousFeedHeater.p;
+To=previousFeedHeater.T;
 
 
 sO=XSteam('s_ph',pO,hO);
