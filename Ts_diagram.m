@@ -78,28 +78,34 @@ if n ~= 0 %feedHeating
         
         %% PLOT : purge steam in the turbine, condensation in the heater and the subcooler
         hold on
-        plot(state(7+4*(i-1)).s,state(7+4*(i-1)).T,'o')
+        %plot(state(7+4*(i-1)).s,state(7+4*(i-1)).T,'o')
+        plot(state(7+5*(i-1)).s,state(7+5*(i-1)).T,'o')
         %text(state(7).s,state(7).T,labels(7))
         hold on
-        plot(state(8+4*(i-1)).s,state(8+4*(i-1)).T,'o')
+        %plot(state(8+4*(i-1)).s,state(8+4*(i-1)).T,'o')
+        plot(state(8+5*(i-1)).s,state(8+5*(i-1)).T,'o')
         %text(state(8).s,state(8).T,labels(8))
         hold on
-        plot(state(9+4*(i-1)).s,state(9+4*(i-1)).T,'o')
+        %plot(state(9+4*(i-1)).s,state(9+4*(i-1)).T,'o')
+        plot(state(9+5*(i-1)).s,state(9+5*(i-1)).T,'o')
         %text(state(9).s,state(9).T,labels(9))
         
-        [Tcond,sCond,~]=vaporizationCondensationPlot(state(9+4*(i-1)),state(7+4*(i-1)));
+        %[Tcond,sCond,~]=vaporizationCondensationPlot(state(9+4*(i-1)),state(7+4*(i-1)));
+        [Tcond,sCond,~]=vaporizationCondensationPlot(state(9+5*(i-1)),state(7+5*(i-1)));
         hold on 
         plot(sCond,Tcond,'Color','b','LineStyle','--','LineWidth',1.5)
         
         %% PLOT : isenthalpic expansion in the valve
         hold on
-        plot(state(10+4*(i-1)).s,state(10+4*(i-1)).T,'o')
+        %plot(state(10+4*(i-1)).s,state(10+4*(i-1)).T,'o')
+        plot(state(10+5*(i-1)).s,state(10+5*(i-1)).T,'o')
         %text(state(10).s,state(10).T,labels(10))
         hold on
         plot(state(5).s,state(5).T,'o')
         text(state(5).s,state(5).T,'5','Position',[state(5).s,state(5).T])
         
-        [Texp,sExp,~] = isenthalpicExpansion(state(10+4*(i-1)),state(9+4*(i-1)));
+        %[Texp,sExp,~] = isenthalpicExpansion(state(10+4*(i-1)),state(9+4*(i-1)));
+        [Texp,sExp,~] = isenthalpicExpansion(state(10+5*(i-1)),state(9+5*(i-1)));
         hold on
         plot(sExp,Texp,'Color','b','LineStyle','--','LineWidth',1.5)
         
@@ -120,9 +126,7 @@ if n ~= 0 %feedHeating
             sR(i)=XSteam('s_pt',state(1).p,T(i));
         end
         plot(sR,T,'Color','r','LineStyle','-','LineWidth',1.5)
-    end
-    
-    
+    end    
 end
 end
 

@@ -15,7 +15,8 @@ eta_mec=0.9;
 if n==0
     stateNumber = 4;
 else
-    stateNumber=4+2+4*n;
+    %stateNumber=4+2+4*n;
+    stateNumber=4+2+5*n;
 end
 state(stateNumber).p = 0; % preallocation
 state(stateNumber).T = 0;

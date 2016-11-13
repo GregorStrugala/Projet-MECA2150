@@ -30,7 +30,7 @@ hI = stateI.h;
 sI = stateI.s;
 
 pO=pI;
-To=Ti+eta_ex*Tmax;
+To=Ti+eta_ex*abs(Tmax-Ti);
 hO=XSteam('h_pt',pO,To);
 sO=XSteam('s_pt',pO,To);
 xO=nan;
@@ -40,7 +40,6 @@ stateO.T = To;
 stateO.x = xO;
 stateO.h = hO;
 stateO.s = sO;
-
 
 end
 

@@ -1,4 +1,4 @@
-function[stateO]=subcooler(stateI,dT)
+function[stateO]=subcooler(stateI,Tmin)
 %SUBCOOLER computes the state variation after that the water has been subcooled in the subcooler.
 %   stateO = SUBCOOLER(stateI,dT) finds the new values of
 %   the state variables contained in stateI, where stateI is a struct with
@@ -32,7 +32,8 @@ hI = stateI.h;
 sI = stateI.s;
 
 pO=pI;
-To=Ti-dT;
+%To=Ti-dT;
+To=Tmin+5;
 
 hO=XSteam('h_pt',pO,To);
 sO=XSteam('s_pt',pO,To);
