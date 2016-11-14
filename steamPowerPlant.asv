@@ -43,15 +43,7 @@ switch nargin % Check for correct inputs, set efficiency to 1 if none is specifi
 end
 
 %% State calculations
-%efficiencies 
 eta_mec=0.9;
-eta_gen=0.945;
-eta_siT=0.88;
-eta_siP=0.8;
-
-turbineEfficiency=0.9;
-pumpEfficiency=0.85;
-
 Tcond=Triver+deltaT;
 
 % FEEDHEATING ONLY
@@ -82,11 +74,11 @@ if feedHeat>0 && nF>0 && reHeat == 0
     state(3).h = XSteam('h_pT',steamPressure,Tmax);
     
     % We begin the cycle at the state (3)
-    [state(4),~,Wmov,e4,ExLossT,turbineLoss,eta_turbex] = turbine(state(3),state(5).p,eta_siT,turbineEfficiency);
+    [state(4),~,Wmov,e4,ExLossT,turbineLoss,eta_turbex] = turbine(state(3),state(5).p,0.88,0.9);
     [state(5),~,e1,condenserLoss,~] = condenser(state(4));
     [state]=feedHeating(state,steamPressure,0.8,0.88,nF); %to do energetic and exergetic analysis
-    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,pumpEfficiency);
-    [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,eta_gen);
+    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,0.8,0.85);
+    [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,0.945);
  
 % REHEATING ONLY
 elseif reHeat>0 && nR > 0 && feedHeat == 0   
@@ -115,11 +107,11 @@ elseif reHeat>0 && nR > 0 && feedHeat == 0
     state(3).h = XSteam('h_pT',steamPressure,Tmax);
     
     % We begin the cycle at the state (3)
-    %[state(4),state(3),Wmov,e4,ExLossT,turbineLoss,eta_turbex] = turbine(state(3),state(1).p,eta_siT,turbineEfficiency);
-    [state, Wmov]=reHeating(state,state(3),0.15,state(1).p,0.88,0.9,0.945);
+    %[state(4),state(3),Wmov,e4,ExLossT,turbineLoss,eta_turbex] = turbine(state(3),state(1).p,0.88,0.9);
+    [state]=reHeating(state(3),0.15,state(1).p,0.88,0.9,0.945)
     [state(1),~,e1,condenserLoss,~] = condenser(state(4));
-    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,pumpEfficiency);
-    [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,eta_gen);
+    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,0.8,0.85);
+    [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,0.945);
     
 % RANKINE-HIRN CYCLE    
 else    
@@ -149,10 +141,10 @@ else
    
     
     % We begin the cycle at the state (3)
-    [state(4),~,Wmov,e4,ExLossT,turbineLoss,eta_turbex] = turbine(state(3),state(1).p,eta_siT,turbineEfficiency);
+    [state(4),~,Wmov,e4,ExLossT,turbineLoss,eta_turbex] = turbine(state(3),state(1).p,0.88,0.9);
     [state(1),~,e1,condenserLoss,~] = condenser(state(4));
-    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,pumpEfficiency);
-    [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,eta_gen);
+    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,0.8,0.85);
+    [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,0.945);
     
 end
 
@@ -172,7 +164,7 @@ disp(array2table(M,'VariableNames',{'p','T','x','h','s'}))
 
 fprintf('Wmcy = %f kJ/kg\n\n',Wmcy)
 
-Ts_diagram(state,eta_siP,eta_siT,feedHeat,nF,reHeat,nR)
+Ts_diagram(state,0.8,0.88,nF)
 %figure(1);
 %hs_diagram(state(1),state(2),state(3),state(4),0.8,0.88)
 end

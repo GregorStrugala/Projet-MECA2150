@@ -49,13 +49,13 @@ xO=NaN;
 
 % Isentropic compression
 sO_s=sI;
-To_s=XSteam('T_ps',steamPressure,sO_s);
-hO_s=XSteam('h_ps',steamPressure,sO_s);
+pO=steamPressure;%p 110-113 Meca1855
+To_s=XSteam('T_ps',pO,sO_s);
+hO_s=XSteam('h_ps',pO,sO_s);
 
 % Non isentropic compression %
 %-> eta_siP = (h2s-h1)/(h2-h1)
 hO=((hO_s-hI))/eta_siP+hI;
-pO=steamPressure;%p 110-113 Meca1855
 To=XSteam('T_ph',steamPressure,hO);
 sO=XSteam('s_ph',pO,hO);
 

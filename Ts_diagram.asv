@@ -25,10 +25,7 @@ figure;
 %plot(sl_t,T,sv_t,T)
 plot([sl_t fliplr(sv_t)], [Tvap fliplr(Tvap)],'Color','g','LineStyle','-','LineWidth',1.5)% no hole
 
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% RANKINE-HIRN CYCLE %%%%%%%%%%%%%%%%%%%%%%%%%%%
-if feedHeat == 0 && reHeat == 0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if feedHeat == 0 && reHeat == 0;
     %% PLOT : compression in the feed pump
     %CODE A VERIFIER !!!!! OK VALABLE QUE LORSQUE LE TITRE EST DEFINI CAD
     %LORSQUE L ETAT 4 EST DANS LA CLOCHE --> a modifier
@@ -72,9 +69,7 @@ if feedHeat == 0 && reHeat == 0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
     
     
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FEEDHEATING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-elseif feedHeat > 0 && nF > 0 && reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
+elseif feedHeat > 0 && nF > 0 && reHeat == 0 && nR == 0%feedHeating
     
     %% PLOT : compression in the feed pump
     %CODE A VERIFIER !!!!! OK VALABLE QUE LORSQUE LE TITRE EST DEFINI CAD
@@ -112,6 +107,9 @@ elseif feedHeat > 0 && nF > 0 && reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
     plot(state(4).s,state(4).T,'o')
     text(state(4).s,state(4).T,'4')
     plot([state(4).s,state(5).s],[state(4).T,state(5).T],'Color','r','LineStyle','-','LineWidth',1.5)
+    
+    
+    
     for i=1:nF
         
         %% PLOT : purge steam in the turbine, condensation in the heater and the subcooler
@@ -148,7 +146,7 @@ elseif feedHeat > 0 && nF > 0 && reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
         plot(sExp,Texp,'Color','b','LineStyle','--','LineWidth',1.5)
         
         %% PLOT : compression in the extracting pump
-        hold on
+                hold on
         plot(state(6).s,state(6).T,'o')
         text(state(6).s,state(6).T,'6','Position',[state(6).s,state(6).T])
         
@@ -163,13 +161,9 @@ elseif feedHeat > 0 && nF > 0 && reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
         for i=1:length(T)
             sR(i)=XSteam('s_pt',state(1).p,T(i));
         end
-        hold on
         plot(sR,T,'Color','r','LineStyle','-','LineWidth',1.5)
     end
-    
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% REHEATING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-elseif reHeat > 0 && nR > 0 && feedHeat == 0 && nF == 0 %%%%%%%%%%%%%%%%%%%
+elseif reHeat > 0 && nR > 0 && feedHeat == 0 && nF == 0
     %% PLOT : compression in the feed pump
     %CODE A VERIFIER !!!!! OK VALABLE QUE LORSQUE LE TITRE EST DEFINI CAD
     %LORSQUE L ETAT 4 EST DANS LA CLOCHE --> a modifier
@@ -181,7 +175,9 @@ elseif reHeat > 0 && nR > 0 && feedHeat == 0 && nF == 0 %%%%%%%%%%%%%%%%%%%
     hold on
     plot(sComp,Tcomp,'Color','r','LineStyle','-','LineWidth',1.5)
     
+    
     %% PLOT : vaporization in the steam generator
+    
     hold on
     plot(state(2).s,state(2).T,'o')
     text(state(2).s,state(2).T,'2')
@@ -197,12 +193,7 @@ elseif reHeat > 0 && nR > 0 && feedHeat == 0 && nF == 0 %%%%%%%%%%%%%%%%%%%
     hold on
     plot(state(3).s,state(3).T,'o')
     text(state(3).s,state(3).T,'3')
-    hold on
-    plot(state(5).s,state(5).T,'o')
-    text(state(5).s,state(5).T,'5')
-    hold on
-    plot(state(6).s,state(6).T,'o')
-    text(state(6).s,state(6).T,'6')
+    
     
     [T_turb1,s_turb1,~]=CompressionExpansionPlot(state(3),state(4),eta_siT,0,1);
     hold on
@@ -214,26 +205,28 @@ elseif reHeat > 0 && nR > 0 && feedHeat == 0 && nF == 0 %%%%%%%%%%%%%%%%%%%
     hold on
     plot(s_turb3,T_turb3,'Color','r','LineStyle','-','LineWidth',1.5)
     
-    T=state(5).T:abs(state(6).T-state(5).T)*0.01:state(6).T;
-    sR=zeros(1,length(T));
-    for i=1:length(T)
-        sR(i)=XSteam('s_pt',state(5).p,T(i));
-    end
-    hold on
-    plot(sR,T,'Color','r','LineStyle','-','LineWidth',1.5)
-    
     %% PLOT : condensation in the condenser
     hold on
     plot(state(4).s,state(4).T,'o')
     text(state(4).s,state(4).T,'4')
     hold on
     plot(state(7).s,state(7).T,'o')
-    text(state(7).s,state(7).T,'7')
+    text(state(7).s,state(7).T,'4')
     if isnan(state(4).x)
+        
         %To be done
     else  %case without feedHeating and reHeating
         plot([state(7).s,state(1).s],[state(7).T,state(1).T],'Color','r','LineStyle','-','LineWidth',1.5)
     end
+    
+    
+    hold on
+    plot(state(6).s,state(6).T,'o')
+    text(state(6).s,state(6).T,'6')
+    
+    hold on
+    plot(state(7).s,state(7).T,'o')
+    text(state(7).s,state(7).T,'7')
 end
 end
 

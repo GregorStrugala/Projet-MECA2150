@@ -1,4 +1,4 @@
-function [Qh,eO,steamGenLoss,Exloss] = steamGenerator(stateI,Tmax,eta_gen)
+function [stateO,Qh,eO,steamGenLoss,Exloss] = steamGenerator(stateI,Tmax,eta_gen)
 %STEAMGENERATOR computes the state variation after a superheating.
 %   [Qh,Exloss] = steamGenerator(stateI,Tmax) returns the heat
 %   provided to transform all the subcooled liquid water into superheated

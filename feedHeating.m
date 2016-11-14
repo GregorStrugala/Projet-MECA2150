@@ -18,12 +18,12 @@ for i=1:n
         [state(9)]=subcooler(state(8),state(5).T);
         outCondenser=state(5);
         [state(10)]=valve(state(9),outCondenser);
-        [state(11)]=exchanger(state(6),0.9,state(8).T);
+        [state(11)]=exchanger(state(6),0.5,state(8).T);
     else
         [state(9+5*(i-1))]=subcooler(state(8+5*(i-1)),state(8+5*(i-2)).T);
         previousHeater=state(10+5*(i-1)-7);
         [state(10+5*(i-1))]=valve(state(9+5*(i-1)),previousHeater);
-        [state(11+5*(i-1))]=exchanger(state(11+5*(i-2)),0.8,state(8+5*(i-1)).T);
+        [state(11+5*(i-1))]=exchanger(state(11+5*(i-2)),0.5,state(8+5*(i-1)).T);
     end
 end
 %[state(6)]=extractionPump(state(5),0.5,pmax,eta_siP);

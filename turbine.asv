@@ -47,43 +47,35 @@ hI = stateI.h;
 sI = stateI.s;
 
 pO = pOut; %Attention robustesse !!! Pas vrai si x pas déf.
-%To = XSteam('Tsat_p',pO); pas assez robuste :)
+%To = XSteam('Tsat_p',pO);
 
-% Find sI and hI with tables --> fait dans la fonction steamPowerPlant
+% Find sI and hI with tables
 %sI = XSteam('s_pT',pI,Ti);
 %hI = XSteam('h_pT',pI,Ti);
 
 % Determine hO using isentropic efficiency
 sO_s=sI;
-To_s=XSteam('T_ps',pO,sO_s);
-hO_s=XSteam('h_ps',pO,sO_s);
-
-% Non isentropic expansion %
-%-> eta_siT = (h2-h1)/(h2s-h1)
+To_s=XSteam('T_ps',steamPressure,sO_s);
+hO_s=XSteam('h_ps',steamPressure,sO_s);
 hO = hI + eta_siT*(hO_s - hI);
-To=XSteam('T_ph',pO,hO);
-sO=XSteam('s_ph',pO,hO);
-
-%determination of the quality
 % sO_v = XSteam('sV_p',pO); % saturated vapour entropy (in the tables)
 % sO_l = XSteam('sL_p',pO); % saturated liquid entropy
 % xO_s = (sO_s - sO_l)/(sO_v - sO_l);
-
-hO_v = XSteam('hV_p',pO); % saturated vapour enthalpy (in the tables)
-hO_l = XSteam('hL_p',pO); % saturated liquid enthalpy
-
+% hO_v = XSteam('hV_p',pO); % saturated vapour enthalpy (in the tables)
+% hO_l = XSteam('hL_p',pO); % saturated liquid enthalpy
 % hO_s = xO_s*hO_v + (1-xO_s)*hO_l;
 % W_s = hO_s - hI; % isentropical work
 % Wmov = eta_siT*W_s; % Work done by the expansion
 % hO = hI + Wmov; % the work is the enthalpy variation
-
-% We find the quality based on h2
-xO = (hO-hO_l)/(hO_v - hO_l);
-% if, necessaire pour le reHeating sinon on obtient un x > 1 :)
-if xO>1
-    xO=nan;
-end
-
+% 
+% % We find the quality based on h2
+% xO = (hO-hO_l)/(hO_v - hO_l);
+% % if necessaire pour le reHeating sinon on obtient un x > 1 :)
+% if xO>1
+%     xO=nan;
+% else
+%     xO=xO;
+% end
 % sO = xO*sO_v + (1-xO)*sO_l;
 
 stateO.p = pO;
@@ -92,8 +84,10 @@ stateO.x = xO;
 stateO.h = hO;
 stateO.s = sO;
 
+% stateI.x = nan;
+% stateI.h = hI;
+% stateI.s = sI;
 %% Energetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Wmov = hO-hI; % Work done by the expansion
 turbineLoss=Wmov*(1-turbineEfficiency);
 %% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 eI=exergy(stateI);
