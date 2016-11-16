@@ -1,4 +1,4 @@
-function steamPowerPlant(deltaT, Triver, Tmax, steamPressure, Pe, feedHeat, nF, reHeat, nR)
+function[]=steamPowerPlant(deltaT, Triver, Tmax, steamPressure, Pe, feedHeat, nF, reHeat, nR)
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
 %   STEAMPOWERPLANT(deltaT, Triver, Tmax, steamPressure, Pe, n) displays a table
 %   with the values of the variables p, T, x, h, s at the differents states
@@ -44,13 +44,13 @@ end
 
 %% State calculations
 %efficiencies 
-eta_mec=0.9;
+eta_mec=0.98;
 eta_gen=0.945;
 eta_siT=0.88;
-eta_siP=0.8;
+eta_siP=0.85;
 
-turbineEfficiency=0.9;
-pumpEfficiency=0.85;
+%turbineEfficiency=0.98;
+%pumpEfficiency=0.98;
 
 Tcond=Triver+deltaT;
 
@@ -82,7 +82,7 @@ if feedHeat>0 && nF>0 && reHeat == 0
     state(3).h = XSteam('h_pT',steamPressure,Tmax);
     
     % We begin the cycle at the state (3)
-    [state(4),~,Wmov,e4,ExLossT,turbineLoss,eta_turbex] = turbine(state(3),state(5).p,eta_siT,turbineEfficiency);
+    [state(4),~,Wmov,e4,ExLossT,~,eta_turbex] = turbine(state(3),state(5).p,eta_siT,turbineEfficiency);
     [state(5),~,e1,condenserLoss,~] = condenser(state(4));
     [state]=feedHeating(state,steamPressure,0.8,0.88,nF); %to do energetic and exergetic analysis
     [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,pumpEfficiency);
@@ -149,10 +149,12 @@ else
    
     
     % We begin the cycle at the state (3)
-    [state(4),~,Wmov,e4,ExLossT,turbineLoss,eta_turbex] = turbine(state(3),state(1).p,eta_siT,turbineEfficiency);
+    [state(4),Wmov,e4,turbineLoss,~,~] = turbine(state(3),state(1).p,eta_siT,eta_mec);
     [state(1),~,e1,condenserLoss,~] = condenser(state(4));
-    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,pumpEfficiency);
+    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
     [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,eta_gen);
+    
+    losses=[turbineLoss+pumpLoss,steamGenLoss, condenserLoss];
     
 end
 
@@ -160,19 +162,28 @@ end
 Wmcy = Wmov+Wop; % note: Wmov<0, Wop>0
 
 %determination of the mass flow rate of vapour
-mVapour=Pe/(eta_mec*Wmcy);
+mVapour=Pe/abs(eta_mec*Wmcy)
 
 eta_cyclen=Wmcy/Qh;
 %eta_gen=mv*(state(3).h-state(2).h)/(mc*LHV);
 % definir une fonction combustion pour def LHV et mc
+
+
 
 M = (reshape(struct2array(state),5,stateNumber))';
 fprintf('\n')
 disp(array2table(M,'VariableNames',{'p','T','x','h','s'}))
 
 fprintf('Wmcy = %f kJ/kg\n\n',Wmcy)
+%% PLOT 
 
-Ts_diagram(state,eta_siP,eta_siT,feedHeat,nF,reHeat,nR)
+%pie chart
+pie([mVapour*losses,Pe])
+
+%T-s diagram
+%figure(1)
+%Ts_diagram(state,eta_siP,eta_siT,feedHeat,nF,reHeat,nR)
 %figure(1);
+%h-s diagram
 %hs_diagram(state(1),state(2),state(3),state(4),0.8,0.88)
 end

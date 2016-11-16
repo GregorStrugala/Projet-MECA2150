@@ -55,8 +55,8 @@ stateO.h = hO;
 stateO.s = sO;
 
 %% Energetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Qc = hO - stateI.h; % Function output: heat extracted at the condenser
-condenserLoss=Qc;% heat loss at the cold source
+Qc = hO - hI; % Function output: heat extracted at the condenser
+condenserLoss=abs(Qc);% heat loss at the cold source
 %% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 eI=exergy(stateI);
 eO=exergy(stateO);

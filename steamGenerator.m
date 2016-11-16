@@ -45,7 +45,7 @@ stateO.s = sO;
 
 %% Energetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Qh = hO - hI; % heat provided at the hot source.
-steamGenLoss=Qh*(1-eta_gen)/eta_gen;
+steamGenLoss=abs(Qh*(1-eta_gen)/eta_gen)
 %% Exergetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 eI=exergy(stateI);
 eO=exergy(stateO);
