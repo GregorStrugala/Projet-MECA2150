@@ -1,5 +1,5 @@
 function[]=steamPowerPlant(deltaT, Triver, Tmax, steamPressure, Pe, feedHeat, nF, reHeat, nR)
-% TEST
+%TEST
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
 %   STEAMPOWERPLANT(deltaT, Triver, Tmax, steamPressure, Pe, n) displays a table
 %   with the values of the variables p, T, x, h, s at the differents states
