@@ -52,28 +52,29 @@ fuels(1,4)=34160;%ec [kJ/kg]
 fuels(1,5)=32780;%LHV [kJ/kg]
 fuels(1,6)=1.042;%ec/LHV
 
-if type==1
-%specific combustive index for a combustible of the form : CHyOx
-y=0;
-x=0;
-
-m_a1=((32+3.76*28)*(1+(y-2*x)/4))/(12+y+16*x); %[kg_air/kg_fuel]
-
-elseif type == 2
-    
-elseif type == 3
+switch type
+    case 'C'
     %specific combustive index for a combustible of the form : CHyOx
-y=4;
-x=0;
+    y=0;
+    x=0;
 
-m_a1=((32+3.76*28)*(1+(y-2*x)/4))/(12+y+16*x) %[kg_air/kg_fuel]
-elseif type == 4
+    m_a1=((32+3.76*28)*(1+(y-2*x)/4))/(12+y+16*x); %[kg_air/kg_fuel]
+
+    case 'CH1.8'
     
-elseif type == 5
+    case 'CH4'
+    %specific combustive index for a combustible of the form : CHyOx
+    y=4;
+    x=0;
+
+    m_a1=((32+3.76*28)*(1+(y-2*x)/4))/(12+y+16*x) %[kg_air/kg_fuel]
+    case 'C3H8'
     
-elseif type == 6
+    case 'H2'
     
-else
-   %lancer une erreur 
+    case 'CO'
+    
+    otherwise
+    %lancer une erreur 
 end
 end
