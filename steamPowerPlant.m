@@ -157,7 +157,6 @@ else
     [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
     [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,eta_gen);
     
-    %losses=[turbineLoss+pumpLoss,steamGenLoss, condenserLoss];
     losses=[steamGenLoss, condenserLoss, turbineLoss+pumpLoss];
     
 end
@@ -182,17 +181,16 @@ fprintf('Wmcy = %f kJ/kg\n\n',Wmcy)
 %% PLOT 
 
 %pie chart
-%figure;
-% pie([mVapour*losses,Pe])
-% h = pie([mVapour*losses,Pe]);
-% hText = findobj(h,'Type','text'); % text object handles
-% percentValues = get(hText,'String'); % percent values
-% txt = {'Steam generator: ';'Condenser: ';'Mechanical: ';'Effective power: '};
-% combinedtxt = strcat(txt,percentValues);
-% hText(1).String = combinedtxt(1);
-% hText(2).String = combinedtxt(2);
-% hText(3).String = combinedtxt(3);
-% hText(4).String = combinedtxt(4);
+h = pie([mVapour*losses,Pe]);
+hText = findobj(h,'Type','text'); % text object handles
+percentValues = get(hText,'String'); % percent values
+txt = {'Steam generator: ';'Condenser: ';'Mechanical: ';'Effective power: '};
+combinedtxt = strcat(txt,percentValues);
+hText(1).String = combinedtxt(1);
+hText(2).String = combinedtxt(2);
+hText(3).String = combinedtxt(3);
+hText(4).String = combinedtxt(4);
+
 
 %T-s diagram
 %figure(1)
