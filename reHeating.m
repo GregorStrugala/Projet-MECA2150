@@ -1,4 +1,5 @@
 function[state,Wmov]=reHeating(state,stateI,r,pOut,eta_siT,turbineEfficiency,eta_gen)
+%REHEATING
 %% State calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 pI = stateI.p;
 Ti = stateI.T;

@@ -186,10 +186,7 @@ hText = findobj(h,'Type','text'); % text object handles
 percentValues = get(hText,'String'); % percent values
 txt = {'Steam generator: ';'Condenser: ';'Mechanical: ';'Effective power: '};
 combinedtxt = strcat(txt,percentValues);
-hText(1).String = combinedtxt(1);
-hText(2).String = combinedtxt(2);
-hText(3).String = combinedtxt(3);
-hText(4).String = combinedtxt(4);
+set(hText,{'String'},combinedtxt);
 
 
 %T-s diagram
