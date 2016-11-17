@@ -9,10 +9,10 @@ sI = stateI.s;
 
 %pO=r*pI;
 
-[state(4),~,Wmov,~,~,~,~] = turbine(stateI,pOut,eta_siT,turbineEfficiency);
-[state(5),~,Wmov,~,~,~,~] = turbine(stateI,r*pI,eta_siT,turbineEfficiency);
+[state(4),Wmov,~,~,~,~] = turbine(stateI,pOut,eta_siT,turbineEfficiency);
+[state(5),Wmov,~,~,~,~] = turbine(stateI,r*pI,eta_siT,turbineEfficiency);
 [state(6),~,~,~,~] = steamGenerator(state(5),Ti,eta_gen);
-[state(7),~,Wmov,~,~,~,~] = turbine(state(6),pOut,eta_siT,turbineEfficiency);
+[state(7),Wmov,~,~,~,~] = turbine(state(6),pOut,eta_siT,turbineEfficiency);
 % stateO1=state(4);
 % stateO2=state(5);
 

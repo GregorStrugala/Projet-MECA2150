@@ -82,11 +82,14 @@ if feedHeat>0 && nF>0 && reHeat == 0
     state(3).h = XSteam('h_pT',steamPressure,Tmax);
     
     % We begin the cycle at the state (3)
-    [state(4),~,Wmov,e4,ExLossT,~,eta_turbex] = turbine(state(3),state(5).p,eta_siT,turbineEfficiency);
+    [state(4),Wmov,e4,turbineLoss,ExLossT,eta_turbex] = turbine(state(3),state(5).p,eta_siT,eta_mec);
     [state(5),~,e1,condenserLoss,~] = condenser(state(4));
     [state]=feedHeating(state,steamPressure,0.8,0.88,nF); %to do energetic and exergetic analysis
-    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,pumpEfficiency);
+    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
     [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,eta_gen);
+    
+    X=0.207;
+    losses=[turbineLoss+pumpLoss,(1+X)*steamGenLoss, condenserLoss];
  
 % REHEATING ONLY
 elseif reHeat>0 && nR > 0 && feedHeat == 0   
@@ -116,9 +119,9 @@ elseif reHeat>0 && nR > 0 && feedHeat == 0
     
     % We begin the cycle at the state (3)
     %[state(4),state(3),Wmov,e4,ExLossT,turbineLoss,eta_turbex] = turbine(state(3),state(1).p,eta_siT,turbineEfficiency);
-    [state, Wmov]=reHeating(state,state(3),0.15,state(1).p,0.88,0.9,0.945);
+    [state, Wmov]=reHeating(state,state(3),0.18,state(1).p,0.88,0.9,0.945);
     [state(1),~,e1,condenserLoss,~] = condenser(state(4));
-    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,pumpEfficiency);
+    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
     [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,eta_gen);
     
 % RANKINE-HIRN CYCLE    
@@ -154,7 +157,8 @@ else
     [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
     [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,eta_gen);
     
-    losses=[turbineLoss+pumpLoss,steamGenLoss, condenserLoss];
+    %losses=[turbineLoss+pumpLoss,steamGenLoss, condenserLoss];
+    losses=[steamGenLoss, condenserLoss, turbineLoss+pumpLoss];
     
 end
 
@@ -178,11 +182,21 @@ fprintf('Wmcy = %f kJ/kg\n\n',Wmcy)
 %% PLOT 
 
 %pie chart
-pie([mVapour*losses,Pe])
+%figure;
+% pie([mVapour*losses,Pe])
+% h = pie([mVapour*losses,Pe]);
+% hText = findobj(h,'Type','text'); % text object handles
+% percentValues = get(hText,'String'); % percent values
+% txt = {'Steam generator: ';'Condenser: ';'Mechanical: ';'Effective power: '};
+% combinedtxt = strcat(txt,percentValues);
+% hText(1).String = combinedtxt(1);
+% hText(2).String = combinedtxt(2);
+% hText(3).String = combinedtxt(3);
+% hText(4).String = combinedtxt(4);
 
 %T-s diagram
 %figure(1)
-%Ts_diagram(state,eta_siP,eta_siT,feedHeat,nF,reHeat,nR)
+Ts_diagram(state,eta_siP,eta_siT,feedHeat,nF,reHeat,nR)
 %figure(1);
 %h-s diagram
 %hs_diagram(state(1),state(2),state(3),state(4),0.8,0.88)
