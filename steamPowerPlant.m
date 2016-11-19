@@ -69,7 +69,7 @@ if feedHeat>0 && nF>0 && reHeat == 0
         state(i).T = 0;
         state(i).x = 0;
         state(i).h = 0;
-        state(i).s = 0; 
+        state(i).s = 0;
     end
     % Given parameters
     state(5).T = Tcond;
