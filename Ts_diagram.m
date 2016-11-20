@@ -97,77 +97,98 @@ elseif feedHeat > 0 && nF > 0 && reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
     [Tvap,sVap1,~]=vaporizationCondensationPlot(state(2),state(3));
     hold on
     plot(sVap1,Tvap,'Color','r','LineStyle','-','LineWidth',1.5)
-    
     %% PLOT : Expansion in the turbine
     hold on
     plot(state(3).s,state(3).T,'o')
     text(state(3).s,state(3).T,'3')
     
-    [T_turb,s_turb,~]=CompressionExpansionPlot(state(3),state(4),eta_siT,0,1);
+    [T_turb,s_turb,~]=CompressionExpansionPlot(state(3),state(8),eta_siT,0,1);
     hold on
     plot(s_turb,T_turb,'Color','r','LineStyle','-','LineWidth',1.5)
     
     %% PLOT : condensation in the condenser
     hold on
-    plot(state(4).s,state(4).T,'o')
-    text(state(4).s,state(4).T,'4')
-    plot([state(4).s,state(5).s],[state(4).T,state(5).T],'Color','r','LineStyle','-','LineWidth',1.5)
-    for i=1:nF
+    plot(state(8).s,state(8).T,'o')
+    text(state(8).s,state(8).T,'4')
+    hold on
+    plot(state(9).s,state(9).T,'o')
+    text(state(9).s,state(9).T,'9')
+    plot([state(8).s,state(9).s],[state(8).T,state(9).T],'Color','r','LineStyle','-','LineWidth',1.5)
+    %% PLOT : reheating in the different heater
+    
+    T=state(10).T:abs(state(1).T-state(10).T)*0.01:state(1).T;
+    sR=zeros(1,length(T));
+    for i=1:length(T)
+        sR(i)=XSteam('s_pt',state(1).p,T(i));
+    end
+    hold on
+    plot(sR,T,'Color','r','LineStyle','-','LineWidth',1.5)
+    for index=1:nF
         
-        %% PLOT : purge steam in the turbine, condensation in the heater and the subcooler
+        %% PLOT : bleed steam in the turbine, condensation in the heater and the subcooler
         hold on
-        %plot(state(7+4*(i-1)).s,state(7+4*(i-1)).T,'o')
-        plot(state(7+5*(i-1)).s,state(7+5*(i-1)).T,'o')
-        %text(state(7).s,state(7).T,labels(7))
+        plot(state(4,index).s,state(4,index).T,'o')
+        text(state(4,index).s,state(4,index).T,'4')
         hold on
-        %plot(state(8+4*(i-1)).s,state(8+4*(i-1)).T,'o')
-        plot(state(8+5*(i-1)).s,state(8+5*(i-1)).T,'o')
-        %text(state(8).s,state(8).T,labels(8))
+        plot(state(5,index).s,state(5,index).T,'o')
         hold on
-        %plot(state(9+4*(i-1)).s,state(9+4*(i-1)).T,'o')
-        plot(state(9+5*(i-1)).s,state(9+5*(i-1)).T,'o')
-        %text(state(9).s,state(9).T,labels(9))
-        
-        %[Tcond,sCond,~]=vaporizationCondensationPlot(state(9+4*(i-1)),state(7+4*(i-1)));
-        [Tcond,sCond,~]=vaporizationCondensationPlot(state(9+5*(i-1)),state(7+5*(i-1)));
+        if index == 1
+            [Tcond,sCond,~]=vaporizationCondensationPlot(state(6,index),state(4,index));
+        else
+            [Tcond,sCond,~]=vaporizationCondensationPlot(state(5,index),state(4,index));
+        end
         hold on
         plot(sCond,Tcond,'Color','b','LineStyle','--','LineWidth',1.5)
         
         %% PLOT : isenthalpic expansion in the valve
         hold on
-        %plot(state(10+4*(i-1)).s,state(10+4*(i-1)).T,'o')
-        plot(state(10+5*(i-1)).s,state(10+5*(i-1)).T,'o')
-        %text(state(10).s,state(10).T,labels(10))
+        plot(state(7).s,state(7).T,'o')
+        text(state(7).s,state(7).T,'7')
         hold on
-        plot(state(5).s,state(5).T,'o')
-        text(state(5).s,state(5).T,'5','Position',[state(5).s,state(5).T])
-        
-        %[Texp,sExp,~] = isenthalpicExpansion(state(10+4*(i-1)),state(9+4*(i-1)));
-        [Texp,sExp,~] = isenthalpicExpansion(state(10+5*(i-1)),state(9+5*(i-1)));
+        plot(state(6,index).s,state(6,index).T,'o')
+        text(state(6,index).s,state(6,index).T,'6')
         hold on
-        plot(sExp,Texp,'Color','b','LineStyle','--','LineWidth',1.5)
+        plot(state(5,index).s,state(5,index).T,'o')
+        text(state(5,index).s,state(5,index).T,'5','Position',[state(5,index).s,state(5,index).T])
+        if index == 1
+            [Texp,sExp,~] = isenthalpicExpansion(state(7,index),state(6,index));
+            hold on
+            plot(sExp,Texp,'Color','b','LineStyle','--','LineWidth',1.5)
+        else
+            [Texp,sExp,~] = isenthalpicExpansion(state(6,index),state(5,index));
+            hold on
+            plot(sExp,Texp,'Color','b','LineStyle','--','LineWidth',1.5)
+        end
         
         %% PLOT : compression in the extracting pump
         hold on
-        plot(state(6).s,state(6).T,'o')
-        text(state(6).s,state(6).T,'6','Position',[state(6).s,state(6).T])
+        plot(state(10).s,state(10).T,'o')
+        text(state(10).s,state(10).T,'10','Position',[state(10).s,state(10).T])
         
-        [Tcomp2,sComp2,~]=CompressionExpansionPlot(state(5),state(6),0.8,1,0);
+        [Tcomp2,sComp2,~]=CompressionExpansionPlot(state(9),state(10),0.8,1,0);
         hold on
         plot(sComp2,Tcomp2,'Color','r','LineStyle','-','LineWidth',1.5)
         
-        %% PLOT : reheating in the different heater
         
-        T=state(6).T:abs(state(1).T-state(6).T)*0.01:state(1).T;
-        sR=zeros(1,length(T));
-        for i=1:length(T)
-            sR(i)=XSteam('s_pt',state(1).p,T(i));
-        end
-        hold on
-        plot(sR,T,'Color','r','LineStyle','-','LineWidth',1.5)
     end
     
-    
+    hold on
+    plot(state(3).s,state(3).T,'o')
+    text(state(3).s,state(3).T,'3')
+    hold on
+    for i=1:nF
+        plot(state(4,i).s,state(4,i).T,'o')
+        text(state(4,i).s,state(4,i).T,'4.i')
+        plot(state(5,i).s,state(5,i).T,'o')
+        text(state(5,i).s,state(5,i).T,'5.i')
+        plot(state(6,i).s,state(6,i).T,'o')
+        text(state(6,i).s,state(6,i).T,'6.i')
+    end
+    for i=1:nF
+        hold on
+        plot(state(11,i).s,state(11,i).T,'*')
+        text(state(11,i).s,state(11,i).T,'11')
+    end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% REHEATING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 elseif reHeat > 0 && nR > 0 && feedHeat == 0 && nF == 0 %%%%%%%%%%%%%%%%%%%
     %% PLOT : compression in the feed pump
@@ -189,7 +210,7 @@ elseif reHeat > 0 && nR > 0 && feedHeat == 0 && nF == 0 %%%%%%%%%%%%%%%%%%%
     [Tvap1,sVap1,~]=vaporizationCondensationPlot(state(2),state(3));
     hold on
     plot(sVap1,Tvap1,'Color','r','LineStyle','-','LineWidth',1.5)
-    [Tvap2,sVap2,~]=vaporizationCondensationPlot(state(2),state(6));
+    [Tvap2,sVap2,~]=vaporizationCondensationPlot(state(2),state(5));
     hold on
     plot(sVap2,Tvap2,'Color','m','LineStyle','-.','LineWidth',1.5)
     
@@ -198,23 +219,28 @@ elseif reHeat > 0 && nR > 0 && feedHeat == 0 && nF == 0 %%%%%%%%%%%%%%%%%%%
     plot(state(3).s,state(3).T,'o')
     text(state(3).s,state(3).T,'3')
     hold on
+    plot(state(4,1).s,state(4,1).T,'o')
+    text(state(4,1).s,state(4,1).T,'4.1')
+    hold on
+    plot(state(4,2).s,state(4,2).T,'o')
+    text(state(4,2).s,state(4,2).T,'4.2')
+    hold on
     plot(state(5).s,state(5).T,'o')
     text(state(5).s,state(5).T,'5')
-    hold on
-    plot(state(6).s,state(6).T,'o')
-    text(state(6).s,state(6).T,'6')
     
-    [T_turb1,s_turb1,~]=CompressionExpansionPlot(state(3),state(4),eta_siT,0,1);
+    [T_turb1,s_turb1,~]=CompressionExpansionPlot(state(3),state(4,2),eta_siT,0,1);
     hold on
     plot(s_turb1,T_turb1,'Color','b','LineStyle','--','LineWidth',1.5)
-    [T_turb2,s_turb2,~]=CompressionExpansionPlot(state(3),state(5),eta_siT,0,1);
+    
+    [T_turb2,s_turb2,~]=CompressionExpansionPlot(state(3),state(4,1),eta_siT,0,1);
     hold on
     plot(s_turb2,T_turb2,'Color','r','LineStyle','-','LineWidth',1.5)
-    [T_turb3,s_turb3,~]=CompressionExpansionPlot(state(6),state(7),eta_siT,0,1);
+    
+    [T_turb3,s_turb3,~]=CompressionExpansionPlot(state(5),state(6),eta_siT,0,1);
     hold on
     plot(s_turb3,T_turb3,'Color','r','LineStyle','-','LineWidth',1.5)
     
-    T=state(5).T:abs(state(6).T-state(5).T)*0.01:state(6).T;
+    T=state(4,1).T:abs(state(5).T-state(4,1).T)*0.01:state(5).T;
     sR=zeros(1,length(T));
     for i=1:length(T)
         sR(i)=XSteam('s_pt',state(5).p,T(i));
@@ -223,17 +249,37 @@ elseif reHeat > 0 && nR > 0 && feedHeat == 0 && nF == 0 %%%%%%%%%%%%%%%%%%%
     plot(sR,T,'Color','r','LineStyle','-','LineWidth',1.5)
     
     %% PLOT : condensation in the condenser
+    
     hold on
-    plot(state(4).s,state(4).T,'o')
-    text(state(4).s,state(4).T,'4')
-    hold on
-    plot(state(7).s,state(7).T,'o')
-    text(state(7).s,state(7).T,'7')
-    if isnan(state(4).x)
+    plot(state(6).s,state(6).T,'o')
+    text(state(6).s,state(6).T,'6')
+    if isnan(state(6).x)
         %To be done
     else  %case without feedHeating and reHeating
-        plot([state(7).s,state(1).s],[state(7).T,state(1).T],'Color','r','LineStyle','-','LineWidth',1.5)
+        plot([state(6).s,state(1).s],[state(6).T,state(1).T],'Color','r','LineStyle','-','LineWidth',1.5)
     end
+    hold on
+    plot(state(3).s,state(3).T,'o')
+    text(state(3).s,state(3).T,'3')
+    hold on
+    plot(state(4,1).s,state(4,1).T,'o')
+    text(state(4,1).s,state(4,1).T,'4.1')
+    hold on
+    plot(state(4,2).s,state(4,2).T,'o')
+    text(state(4,2).s,state(4,2).T,'4.2')
+    
+    hold on
+    plot(state(5).s,state(5).T,'o')
+    text(state(5).s,state(5).T,'5')
+    hold on
+    plot(state(6).s,state(6).T,'o')
+    text(state(6).s,state(6).T,'6')
+    hold on
+    plot(state(1).s,state(1).T,'o')
+    text(state(1).s,state(1).T,'1')
+    hold on
+    plot(state(2).s,state(2).T,'o')
+    text(state(2).s,state(2).T,'2')
 end
 end
 
