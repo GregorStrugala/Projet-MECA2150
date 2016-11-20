@@ -1,4 +1,4 @@
-function[]=steamPowerPlant(deltaT, Triver, Tmax, steamPressure, Pe, feedHeat, nF, reHeat, nR, dTpinch)
+function[]=steamPowerPlant(deltaT, Triver, Tmax, steamPressure, Pe, nF, nR, dTpinch)
 %TEST
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
 %   STEAMPOWERPLANT(deltaT, Triver, Tmax, steamPressure, Pe, n) displays a table
@@ -55,10 +55,10 @@ eta_siP=0.85;
 
 Tcond=Triver+deltaT;
 
-%%%%%%%%%%%%%%%%%%%%%%% FEEDHEATING ONLY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if feedHeat>0 && nF>0 && reHeat == 0
+%%%%%%%%%%%%%%%%%%%%%%% COMBINING, FEEDHEATING ONLY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if nF>0
     %stateNumber=4+2+4*n;
-    stateNumber=11; %independent of nF!
+    stateNumber=11+2*nR; %independent of nF!
     state(stateNumber,nF).p = 0; % preallocation
     state(stateNumber,nF).T = 0;
     state(stateNumber,nF).x = 0;
@@ -75,8 +75,8 @@ if feedHeat>0 && nF>0 && reHeat == 0
     end
     
     % Given parameters
-    state(8).T = Tcond;
-    state(8).p = XSteam('psat_T',Tcond);
+    state(8+2*nR).T = Tcond;
+    state(8+2*nR).p = XSteam('psat_T',Tcond);
     
     %definition of the state(3) : complete !
     state(3).p = steamPressure;
@@ -86,15 +86,21 @@ if feedHeat>0 && nF>0 && reHeat == 0
     state(3).h = XSteam('h_pT',steamPressure,Tmax);
     
     % We begin the cycle at the state (3)
-    [state(8),Wmov,e4,turbineLoss,ExLossT,eta_turbex] = turbine(state(3),state(8).p,eta_siT,eta_mec);
-    [state(9),~,e1,condenserLoss,~] = condenser(state(8));
-    [state]=feedHeating(state,steamPressure,0.8,0.88,nF,dTpinch); %to do energetic and exergetic analysis
+    if nR == 0
+        [state(8),Wmov,e4,turbineLoss,ExLossT,eta_turbex] = turbine(state(3),state(8).p,eta_siT,eta_mec);
+    else
+        pOut = XSteam('psat_T',Tcond);
+        [state, Wmov]=reHeating(state,state(3),0.18,pOut,eta_siT,eta_mec,eta_gen,nF,nR);
+    end
+    
+    [state(9+2*nR),~,e1,condenserLoss,~] = condenser(state(8+2*nR));
+    [state]=feedHeating(state,steamPressure,0.8,0.88,nF,nR,dTpinch); %to do energetic and exergetic analysis
     [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
     [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,eta_gen);
     
     
     %%%%%%%%%%%%%%%%%%%%%%%%% REHEATING ONLY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-elseif reHeat>0 && nR > 0 && feedHeat == 0
+elseif  nR > 0 && nF == 0
     stateNumber=4+2*nR;
     state(stateNumber,nR+1).p = 0; % preallocation
     state(stateNumber,nR+1).T = 0;
@@ -124,7 +130,8 @@ elseif reHeat>0 && nR > 0 && feedHeat == 0
     state(3).h = XSteam('h_pT',steamPressure,Tmax);
     
     %We begin the cycle at the state (3)
-    [state, Wmov]=reHeating(state,state(3),0.18,state(1).p,eta_siT,eta_mec,eta_gen);
+    pOut = XSteam('psat_T',Tcond);
+    [state, Wmov]=reHeating(state,state(3),0.18,pOut,eta_siT,eta_mec,eta_gen,nF,nR);
     [state(1),~,e1,condenserLoss,~] = condenser(state(6));
     [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
     [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,eta_gen);
@@ -197,7 +204,7 @@ end
 
 %T-s diagram
 %figure(1)
-Ts_diagram(state,eta_siP,eta_siT,feedHeat,nF,reHeat,nR)
+Ts_diagram(state,eta_siP,eta_siT,nF,nR)
 %figure(1);
 %h-s diagram
 %hs_diagram(state(1),state(2),state(3),state(4),0.8,0.88)
