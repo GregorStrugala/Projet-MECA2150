@@ -1,4 +1,4 @@
-function [ Cp ] = cp(T,A)
+function Cp = cp(T,A)
 %CP computes the heat capacity of species A for a certain temperature.
 %   CP(T,A) returns the value of the heat capacity of species A (A must be
 %   a string) at temperature T, eg cp(600,'CO2').
