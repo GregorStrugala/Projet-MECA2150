@@ -1,4 +1,4 @@
-function[stateO]=bleed(hO,stateI,eta_siT)
+function[stateO]=bleed(index,hO,stateI,eta_siT)
 %PURGE computes the state variation after the steam extraction in the turbine.
 %   stateO = PURGE(stateI,eta_siT) finds the new values of
 %   the state variables contained in stateI, where stateI is a struct with
@@ -49,5 +49,7 @@ stateO.T = To;
 stateO.x = xO;
 stateO.h = hO;
 stateO.s = sO;
+
+
 
 end

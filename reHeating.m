@@ -1,4 +1,4 @@
-function[state,Wmov]=reHeating(state,stateI,r,pOut,eta_siT,turbineEfficiency,eta_gen)
+function[state,Wmov]=reHeating(state,stateI,r,pOut,eta_siT,turbineEfficiency,eta_gen,nF,nR)
 %REHEATING
 %% State calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 pI = stateI.p;
@@ -6,24 +6,16 @@ Ti = stateI.T;
 xI = stateI.x;
 hI = stateI.h;
 sI = stateI.s;
-
-
-%pO=r*pI;
-
-[state(4),Wmov,~,~,~,~] = turbine(stateI,pOut,eta_siT,turbineEfficiency);
-[state(5),Wmov,~,~,~,~] = turbine(stateI,r*pI,eta_siT,turbineEfficiency);
-[state(6),~,~,~,~] = steamGenerator(state(5),Ti,eta_gen);
-[state(7),Wmov,~,~,~,~] = turbine(state(6),pOut,eta_siT,turbineEfficiency);
-% stateO1=state(4);
-% stateO2=state(5);
-
-
-
-
-
-% stateO.p = pO;
-% stateO.T = To;
-% stateO.x = xO;
-% stateO.h = hO;
-% stateO.s = sO;
+if nF == 0
+    %pO=r*pI;
+    [state(4,1),Wmov,~,~,~,~] = turbine(stateI,r*pI,eta_siT,turbineEfficiency);
+    [state(4,2),Wmov,~,~,~,~] = turbine(stateI,pOut,eta_siT,turbineEfficiency);
+    [state(5),~,~,~,~] = steamGenerator(state(4,1),Ti,eta_gen);
+    [state(6),Wmov,~,~,~,~] = turbine(state(5),pOut,eta_siT,turbineEfficiency);
+else    
+    [state(4,1),Wmov,~,~,~,~] = turbine(stateI,r*pI,eta_siT,turbineEfficiency);
+    [state(4,2),Wmov,~,~,~,~] = turbine(stateI,pOut,eta_siT,turbineEfficiency);
+    [state(5),~,~,~,~] = steamGenerator(state(4,1),Ti,eta_gen);
+    [state(8+2*nR),Wmov,~,~,~,~] = turbine(state(5),pOut,eta_siT,turbineEfficiency);
+end
 end

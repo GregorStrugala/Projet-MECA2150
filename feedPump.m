@@ -67,7 +67,7 @@ stateO.s = sO;
 
 %% Energetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Wop = hO-hI; % work done by the pump, it should be positive (operative work)
-pumpLoss=abs(Wop*(1-pumpEfficiency)/pumpEfficiency)%pumpEfficiency == eta_mec !
+pumpLoss=abs(Wop*(1-pumpEfficiency)/pumpEfficiency);%pumpEfficiency == eta_mec !
 
 %% Exergetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 eI=exergy(stateI);

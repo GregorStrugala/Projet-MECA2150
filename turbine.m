@@ -94,7 +94,7 @@ stateO.s = sO;
 
 %% Energetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Wmov = hO-hI; % Work done by the expansion
-turbineLoss=abs(Wmov*(1-turbineEfficiency))
+turbineLoss=abs(Wmov*(1-turbineEfficiency));
 %% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 eI=exergy(stateI);
 eO=exergy(stateO);

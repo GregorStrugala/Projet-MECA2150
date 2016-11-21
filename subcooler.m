@@ -1,4 +1,4 @@
-function[stateO]=subcooler(stateI,Tmin)
+function[stateO]=subcooler(stateI,Tmin,dTpinch)
 %SUBCOOLER computes the state variation after that the water has been subcooled in the subcooler.
 %   stateO = SUBCOOLER(stateI,dT) finds the new values of
 %   the state variables contained in stateI, where stateI is a struct with
