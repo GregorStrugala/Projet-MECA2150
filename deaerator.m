@@ -41,9 +41,10 @@ stateO.s = XSteam('sL_T',To);
 
 %% Exergetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if nargout==2 % we compute the exergy only if needed.
-eO = exergy(stateO);
-eI = exergy(stateI);
-eII = exergy(stateII);
-ExLoss = eO - ( eI + eII );
+    eO = exergy(stateO);
+    eBleeds = exergy(stateBleeds(i));
+    eI = exergy(stateI);
+    eII = exergy(stateII);
+    ExLoss = eO - ( eBleeds + eI + eII );
 end
 end
