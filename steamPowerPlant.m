@@ -59,20 +59,20 @@ Tcond=Triver+deltaT;
 if nF>0
     %stateNumber=4+2+4*n;
     stateNumber=11+2*nR; %independent of nF!
-    state(stateNumber,nF).p = 0; % preallocation
-    state(stateNumber,nF).T = 0;
-    state(stateNumber,nF).x = 0;
-    state(stateNumber,nF).h = 0;
-    state(stateNumber,nF).s = 0;
-    for i=1:stateNumber-1
-        for j=1:nF
-            state(i,j).p = 0;
-            state(i,j).T = 0;
-            state(i,j).x = 0;
-            state(i,j).h = 0;
-            state(i,j).s = 0;
-        end
-    end
+    state(stateNumber,nF).p = []; % preallocation
+    state(stateNumber,nF).T = [];
+    state(stateNumber,nF).x = [];
+    state(stateNumber,nF).h = [];
+    state(stateNumber,nF).s = [];
+%     for i=1:stateNumber-1
+%         for j=1:nF
+%             state(i,j).p = 0;
+%             state(i,j).T = 0;
+%             state(i,j).x = 0;
+%             state(i,j).h = 0;
+%             state(i,j).s = 0;
+%         end
+%     end
     
     % Given parameters
     state(8+2*nR).T = Tcond;
@@ -185,7 +185,7 @@ end
 % definir une fonction combustion pour def LHV et mc
 
 
-
+disp(struct2array(state))
 % M = (reshape(struct2array(state),5,stateNumber))';
 % fprintf('\n')
 % disp(array2table(M,'VariableNames',{'p','T','x','h','s'}))
