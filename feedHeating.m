@@ -6,12 +6,23 @@ function[state]=feedHeating(state,pmax,eta_siP,eta_siT,nF,nR,dTpinch)
 
 
 %% State calculation
+[state(10+2*nR)]=extractionPump(state(9+2*nR),0.5,pmax,eta_siP);
 for index=1:nF
     
-    hPurge=index*abs(state(3+2*nR).h-state(8+2*nR).h)/(nF+1)+state(8+2*nR).h;
+    if nR == 0
     
-    [state(10+2*nR)]=extractionPump(state(9+2*nR),0.5,pmax,eta_siP);
+    hPurge=index*abs(state(3+2*nR).h-state(8+2*nR).h)/(nF+1)+state(8+2*nR).h;
     [state(4+2*nR,index)]=bleed(index,hPurge,state(3+2*nR),eta_siT);
+    elseif nR~= 0 && index==nF
+    hPurge=state(4,1).h;
+    [state(4+2*nR,index)]=bleed(index,hPurge,state(4,1),eta_siT);
+    else
+        hPurge=index*abs(state(3+2*nR).h-state(8+2*nR).h)/(nF)+state(8+2*nR).h;
+        [state(4+2*nR,index)]=bleed(index,hPurge,state(3+2*nR),eta_siT);
+    end
+    
+    
+    %[state(4+2*nR,index)]=bleed(index,hPurge,state(3+2*nR),eta_siT);
     [state(5+2*nR,index),~,~,~,~]=condenser(state(4+2*nR,index));
     
     if index == 1

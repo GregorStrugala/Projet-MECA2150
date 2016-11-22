@@ -87,7 +87,7 @@ if nF>0
     
     % We begin the cycle at the state (3)
     if nR == 0
-        [state(8),Wmov,e4,turbineLoss,ExLossT,eta_turbex] = turbine(state(3),state(8).p,eta_siT,eta_mec);
+        [state(8),Wmov,e4,turbineLoss,ExLossT,eta_turbex] = turbine(state(3,1),state(8).p,eta_siT,eta_mec);
     else
         pOut = XSteam('psat_T',Tcond);
         [state, Wmov]=reHeating(state,state(3),0.18,pOut,eta_siT,eta_mec,eta_gen,nF,nR);
@@ -95,8 +95,8 @@ if nF>0
     
     [state(9+2*nR),~,e1,condenserLoss,~] = condenser(state(8+2*nR));
     [state]=feedHeating(state,steamPressure,0.8,0.88,nF,nR,dTpinch); %to do energetic and exergetic analysis
-    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
-    [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,eta_gen);
+    [state(2,1),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1,1),steamPressure,eta_siP,eta_mec);
+    [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2,1),Tmax,eta_gen);
     
     
     %%%%%%%%%%%%%%%%%%%%%%%%% REHEATING ONLY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -201,7 +201,8 @@ end
 % combinedtxt = strcat(txt,percentValues);
 % set(hText,{'String'},combinedtxt);
 
-
+%state(1)
+%state(2)
 %T-s diagram
 %figure(1)
 Ts_diagram(state,eta_siP,eta_siT,nF,nR)
