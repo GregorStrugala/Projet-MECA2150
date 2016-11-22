@@ -1,4 +1,4 @@
-function[]=steamPowerPlant(deltaT, Triver, Tmax, steamPressure, Pe, nF, nR, dTpinch)
+function state = steamPowerPlant(deltaT, Triver, Tmax, steamPressure, Pe, nF, nR, dTpinch)
 %TEST
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
 %   STEAMPOWERPLANT(deltaT, Triver, Tmax, steamPressure, Pe, n) displays a table
@@ -185,7 +185,6 @@ end
 % definir une fonction combustion pour def LHV et mc
 
 
-disp(struct2array(state))
 % M = (reshape(struct2array(state),5,stateNumber))';
 % fprintf('\n')
 % disp(array2table(M,'VariableNames',{'p','T','x','h','s'}))
