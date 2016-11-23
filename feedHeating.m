@@ -21,8 +21,6 @@ for index=1:nF
         [state(4+2*nR,index)]=bleed(index,hPurge,state(3+2*nR),eta_siT);
     end
     
-    
-    %[state(4+2*nR,index)]=bleed(index,hPurge,state(3+2*nR),eta_siT);
     [state(5+2*nR,index),~,~,~,~]=condenser(state(4+2*nR,index));
     
     if index == 1

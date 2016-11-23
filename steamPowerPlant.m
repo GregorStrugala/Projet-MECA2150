@@ -95,10 +95,11 @@ if nF>0
     
     [state(9+2*nR),~,e1,condenserLoss,~] = condenser(state(8+2*nR));
     [state]=feedHeating(state,steamPressure,0.8,0.88,nF,nR,dTpinch); %to do energetic and exergetic analysis
-    [state(2,1),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1,1),steamPressure,eta_siP,eta_mec);
-    [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2,1),Tmax,eta_gen);
+    [state(2),Wop,e2,pumpLoss,ExlossP] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
+    [~,Qh,e3,steamGenLoss,Exloss] = steamGenerator(state(2),Tmax,eta_gen);
+    [X]=bleedFraction(state,nF,nR)
     
-    
+ 
     %%%%%%%%%%%%%%%%%%%%%%%%% REHEATING ONLY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 elseif  nR > 0 && nF == 0
     stateNumber=4+2*nR;

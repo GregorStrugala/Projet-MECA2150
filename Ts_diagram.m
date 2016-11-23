@@ -82,6 +82,12 @@ elseif nF > 0 %&& reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
     hold on
     plot(state(1).s,state(1).T,'o')
     text(state(1).s,state(1).T,'1')
+    hold on
+    plot(state(11,nF).s,state(11,nF).T,'*')
+    hold on 
+     plot(state(5,nF).s,state(5,nF).T,'*')
+    
+    text(state(11,nF).s,state(11,nF).T,'11')
     
     [Tcomp,sComp,~]=CompressionExpansionPlot(state(1),state(2),eta_siP,1,0);
     hold on
