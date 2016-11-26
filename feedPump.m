@@ -1,4 +1,4 @@
-function [stateO,Wop,eO,pumpLoss,Exloss] = feedPump(stateI,steamPressure,eta_siP,pumpEfficiency)
+function [stateO,Wop,lossEn,lossEx] = feedPump(stateI,steamPressure,eta_siP,pumpEfficiency)
 %FEEDPUMP computes the state variation after a compression.
 %   stateO = FEEDPUMP(stateI,steamPressure,eta_siP) finds the new values of
 %   the state variables contained in stateI, where stateI is a struct with
@@ -41,6 +41,7 @@ Ti = stateI.T;
 xI = stateI.x;
 hI = stateI.h;
 sI = stateI.s;
+eI = stateI.e;
 
 
 T0=15;
@@ -67,11 +68,12 @@ stateO.s = sO;
 
 %% Energetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Wop = hO-hI; % work done by the pump, it should be positive (operative work)
-pumpLoss=abs(Wop*(1-pumpEfficiency)/pumpEfficiency);%pumpEfficiency == eta_mec !
+lossEn=abs(Wop*(1-pumpEfficiency)/pumpEfficiency);%pumpEfficiency == eta_mec !
 
 %% Exergetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-eI=exergy(stateI);
+%eI=exergy(stateI);
 eO=exergy(stateO);
+stateO.e = eO;
 
-Exloss = eO - eI; % Exergy loss due to irreversibilities in the pump.
+lossEx = abs(Wop)-(abs(eO - eI)); % Exergy loss due to irreversibilities in the pump.
 end

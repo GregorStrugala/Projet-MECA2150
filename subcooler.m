@@ -45,5 +45,5 @@ stateO.T = To;
 stateO.x = xO;
 stateO.h = hO;
 stateO.s = sO;
-
+stateO.e = exergy(stateO);
 end

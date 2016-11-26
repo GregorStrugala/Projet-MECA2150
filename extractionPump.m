@@ -44,6 +44,7 @@ Ti = stateI.T;
 xI = stateI.x;
 hI = stateI.h;
 sI = stateI.s;
+eI = stateI.e;
 
 pO=X*pmax;%or state(2).p
 xO=NaN;
@@ -65,5 +66,7 @@ stateO.T = To;
 stateO.x = xO;
 stateO.h = hO;
 stateO.s = sO;
+stateO.e = exergy(stateO);
+
 
 end

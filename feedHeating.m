@@ -21,7 +21,7 @@ for index=1:nF
         [state(4+2*nR,index)]=bleed(index,hPurge,state(3+2*nR),eta_siT);
     end
     
-    [state(5+2*nR,index),~,~,~,~]=condenser(state(4+2*nR,index));
+    [state(5+2*nR,index),~,~,~]=condenser(state(4+2*nR,index));
     
     if index == 1
         [state(6+2*nR,index)]=subcooler(state(5+2*nR,index),state(9+2*nR).T,dTpinch);

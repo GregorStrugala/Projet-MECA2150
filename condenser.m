@@ -1,4 +1,4 @@
-function [stateO,Qc,eO,condenserLoss,ExLoss] = condenser(stateI)
+function [stateO,Qc,lossEn,lossEx] = condenser(stateI)
 %TO BE REWRITE CASE OF X IS NOT DEFINE !!!
 %CONDENSER computes the state variation after an isohtermal ad isobaric
 %condensation.
@@ -31,6 +31,7 @@ Ti = stateI.T;
 xI = stateI.x;
 hI = stateI.h;
 sI = stateI.s;
+eI = stateI.e;
 
 %if isnan(xI)
 To=XSteam('Tsat_p',pI);%more general
@@ -56,10 +57,11 @@ stateO.s = sO;
 
 %% Energetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Qc = hO - hI; % Function output: heat extracted at the condenser
-condenserLoss=abs(Qc);% heat loss at the cold source
+lossEn=abs(Qc);% heat loss at the cold source
 %% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-eI=exergy(stateI);
+%eI=exergy(stateI);
 eO=exergy(stateO);
-ExLoss = eO-eI; % Exergy loss due to heat transfer in the condenser.
+stateO.e = eO;
+lossEx = abs(eO-eI); % Exergy loss due to heat transfer in the condenser.
 
 end
