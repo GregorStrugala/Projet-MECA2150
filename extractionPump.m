@@ -1,4 +1,4 @@
-function[stateO]=extractionPump(stateI,X,pmax,eta_siP)
+function[stateO,Wop,lossEn,lossEx]=extractionPump(stateI,X,pmax,eta_siP,pumpEfficiency)
 %EXTRACTIONPUMP computes the state variation after a compression by the extraction pump.
 %   stateO = EXTRACTIONPUMP(stateI,X,eta_siP) finds the new values of
 %   the state variables contained in stateI, where stateI is a struct with
@@ -44,6 +44,7 @@ Ti = stateI.T;
 xI = stateI.x;
 hI = stateI.h;
 sI = stateI.s;
+eI = stateI.e;
 
 pO=X*pmax;%or state(2).p
 xO=NaN;
@@ -65,5 +66,18 @@ stateO.T = To;
 stateO.x = xO;
 stateO.h = hO;
 stateO.s = sO;
+stateO.e = exergy(stateO);
+
+%% Energetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Wop = hO-hI; % work done by the pump, it should be positive (operative work)
+lossEn=abs(Wop*(1-pumpEfficiency)/pumpEfficiency);%pumpEfficiency == eta_mec !
+
+%% Exergetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%eI=exergy(stateI);
+eO=exergy(stateO);
+stateO.e = eO;
+
+lossEx = abs(Wop)-(abs(eO - eI)); % Exergy loss due to irreversibilities in the pump.
+
 
 end

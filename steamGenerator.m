@@ -1,4 +1,4 @@
-function [stateO,Qh,eO,steamGenLoss,Exloss] = steamGenerator(stateI,Tmax,eta_gen)
+function [stateO,Qh,steamGenLossEn] = steamGenerator(stateI,Tmax,eta_gen)
 %STEAMGENERATOR computes the state variation after a superheating.
 %   [Qh,Exloss] = steamGenerator(stateI,Tmax) returns the heat
 %   provided to transform all the subcooled liquid water into superheated
@@ -29,6 +29,7 @@ Ti = stateI.T;
 sI = stateI.s;
 hI = stateI.h;
 xI = stateI.x;
+eI = stateI.e;
 
 pO=pI;
 To=Tmax;
@@ -45,10 +46,8 @@ stateO.s = sO;
 
 %% Energetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Qh = hO - hI; % heat provided at the hot source.
-steamGenLoss=abs(Qh*(1-eta_gen)/eta_gen);
+steamGenLossEn=abs(Qh*(1-eta_gen)/eta_gen);
 %% Exergetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-eI=exergy(stateI);
 eO=exergy(stateO);
-
-Exloss = eO - eI; % Exergy loss due to heat transfer.
+stateO.e = eO;
 end
