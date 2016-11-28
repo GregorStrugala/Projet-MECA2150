@@ -55,7 +55,7 @@ eta_siP=0.85;
 
 Tcond=Triver+deltaT;
 
-%%%%%%%%%%%%%%%%%%%%%%% COMBINING, FEEDHEATING ONLY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%% COMBINING, FEEDHEATING ONLY %%%%%%%%%%%%%%%%%%%%%%%
 if nF>0
     %stateNumber=4+2+4*n;
     stateNumber=11+2*nR; %independent of nF!
@@ -75,7 +75,7 @@ if nF>0
 %     end
 
 if nR==0 && nF==0
-    %% %%%%%%%%%%%%%%%%%%%%%% RANKINE-HIRN CYCLE  %%%%%%%%%%%%%%%%%%%%%%%%%%
+    %% %%%%%%%%%%%%%%%%%%%%%% RANKINE-HIRN CYCLE  %%%%%%%%%%%%%%%%%%%%%%%%%
     stateNumber = 4;
     state(stateNumber).p = 0; % preallocation
     state(stateNumber).T = 0;
