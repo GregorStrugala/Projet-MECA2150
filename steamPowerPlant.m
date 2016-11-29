@@ -1,4 +1,5 @@
-function[]=steamPowerPlant(deltaT, Triver, Tmax, steamPressure, Pe, nF, nR, dTpinch)
+
+function[state]=steamPowerPlant(deltaT, Triver, Tmax, steamPressure, Pe, nF, nR, dTpinch)
 %NEWSTRUCT
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
 %   STEAMPOWERPLANT(deltaT, Triver, Tmax, steamPressure, Pe, n) displays a table
@@ -55,9 +56,27 @@ eta_siP=0.85;
 
 Tcond=Triver+deltaT;
 
+%%%%%%%%%%%%%%%%%%%%%%% COMBINING, FEEDHEATING ONLY %%%%%%%%%%%%%%%%%%%%%%%
+if nF>0
+    %stateNumber=4+2+4*n;
+    stateNumber=11+2*nR; %independent of nF!
+    state(stateNumber,nF).p = []; % preallocation
+    state(stateNumber,nF).T = [];
+    state(stateNumber,nF).x = [];
+    state(stateNumber,nF).h = [];
+    state(stateNumber,nF).s = [];
+%     for i=1:stateNumber-1
+%         for j=1:nF
+%             state(i,j).p = 0;
+%             state(i,j).T = 0;
+%             state(i,j).x = 0;
+%             state(i,j).h = 0;
+%             state(i,j).s = 0;
+%         end
+%     end
 
 if nR==0 && nF==0
-    %% %%%%%%%%%%%%%%%%%%%%%% RANKINE-HIRN CYCLE  %%%%%%%%%%%%%%%%%%%%%%%%%%
+    %% %%%%%%%%%%%%%%%%%%%%%% RANKINE-HIRN CYCLE  %%%%%%%%%%%%%%%%%%%%%%%%%
     stateNumber = 4;
     state(stateNumber).p = 0; % preallocation
     state(stateNumber).T = 0;
