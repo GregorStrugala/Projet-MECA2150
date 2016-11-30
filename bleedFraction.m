@@ -1,7 +1,7 @@
 function[X]=bleedFraction(state,nF,nR,~)
 
- A=zeros(nF,nF);%preallocations
- b=zeros(1,nF);
+A=zeros(nF,nF);%preallocations
+b=zeros(1,nF);
 for i=1:nF
     outTurbine=state(4+2*nR,i).h;
     if i==1 %first bleed:need to add a subcooler !
@@ -27,8 +27,9 @@ for i=1:nF
             inNextHeater=state(11+2*nR,i+1).h;
             outValve=state(6+2*nR,i+1).h;
         end
-     end
-    %filling the matrix; system : A*X=b    
+    end
+    
+    %filling the matrix; system : A*X=b
     A(i,i)=A(i,i)+(outTurbine-inValve);
     b(i)=inNextHeater-outPreviousHeater;
     for j=1:nF
