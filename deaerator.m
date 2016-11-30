@@ -1,4 +1,4 @@
-function [stateO, ExLoss] = deaerator(stateBleeds, stateI, stateII)
+function [stateO, ExLoss] = deaerator(stateI,To)
 %DEAERATOR computes the state variation after a de-gazing and a heat
 %exchange.
 %   stateO = DEAERATOR(stateBleed,stateI,stateII) returns a struct
@@ -9,28 +9,28 @@ function [stateO, ExLoss] = deaerator(stateBleeds, stateI, stateII)
 %   the exergetic loss due to the heat transfer.
 
 %% robustness %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if nargin==0 || nargin==1 % Check for presence of inputs.
-    msgID = 'DEAERATOR:NoState';
-    msg = 'Feeds and input state must be specified.';
-    baseException = MException(msgID,msg);
-    throw(baseException)
-elseif nargout==2 && nargin==2
-    msgID = 'DEAERATOR:NoState';
-    msg = 'stateII must be specified in order to compute exergetic losses';
-    baseException = MException(msgID,msg);
-    throw(baseException)
-end
+% if nargin==0 || nargin==1 % Check for presence of inputs.
+%     msgID = 'DEAERATOR:NoState';
+%     msg = 'Feeds and input state must be specified.';
+%     baseException = MException(msgID,msg);
+%     throw(baseException)
+% elseif nargout==2 && nargin==2
+%     msgID = 'DEAERATOR:NoState';
+%     msg = 'stateII must be specified in order to compute exergetic losses';
+%     baseException = MException(msgID,msg);
+%     throw(baseException)
+% end
 
 %% Check for correct input bleed %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Tsat = 0;
-i = 0;
-while Tsat < 120 % the saturation temperature must be higher than 120°C
-    i = i+1;
-    Tsat = XSteam('Tsat_p',stateBleeds(i).p);
-end
-% at the end of the loop, Tsat is the saturation temperature and i is the
-% index of the corresponding bleed.
-To = Tsat; % ?
+% Tsat = 0;
+% i = 0;
+% while Tsat < 120 % the saturation temperature must be higher than 120°C
+%     i = i+1;
+%     Tsat = XSteam('Tsat_p',stateBleeds(i).p);
+% end
+% % at the end of the loop, Tsat is the saturation temperature and i is the
+% % index of the corresponding bleed.
+% To = Tsat; % ?
 
 %% State calculation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 stateO.p = stateI.p;
@@ -38,13 +38,15 @@ stateO.T = To;
 stateO.x = 0;
 stateO.h = XSteam('hL_T',To);
 stateO.s = XSteam('sL_T',To);
+stateO.e = exergy(stateO);
 
-%% Exergetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if nargout==2 % we compute the exergy only if needed.
-    eO = exergy(stateO);
-    eBleeds = exergy(stateBleeds(i));
-    eI = exergy(stateI);
-    eII = exergy(stateII);
-    ExLoss = eO - ( eBleeds + eI + eII );
-end
+% %% Exergetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% if nargout==2 % we compute the exergy only if needed.
+%     eO = exergy(stateO);
+%     eBleeds = exergy(stateBleeds(i));
+%     eI = exergy(stateI);
+%     eII = exergy(stateII);
+%     ExLoss = eO - ( eBleeds + eI + eII );
+ExLoss=0;
+% end
 end

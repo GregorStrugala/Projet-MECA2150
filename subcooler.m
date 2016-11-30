@@ -33,6 +33,7 @@ sI = stateI.s;
 
 pO=pI;
 %To=Ti-dT;
+%To=Tmin+dTpinch;
 To=Tmin+5;
 
 hO=XSteam('h_pt',pO,To);

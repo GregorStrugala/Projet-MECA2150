@@ -1,44 +1,43 @@
-function[X]=bleedFraction(state,nF,nR)
+function[X]=bleedFraction(state,nF,nR,~)
 
-A=zeros(nF,nF);
-b=zeros(1,nF);
-outTurbine=zeros(1,nF);
-outValve=zeros(1,nF);
-inNextHeater=zeros(1,nF);
-outPreviousHeater=zeros(1,nF);
+ A=zeros(nF,nF);%preallocations
+ b=zeros(1,nF);
 for i=1:nF
-    if i==1
-        outTurbine(i)=state(4+2*nR,i).h;
-        outSubcooler=state(6+2*nR,i).h;
-        outValve(i)=outSubcooler;%in Valve in fact, used to be more general
+    outTurbine=state(4+2*nR,i).h;
+    if i==1 %first bleed:need to add a subcooler !
         outExtractPump=state(10+2*nR).h;
-        outPreviousHeater(i)=outExtractPump;%no previous heater --> extracting pump
-        if i==nF%case with only one feed heating
-            inNextHeater(i)=state(1).h;%no next heater --> feedPump
-        else%case with more than one feed heating
-            inNextHeater(i)=state(11+2*nR,i+1).h;
+        outPreviousHeater=outExtractPump;%no previous heater-->extracting pump
+        outSubcooler=state(6+2*nR,i).h;%first stage:need to add a subcooler
+        inValve=outSubcooler;
+        if i==nF%case where there is only one feed-heater
+            inFeedPump=state(1).h;
+            inNextHeater=inFeedPump;%there is no next stage of heater-->directly in the feed pump
+            outValve=0;%no next heater-->no input of fluid
+        else%case with multiple feed-heaters
+            inNextHeater=state(11+2*nR,i+1).h;%output of the current heater (1) that corresponds at the input of the second heater
+            outValve=state(6+2*nR,i+1).h;%input of fluid in the current heater (1)
         end
-        
-        A(i,i)=(inNextHeater(i)+outValve(i)-(outPreviousHeater(i)+outTurbine(i)));
-        b(i)=outPreviousHeater(i)-inNextHeater(i);
-    else %i~=1
-        outTurbine(i)=state(4+2*nR,i).h;
-        outValve(i)=state(6+2*nR,i).h;
-        outPreviousHeater(i)=state(11+2*nR,i).h;
-        if i==nF%no next heater --> feedPump
-            inNextHeater(i)=state(1).h;
+    else %case of the i th feed heater
+        inValve=state(5+2*nR,i).h;
+        outPreviousHeater=state(11+2*nR,i).h;
+        if i==nF%case where the i th is the last feed heater
+            inNextHeater=state(1).h;%there is no next stage of heater-->directly in the feed pump
+            outValve=0;%no next heater-->no input of fluid
         else
-            inNextHeater(i)=state(11+2*nR,i+1).h;
+            inNextHeater=state(11+2*nR,i+1).h;
+            outValve=state(6+2*nR,i+1).h;
         end
-        A(i,i)=(inNextHeater(i)+outValve(i)-(outPreviousHeater(i)+outTurbine(i)));
-        b(i)=outPreviousHeater(i)-inNextHeater(i);
-        for j=1:(i-1)
-             A(i,j)=inNextHeater(i)-outPreviousHeater(i);%ok for nF=2 not for nF>2
+     end
+    %filling the matrix; system : A*X=b    
+    A(i,i)=A(i,i)+(outTurbine-inValve);
+    b(i)=inNextHeater-outPreviousHeater;
+    for j=1:nF
+        if j>i
+            A(i,j)=outValve-inValve;
         end
+        A(i,j)=A(i,j)+(outPreviousHeater-inNextHeater);
     end
-    
 end
-
 b=b';
 X=A\b;
 end
