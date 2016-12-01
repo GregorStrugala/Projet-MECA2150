@@ -16,7 +16,7 @@ if nF == 0
 else
     [state(4,1),Wmov1,turbineLossEn1,turbineLossEx1] = turbine(stateI,r*pI,eta_siT,turbineEfficiency);
     [state(4,2),~,~,~] = turbine(stateI,pOut,eta_siT,turbineEfficiency);
-    [state(5),~,~,~] = steamGenerator(state(4,1),Ti,eta_gen);
+    [state(5),~,~] = steamGenerator(state(4,1),Ti,eta_gen);
     [state(8+2*nR),Wmov2,turbineLossEn2,turbineLossEx2] = turbine(state(5),pOut,eta_siT,turbineEfficiency);
 end
 Wmov=Wmov1+Wmov2;

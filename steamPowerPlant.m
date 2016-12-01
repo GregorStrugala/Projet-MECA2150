@@ -1,4 +1,4 @@
-function[]=steamPowerPlant(deltaT, Triver, Tmax, steamPressure, Pe, nF, nR, dTpinch, diagrams, pieChart)
+function[]=steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deaeratorON,diagrams,pieChart)
 %NEWSTRUCT
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
 %   STEAMPOWERPLANT(deltaT, Triver, Tmax, steamPressure, Pe, n) displays a table
@@ -173,16 +173,17 @@ else
     state(3).s = XSteam('s_pT',steamPressure,Tmax);
     state(3).h = XSteam('h_pT',steamPressure,Tmax);
     state(3).e = exergy(state(3));
-    
+    %if deaeratorON
+        
     % We begin the cycle at the state(3)
     if nR == 0 %case without re-heating
         [state(8),Wmov,turbineLossEn,turbineLossEx] = turbine(state(3,1),state(8).p,eta_siT,eta_mec);
     else %case with re-heating
         pOut = XSteam('psat_T',Tcond);
-        [state, Wmov]=reHeating(state,state(3),0.18,pOut,eta_siT,eta_mec,eta_gen,nF,nR);
+        [state, Wmov,turbineLossEn,turbineLossEx]=reHeating(state,state(3),0.18,pOut,eta_siT,eta_mec,eta_gen,nF,nR);
     end
     [state(9+2*nR),~,condenserLossEn,condenserLossEx] = condenser(state(8+2*nR));
-    [state,WmovAdd,WopExtractPump,pumpExtractLossEn,pumpExtractLossEx,turbineBleedLossEn,turbineBleedLossEx,diffHeatingExergy,indexDeaerator]=feedHeating(state,steamPressure,eta_siP,eta_siT,eta_mec,nF,nR,dTpinch); %to do energetic and exergetic analysis
+    [state,WmovAdd,WopExtractPump,pumpExtractLossEn,pumpExtractLossEx,turbineBleedLossEn,turbineBleedLossEx,indexDeaerator]=feedHeating(state,steamPressure,eta_siP,eta_siT,eta_mec,nF,nR,dTpinch,deaeratorON); %to do energetic and exergetic analysis
     [state(2),WopFeedPump,pumpLossEn,pumpLossEx] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
     [~,Qh,steamGenLossEn] = steamGenerator(state(2),Tmax,eta_gen);
     [X]=bleedFraction(state,nF,nR,indexDeaerator);
@@ -313,13 +314,14 @@ if pieChart
         chimneyLossEx=mf*(ef-er)-mf*(ef-e_exh);
         transLossEx=mc*ec*0.689*0.991-mVapourSteamGen*(state(3).e-state(2).e);
         diffExergyHeatingFluid=0;
+        
         for i=1:nF
             if i==nF
                 diffExergyHeatingFluid=diffExergyHeatingFluid+X(i)*abs(state(5+2*nR,i).e-state(4+2*nR,i).e);
             elseif i==1 && nF>1
-                diffExergyHeatingFluid=diffExergyHeatingFluid+abs(sum(X)*state(6,i).e-(X(i)*state(4,i).e+(sum(X)-X(i))*state(6,i+1).e));
+                diffExergyHeatingFluid=diffExergyHeatingFluid+abs(sum(X)*state(6+2*nR,i).e-(X(i)*state(4+2*nR,i).e+(sum(X)-X(i))*state(6+2*nR,i+1).e));
             else
-                diffExergyHeatingFluid=diffExergyHeatingFluid+abs((sum(X(i+1:end))+X(i))*state(5,i).e-(X(i)*state(4,i).e+(sum(X(i+1:end)))*state(6,i+1).e));
+                diffExergyHeatingFluid=diffExergyHeatingFluid+abs((sum(X(i+1:end))+X(i))*state(5+2*nR,i).e-(X(i)*state(4+2*nR,i).e+(sum(X(i+1:end)))*state(6+2*nR,i+1).e));
             end
         end
         heatLossEx=mVapourCond*diffExergyHeatingFluid-mVapourSteamGen*abs(state(1).e-state(10+2*nR,1).e);
