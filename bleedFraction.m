@@ -2,10 +2,11 @@ function[X]=bleedFraction(state,nF,nR,indexDeaerator)
 
 A=zeros(nF,nF);%preallocations
 b=zeros(1,nF);
+%outDeaerator=0;
 %TEST : add deaerator
 for i=1:nF
     outTurbine=state(4+2*nR,i).h;
-    if i==1
+    if i==1 && i~=indexDeaerator %il faut gerer le cas ou indexDeaerator==1
         outExtractPump=state(10+2*nR).h;
         outPreviousHeater=outExtractPump;%no previous heater-->extracting pump
         outSubcooler=state(6+2*nR,i).h;%first stage:need to add a subcooler
@@ -18,8 +19,14 @@ for i=1:nF
             inNextHeater=state(11+2*nR,i+1).h;%output of the current heater (1) that corresponds at the input of the second heater
             outValve=state(6+2*nR,i+1).h;%input of fluid in the current heater (1)
         end
-    elseif i == indexDeaerator %we take into account that there is other heaters before and after
+    elseif i==indexDeaerator %we take into account that there is other heaters before and after
+        %gerer le cas ou i==1 && i==nF
         outDeaerator=state(5+2*nR,i).h;
+        if i==1
+            
+        elseif i==nF
+            
+        end
         %outExtractPump=state(11+2*nR,index).h;
     else
         inValve=state(5+2*nR,i).h;

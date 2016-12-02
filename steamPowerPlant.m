@@ -44,6 +44,7 @@ switch nargin % Check for correct inputs, set efficiency to 1 if none is specifi
 end
 
 % State calculations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+indexDeaerator=0;
 %efficiencies
 eta_mec=0.98;
 eta_gen=0.945;
@@ -160,8 +161,7 @@ else
             state(i,j).s = 0;
             state(i,j).e = 0;
         end
-    end
-    
+    end    
     % Given parameters
     state(8+2*nR).T = Tcond;
     state(8+2*nR).p = XSteam('psat_T',Tcond);
@@ -186,7 +186,7 @@ else
     [state,WmovAdd,WopExtractPump,pumpExtractLossEn,pumpExtractLossEx,turbineBleedLossEn,turbineBleedLossEx,indexDeaerator]=feedHeating(state,steamPressure,eta_siP,eta_siT,eta_mec,nF,nR,dTpinch,deaeratorON); %to do energetic and exergetic analysis
     [state(2),WopFeedPump,pumpLossEn,pumpLossEx] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
     [~,Qh,steamGenLossEn] = steamGenerator(state(2),Tmax,eta_gen);
-    [X]=bleedFraction(state,nF,nR,indexDeaerator);
+    [X]=bleedFraction(state,nF,nR,indexDeaerator)
     
     %work done on the cycle
     Wmov=1*Wmov+WmovAdd*X; %turbine (note : Wmov is line vector; X is column vector)
@@ -352,7 +352,7 @@ end
 if diagrams
     %T-s diagram
     %figure(3)
-    Ts_diagram(state,eta_siP,eta_siT,nF,nR)
+    Ts_diagram(state,eta_siP,eta_siT,nF,nR,deaeratorON,indexDeaerator)
     %figure(1);
     %h-s diagram
     %hs_diagram(state(1),state(2),state(3),state(4),0.8,0.88)
