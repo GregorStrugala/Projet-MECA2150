@@ -32,7 +32,6 @@ sI = stateI.s;
 
 pO=pI;
 To=Tmax-dTpinch;
-fprintf('\npO = %f\nTo = %f\n',pO,To)
 hO=XSteam('h_pt',pO,To);
 sO=XSteam('s_pt',pO,To);
 xO=nan;
