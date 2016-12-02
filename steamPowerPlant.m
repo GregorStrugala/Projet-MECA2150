@@ -57,19 +57,19 @@ Tcond=Triver+deltaT;
 if nR==0 && nF==0
     %% %%%%%%%%%%%%%%%%%%%%%% RANKINE-HIRN CYCLE  %%%%%%%%%%%%%%%%%%%%%%%%%
     stateNumber = 4;
-    state(stateNumber).p = 0; %preallocation
-    state(stateNumber).T = 0;
-    state(stateNumber).x = 0;
-    state(stateNumber).h = 0;
-    state(stateNumber).s = 0;
-    state(stateNumber).e = 0;
+    state(stateNumber).p = []; %preallocation
+    state(stateNumber).T = [];
+    state(stateNumber).x = [];
+    state(stateNumber).h = [];
+    state(stateNumber).s = [];
+    state(stateNumber).e = [];
     for i=1:stateNumber-1
-        state(i).p = 0;
-        state(i).T = 0;
-        state(i).x = 0;
-        state(i).h = 0;
-        state(i).s = 0;
-        state(i).e = 0;
+        state(i).p = [];
+        state(i).T = [];
+        state(i).x = [];
+        state(i).h = [];
+        state(i).s = [];
+        state(i).e = [];
     end
     
     % Given parameters
@@ -100,20 +100,20 @@ if nR==0 && nF==0
 elseif  nR > 0 && nF == 0
     %%   %%%%%%%%%%%%%%%%%%%%%%%%% REHEATING ONLY %%%%%%%%%%%%%%%%%%%%%%%%%
     stateNumber=4+2*nR;
-    state(stateNumber,nR+1).p = 0; %preallocation
-    state(stateNumber,nR+1).T = 0;
-    state(stateNumber,nR+1).x = 0;
-    state(stateNumber,nR+1).h = 0;
-    state(stateNumber,nR+1).s = 0;
-    state(stateNumber,nR+1).e = 0;
+    state(stateNumber,nR+1).p = []; %preallocation
+    state(stateNumber,nR+1).T = [];
+    state(stateNumber,nR+1).x = [];
+    state(stateNumber,nR+1).h = [];
+    state(stateNumber,nR+1).s = [];
+    state(stateNumber,nR+1).e = [];
     for i=1:stateNumber-1
         for j=1:nR
-            state(i,j).p = 0;
-            state(i,j).T = 0;
-            state(i,j).x = 0;
-            state(i,j).h = 0;
-            state(i,j).s = 0;
-            state(i,j).e = 0;
+            state(i,j).p = [];
+            state(i,j).T = [];
+            state(i,j).x = [];
+            state(i,j).h = [];
+            state(i,j).s = [];
+            state(i,j).e = [];
         end
     end
     
@@ -146,20 +146,20 @@ elseif  nR > 0 && nF == 0
 else
     %% %%%%%%%%%%%%%%%%%%%% COMBINING, FEEDHEATING ONLY %%%%%%%%%%%%%%%%%%%%%%%
     stateNumber=11+2*nR; %independent of nF!
-    state(stateNumber,nF).p = 0; %preallocation
-    state(stateNumber,nF).T = 0;
-    state(stateNumber,nF).x = 0;
-    state(stateNumber,nF).h = 0;
-    state(stateNumber,nF).s = 0;
-    state(stateNumber,nF).e = 0;
+    state(stateNumber,nF).p = []; %preallocation
+    state(stateNumber,nF).T = [];
+    state(stateNumber,nF).x = [];
+    state(stateNumber,nF).h = [];
+    state(stateNumber,nF).s = [];
+    state(stateNumber,nF).e = [];
     for i=1:stateNumber-1
         for j=1:nF
-            state(i,j).p = 0;
-            state(i,j).T = 0;
-            state(i,j).x = 0;
-            state(i,j).h = 0;
-            state(i,j).s = 0;
-            state(i,j).e = 0;
+            state(i,j).p = [];
+            state(i,j).T = [];
+            state(i,j).x = [];
+            state(i,j).h = [];
+            state(i,j).s = [];
+            state(i,j).e = [];
         end
     end    
     % Given parameters
@@ -343,9 +343,24 @@ if pieChart
     end
 end
 
-% M = (reshape(struct2array(state),5,stateNumber))';
-% fprintf('\n')
-% disp(array2table(M,'VariableNames',{'p','T','x','h','s'}))
+%% State display in table
+M = (reshape(struct2array(state),6,(stateNumber + nR + 4*(nF-1))))';
+T = array2table(M,'VariableNames',{'p','T','x','h','s','e'});
+% stateIndex = cell(stateNumber+3*nF+2*nR,1);
+% for i = 1:length(stateIndex)
+%     if i<5
+%         stateIndex(i) = {num2str(i)};
+%     elseif 5<=i && i<5+2*nR
+%         if mod(i,2)~=0
+%             stateIndex(i) = {[num2str((5+i)/2) ',' nums2str((i-3)/2)]};
+%         else
+%             stateIndex(i) = 
+%         end
+%     end
+% end
+disp(T)
+fprintf('\n')
+
 %fprintf('Wmcy = %f kJ/kg\n\n',Wmcy)
 
 %% DIAGRAMS : TS and HS
