@@ -1,8 +1,8 @@
-function etaCombex = combustion(species,lambda)
+function [etaCombex,etaGen,fuelFlowRate,ec] = combustion(fuel,lambda,Texh,Ta,wallLoss,Psg)
 %COMBUSTION compute parameters associated with a certain combustion.
-%   etaCombex = COMBUSTION(species,lambda) returns the efficiency of a
+%   etaCombex = COMBUSTION(fuel,lambda) returns the efficiency of a
 %   combustion of a fuel whose chemical formula must be indicated in a
-%   string contained in variable species, and be one of the following:
+%   string contained in variable fuel, and be one of the following:
 %       +-----------+
 %       |   C       |
 %       |   CH1.8   |
@@ -15,20 +15,59 @@ function etaCombex = combustion(species,lambda)
 %   default value is set to 1. Additionnaly, if no fuel is specified, the
 %   default fuel used is CH4, i.e. COMBUSTION() returns the efficiency of a
 %   stoichiometric combustion of CH4.
+%
+%   etaCombex = COMBUSTION(fuel,lambda,Texh,Ta) allows to tune
+%   the temperature (in Kelvins) of the exhaust gases and of the ambient
+%   air. The defualt values if they are not specified are Texh = 393.15 and
+%   Ta = 288.15. Psg is the power supplied by the steam generator (vapor
+%   flow rate times enthalpy variation).
+%
+%   [etaCombex,etaGen] = COMBUSTION(fuel,lambda,Texh,Ta,wallLoss) also
+%   returns the energetic efficieny. wallLoss is the energy lost
+%   because of a non-perfect insulation in the stack, it is expressed as a
+%   fraction of the LHV, and its default value is 1% = 0.01.
+%
+%   [~,~,fuelFlowRate] = COMBUSTION(fuel,lambda,Texh,Ta,wallLoss,Psg)
+%   returns the fuel flow rate corresponding to a certain power supplied by
+%   the steam generator (vapor flow rate times enthalpy variation). It is
+%   given in the argument Psg and MUST be provided (no default values).
+%
+%   [~,~,~,ec] = COMBUSTION(fuel,...) also returns the exergy of the fuel.
 
 %% Robustness %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if nargout>2 && nargin<6
+    msgID = 'COMBUSTION:NotEnoughArguments';
+    msg = 'The power of the steam generator must be provided!';
+    baseException = MException(msgID,msg);
+    throw(baseException)
+end
 switch nargin
     case 0
-        species = 'CH4';
+        fuel = 'CH4';
         lambda = 1;
+        Texh = 273.15 + 120;
+        Ta = 273.15 + 15;
+        wallLoss = 0.01;
     case 1
         lambda = 1;
+        Texh = 273.15 + 120;
+        Ta = 273.15 + 15;
+        wallLoss = 0.01;
+    case 2
+        Texh = 273.15 + 120;
+        Ta = 273.15 + 15;
+        wallLoss = 0.01;
+    case 3
+        Ta = 273.15 + 15;
+        wallLoss = 0.01;
+    case 4
+        wallLoss = 0.01;
 end
 
 %%
 T0 = 273.15 + 15; % [K]
 nC = 12; % modified only for H2, where no carbon is present
-switch species
+switch fuel
     case 'C' % C + L(O2 + 3.76N2) -> CO2 + (L-1)O2 + 3.76L N2
         nCO2 = 1;
         nH2O = 0;
@@ -85,7 +124,7 @@ switch species
         LHV = 10085;
         ec = 9845;
     otherwise
-        msgID = 'COMBUSTION:InvalidSpecies';
+        msgID = 'COMBUSTION:Invalidfuel';
         msg = 'The chemical formula of the fuel burnt must be one of those indicated in the documentation.';
         baseException = MException(msgID,msg);
         throw(baseException)
@@ -97,19 +136,40 @@ MH2O = 18.01494;
 MO2 = 31.998;
 MN2 = 28.014;
 M = [MCO2 MH2O MO2 MN2];
-Ta = 15+273.15; % temperature of the ambient air
+nM = n.*M;
 Mair = 0.21*MO2 + 0.79*MN2;
 ha = (0.21*MO2*enthalpy('O2',Ta) + 0.79*MN2*enthalpy('N2',Ta))/Mair; % kJ/kg (of air)
 hf = (LHV + lambda*ma*ha)/(1 + lambda*ma);
+% temperature of the flue gases:
 [Tf,h0] = fgTemp(hf,n); % h0 is the reference enthaply at 0°C
+
+% quantites needed to compute the flue gas exergy
 baseHf0 = hsBase('h',T0);
-hf0 = baseHf0*(n.*M)'/sum(n.*M) - h0;
+hf0 = baseHf0*(nM)'/sum(nM) - h0; % integration of cpf between 0 and T0.
 baseSf = hsBase('s',Tf);
-sf = baseSf*(n.*M)'/sum(n.*M);
+sf = baseSf*(nM)'/sum(nM);
 baseSf0 = hsBase('s',T0);
-sf0 = baseSf0*(n.*M)'/sum(n.*M);
+sf0 = baseSf0*(nM)'/sum(nM);
+
 ef = (hf - hf0) - T0*(sf - sf0);
-etaCombex = ef*(1+lambda*ma)/ec;
+etaCombex = ef*(1+lambda*ma)/ec; % exergetic efficiency
+
+if nargout>1
+    baseHexh = hsBase('h',Texh);
+    baseHa = hsBase('h',Ta);
+    stackLoss = ( (1 + lambda*ma)*(baseHexh*(nM)'/sum(nM) - h0) - lambda*ma*(baseHa*(nM)'/sum(nM) - h0) )/LHV;
+    etaGen = 1 - stackLoss - wallLoss;
+    if etaGen < 0
+        msgID = 'COMBUSTION:InvalidEnergyLosses';
+        msg = ['Physical inconsistence warning: the energy losses at the stack '...
+            'and the walls represents more than the totality of the supplied energy!'];
+        baseException = MException(msgID,msg);
+        throw(baseException)
+    end
+end
+if nargout>2
+   fuelFlowRate = abs(Psg/(etaGen*LHV)); 
+end
 
     function base = hsBase(prop,T)% if size(T) = 1 x n, then size(base) = n x 4. 
         switch prop

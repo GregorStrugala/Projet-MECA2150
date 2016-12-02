@@ -1,4 +1,4 @@
-function[]=steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deaeratorON,diagrams,pieChart)
+function steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deaeratorON,diagrams,pieChart)
 %NEWSTRUCT
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
 %   STEAMPOWERPLANT(deltaT, Triver, Tmax, steamPressure, Pe, n) displays a table
