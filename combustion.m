@@ -146,7 +146,7 @@ hf = (LHV + lambda*ma*ha)/(1 + lambda*ma);
 % temperature of the flue gases:
 [Tf,h0] = fgTemp(hf,n); % h0 is the reference enthaply at 0°C
 
-% quantites needed to compute the flue gas exergy
+% quantities needed to compute the flue gas exergy
 baseHf0 = hsBase('h',T0);
 hf0 = baseHf0*(nM)'/sum(nM) - h0; % integration of cpf between 0 and T0.
 baseSf = hsBase('s',Tf);
@@ -175,10 +175,7 @@ if nargout>2
 end
 if nargout>3
     sExh = hsBase('s',Texh)*(nM)'/sum(nM);
-    stateExh.h = hExh;
-    stateExh.s = sExh;
-    fprintf('\n h = %f\n s = %f\n',hExh,sExh)
-    eExh = exergy(stateExh);
+    eExh = (hExh - h0) - hf0 - T0*(sExh - sf0);
 end
 
     function base = hsBase(prop,T)% if size(T) = 1 x n, then size(base) = n x 4. 
