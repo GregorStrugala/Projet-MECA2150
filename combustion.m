@@ -1,4 +1,4 @@
-function [etaCombex,etaGen,fuelFlowRate,ec,ef,LHV] = combustion(fuel,lambda,Texh,Ta,wallLoss,Psg)
+function [etaCombex,etaGen,fuelFlowRate,eExh,ec,ef,LHV] = combustion(fuel,lambda,Texh,Ta,wallLoss,Psg)
 %COMBUSTION compute parameters associated with a certain combustion.
 %   etaCombex = COMBUSTION(fuel,lambda) returns the efficiency of a
 %   combustion of a fuel whose chemical formula must be indicated in a
@@ -32,7 +32,9 @@ function [etaCombex,etaGen,fuelFlowRate,ec,ef,LHV] = combustion(fuel,lambda,Texh
 %   the steam generator (vapor flow rate times enthalpy variation). It is
 %   given in the argument Psg and MUST be provided (no default values).
 %
-%   [~,~,~,ec] = COMBUSTION(fuel,...) also returns the exergy of the fuel.
+%   [~,~,~,eExh,ec,ef,LHV] = COMBUSTION(fuel,...) also returns the exergy
+%   of the exhaust gases, the exergy of the fuel, the exergy of the flue
+%   gas and the LHV of the fuel.
 
 %% Robustness %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if nargout>2 && nargin<6
@@ -144,7 +146,7 @@ hf = (LHV + lambda*ma*ha)/(1 + lambda*ma);
 % temperature of the flue gases:
 [Tf,h0] = fgTemp(hf,n); % h0 is the reference enthaply at 0°C
 
-% quantites needed to compute the flue gas exergy
+% quantities needed to compute the flue gas exergy
 baseHf0 = hsBase('h',T0);
 hf0 = baseHf0*(nM)'/sum(nM) - h0; % integration of cpf between 0 and T0.
 baseSf = hsBase('s',Tf);
@@ -156,9 +158,9 @@ ef = (hf - hf0) - T0*(sf - sf0);
 etaCombex = ef*(1+lambda*ma)/ec; % exergetic efficiency
 
 if nargout>1
-    baseHexh = hsBase('h',Texh);
-    baseHa = hsBase('h',Ta);
-    stackLoss = ( (1 + lambda*ma)*(baseHexh*(nM)'/sum(nM) - h0) - lambda*ma*(baseHa*(nM)'/sum(nM) - h0) )/LHV;
+    hExh = hsBase('h',Texh)*(nM)'/sum(nM);
+    ha0 = (0.21*MO2*enthalpy('O2',273.15) + 0.79*MN2*enthalpy('N2',273.15))/Mair; % kJ/kg (of air)
+    stackLoss = ( (1 + lambda*ma)*(hExh - h0) - lambda*ma*(ha - ha0) )/LHV;
     etaGen = 1 - stackLoss - wallLoss;
     if etaGen < 0
         msgID = 'COMBUSTION:InvalidEnergyLosses';
@@ -169,7 +171,11 @@ if nargout>1
     end
 end
 if nargout>2
-   fuelFlowRate = abs(Psg/(etaGen*LHV)); 
+   fuelFlowRate = abs(Psg/(etaGen*LHV));
+end
+if nargout>3
+    sExh = hsBase('s',Texh)*(nM)'/sum(nM);
+    eExh = (hExh - h0) - hf0 - T0*(sExh - sf0);
 end
 
     function base = hsBase(prop,T)% if size(T) = 1 x n, then size(base) = n x 4. 
