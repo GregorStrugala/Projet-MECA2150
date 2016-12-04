@@ -344,7 +344,11 @@ if pieChart
 end
 
 %% State display in table
-M = (reshape(struct2array(state),6,(stateNumber + nR + 4*(nF-1))))';
+if nR==0 && nF==0 %Rankine-Hirn cycle
+    M = (reshape(struct2array(state),6,4))';
+else %R-H cycle with feed-heating and/or re-heating
+    M = (reshape(struct2array(state),6,(stateNumber + nR + 4*(nF-1))))';
+end
 T = array2table(M,'VariableNames',{'p','T','x','h','s','e'});
 % stateIndex = cell(stateNumber+3*nF+2*nR,1);
 % for i = 1:length(stateIndex)
