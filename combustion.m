@@ -1,4 +1,4 @@
-function [etaCombex,etaGen,fuelFlowRate,eExh,ec] = combustion(fuel,lambda,Texh,Ta,wallLoss,Psg)
+function [etaCombex,etaGen,fuelFlowRate,eExh,ec,ef,LHV] = combustion(fuel,lambda,Texh,Ta,wallLoss,Psg)
 %COMBUSTION compute parameters associated with a certain combustion.
 %   etaCombex = COMBUSTION(fuel,lambda) returns the efficiency of a
 %   combustion of a fuel whose chemical formula must be indicated in a
@@ -32,7 +32,9 @@ function [etaCombex,etaGen,fuelFlowRate,eExh,ec] = combustion(fuel,lambda,Texh,T
 %   the steam generator (vapor flow rate times enthalpy variation). It is
 %   given in the argument Psg and MUST be provided (no default values).
 %
-%   [~,~,~,ec] = COMBUSTION(fuel,...) also returns the exergy of the fuel.
+%   [~,~,~,eExh,ec,ef,LHV] = COMBUSTION(fuel,...) also returns the exergy
+%   of the exhaust gases, the exergy of the fuel, the exergy of the flue
+%   gas and the LHV of the fuel.
 
 %% Robustness %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if nargout>2 && nargin<6
@@ -129,6 +131,7 @@ switch fuel
         baseException = MException(msgID,msg);
         throw(baseException)
 end
+
 ma = ( (32 + 3.76*28)*(1 + (y-2*x)/4) )/(nC + y + 16*x); % [kg_air/kg_fuel]
 n = [nCO2 nH2O nO2 nN2];
 MCO2 = 44.008;
@@ -174,6 +177,7 @@ if nargout>3
     sExh = hsBase('s',Texh)*(nM)'/sum(nM);
     stateExh.h = hExh;
     stateExh.s = sExh;
+    fprintf('\n h = %f\n s = %f\n',hExh,sExh)
     eExh = exergy(stateExh);
 end
 
