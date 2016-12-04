@@ -26,7 +26,7 @@ end
 pI = stateI.p;
 Ti = stateI.T;
 pO = r*pI;
-haI = hAir(Ti);
+haI = AirProp('h',Ti);
 
 % Use a bracketing method to find To
 R = 8.314472;
@@ -40,7 +40,7 @@ To = (Tinf + Tsup)/2;
 precision = 1e-4; % three significant figures.
 a = 1 + precision;
 while abs(a) > precision
-    a = log(To/Ti)/log(r) - Ra*(To-Ti)/(etaC*( hAir(To) - haI ));
+    a = log(To/Ti)/log(r) - Ra*(To-Ti)/(etaC*( AirProp('h',To) - haI ));
     if a > 0
         Tsup = To;
     elseif a < 0;
@@ -51,27 +51,13 @@ while abs(a) > precision
     To = (Tinf+Tsup)/2;
 end
 
-hO = hAir(To);
-sO = sAir(To);
+hO = AirProp('h',To);
+sO = AirProp('s',To);
 
 stateO.p = pO;
 stateO.T = To;
 stateO.h = hO;
 stateO.s = sO;
-
-
-%% functions to compute the enthalpy and entropy of the air, in kJ/kg_air
-    function h = hAir(T)
-        MO2 = 31.998;
-        MN2 = 28.014;
-        Mair = 0.21*MO2 + 0.79*MN2;
-        h = (0.21*MO2*enthalpy('O2',T) + 0.79*MN2*enthalpy('N2',T))/Mair;
-    end
-    function s = sAir(T)
-        MO2 = 31.998;
-        MN2 = 28.014;
-        Mair = 0.21*MO2 + 0.79*MN2;
-        s = (0.21*MO2*entropy('O2',T) + 0.79*MN2*entropy('N2',T))/Mair;
-    end
+stateO.e = exergy(stateO);
 end
 
