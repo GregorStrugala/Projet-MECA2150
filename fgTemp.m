@@ -21,11 +21,10 @@ h0 = sum(baseH.*M.*n)/sum(n.*M); % kJ/kg of flue gas
 Tinf = 300;
 Tsup = 5000;
 precision = 1e-4; % three significant figures.
-r = 1 + precision;
-while abs(r) > precision
+while Tsup-Tinf > precision
     Tf = (Tsup+Tinf)/2;
     baseH = [enthalpy('CO2',Tf) enthalpy('H2O',Tf) enthalpy('O2',Tf) enthalpy('N2',Tf)];
-    r = sum(baseH.*M.*n)/sum(n.*M) - hf - h0; % h = hf + h0
+    r = (sum(baseH.*M.*n)/sum(n.*M)- h0) - hf ; % h = hf + h0
     if r > 0
         Tsup = Tf;
     elseif r < 0
