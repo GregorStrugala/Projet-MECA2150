@@ -1,4 +1,4 @@
-function [etaCombex,etaGen,fuelFlowRate,ec] = combustion(fuel,lambda,Texh,Ta,wallLoss,Psg)
+function [etaCombex,etaGen,fuelFlowRate,ec,ef,LHV] = combustion(fuel,lambda,Texh,Ta,wallLoss,Psg)
 %COMBUSTION compute parameters associated with a certain combustion.
 %   etaCombex = COMBUSTION(fuel,lambda) returns the efficiency of a
 %   combustion of a fuel whose chemical formula must be indicated in a
@@ -129,6 +129,7 @@ switch fuel
         baseException = MException(msgID,msg);
         throw(baseException)
 end
+
 ma = ( (32 + 3.76*28)*(1 + (y-2*x)/4) )/(nC + y + 16*x); % [kg_air/kg_fuel]
 n = [nCO2 nH2O nO2 nN2];
 MCO2 = 44.008;

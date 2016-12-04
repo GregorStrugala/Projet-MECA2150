@@ -201,6 +201,8 @@ else
     pumpLossEx=(pumpLossEx+pumpExtractLossEx)*(1+sum(X));
     
 end
+
+
 %% WORK ON THE CYCLE
 %determination of the work over a cycle
 Wmcy = Wmov+Wop; % note: Wmov<0, Wop>0
@@ -208,25 +210,27 @@ Wmcy = Wmov+Wop; % note: Wmov<0, Wop>0
 %% FLOW RATES
 %determination of the mass flow rate of vapour
 mVapour=Pe/abs(eta_mec*Wmcy);
+[eta_combex,eta_gen,mc,ec,ef,LHV]=combustion('CH4',1.05,120+273.15,15+273.15,0.01,mVapour*(state(3).h-state(2).h))
+T0=15; % celsius
+p0=1; % bar
 
-%% EFFICIENCIES
-%to complete
-eta_cyclen=Wmcy/Qh;
-%eta_gen=mv*(state(3).h-state(2).h)/(mc*LHV);
-%definir une fonction combustion pour def LHV et mc
-
+h0=XSteam('h_pt',p0,T0)
+s0=XSteam('s_pt',p0,T0)
+h_exh=XSteam('h_pt',p0,120)
+s_exh=XSteam('s_pt',p0,120)
+e_exh=(h_exh-h0)-(T0+273.15)*(s_exh-s0) % kJ/kg
 %% PIE CHART
 if pieChart
     %%%%%%%%%%%%%%%%%%%%%%%% RANKINE-HIRN CYCLE %%%%%%%%%%%%%%%%%%%%%%%%%%%
     if nR==0 && nF==0
-        eta_gen=0.945;
-        LHV=50150;
-        ec=52205;
-        mf=42.03;
-        ef=1881.9;
-        e_exh=17.3;
-        er=0.04;
-        mc=mVapour*(state(3).h-state(2).h)/(eta_gen*LHV);
+%         eta_gen=0.945;
+%         LHV=50150;
+%         ec=52205;
+         mf=42.03;
+         ef=1881.9;
+         e_exh=17.3;
+         er=0.04;
+        %mc=mVapour*(state(3).h-state(2).h)/(eta_gen*LHV);
         
         %Energy pie chart
         figure(1);
@@ -343,6 +347,21 @@ if pieChart
     end
 end
 
+%% EFFICIENCIES
+
+%Energy
+eta_cyclen=abs(Wmcy)/Qh %NOTE : Wmcy<0
+eta_toten=Pe/(mc*LHV)
+eta_gen
+eta_mec
+
+%Exergy
+eIsteamGen=exergy(state(2));
+eOsteamGen=exergy(state(3));
+eta_cyclex=abs(Wmcy)/(eOsteamGen-eIsteamGen)
+eta_totex=Pe/(mc*ec)
+eta_combex
+eta_gex=mVapour*(eOsteamGen-eIsteamGen)/(mc*ec)
 %% State display in table
 if nR==0 && nF==0 %Rankine-Hirn cycle
     M = (reshape(struct2array(state),6,4))';
