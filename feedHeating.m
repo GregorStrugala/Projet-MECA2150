@@ -4,8 +4,6 @@ function[state,WmovAdd,Wop,pumpExtractLossEn,pumpExtractLossEx,turbineLossEn,tur
 
 % TO DO energetic and exergetic analysis !
 
-
-
 %% State calculation
 deaeratorOFF=0;
 indexDeaerator=0;
