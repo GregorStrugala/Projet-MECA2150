@@ -51,13 +51,13 @@ while abs(a) > precision
     To = (Tinf+Tsup)/2;
 end
 
-hO = AirProp('h',To);
-sO = AirProp('s',To);
+hO = AirProp('h',To) - AirProp('h',273.15);
+sO = AirProp('s',To) - AirProp('s',273.15);
+eO = AirProp('e',To);
 
 stateO.p = pO;
 stateO.T = To;
 stateO.h = hO;
 stateO.s = sO;
-stateO.e = exergy(stateO);
+stateO.e = eO;
 end
-

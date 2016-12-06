@@ -49,15 +49,23 @@ state(stateNumber).e = [];
 % provided data
 state(1).p = pa;
 state(1).T = Ta;
-state(1).h = AirProp('h',Ta);
-state(1).s = AirProp('s',Ta);
-state(1).e = exergy(state(1));
-state(3).T = Tf;
+state(1).h = AirProp('h',Ta) - AirProp('h',273.15);
+state(1).s = AirProp('s',Ta) - AirProp('s',273.15);
+state(1).e = 0;
 
 % Compression
 state(2) = compressor(state(1),r,etaC);
 
 % Combustion
+[state(3),n,~] = combustionChamber(state(2),fuel,Tf,kcc);
+
+% Expansion
+state(4) = turbine2(state(3),r,kcc,n,etaT);
+
+% Put states in a table
+M = (reshape(struct2array(state),5,stateNumber))';
+fprintf('\n')
+disp(array2table(M,'VariableNames',{'p','T','h','s','e'}))
 
 end
 

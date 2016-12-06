@@ -14,5 +14,10 @@ switch prop
         x = (0.21*MO2*enthalpy('O2',T) + 0.79*MN2*enthalpy('N2',T))/Mair;
     case 's'
         x = (0.21*MO2*entropy('O2',T) + 0.79*MN2*entropy('N2',T))/Mair;
+    case 'e'
+        T0 = 273.15 + 15;
+        deltaH = AirProp('h',T) - AirProp('h',T0);
+        deltaS = AirProp('s',T) - AirProp('s',T0);
+        x = deltaH - T0*deltaS;
 end
 end
