@@ -47,24 +47,25 @@ MO2 = 31.998;
 MN2 = 28.014;
 M = [MCO2 MH2O MO2 MN2];
 n = n(:); % make sure that n is a column vector to perform scalar product
-Mfg = M*n;
+Mfg = M*n/sum(n);
 nM = n'.*M;
+nM = nM./sum(nM); % make the normalization before the loop to avoid too many computations.
 Rg = R/Mfg; % gas constant of the flue gas
+hfI = hI + hsBase('h',273.15)*(nM)';
 Tinf = 273;
-Tsup = Ti-100; % PROMBLEME DE CONVERGENCE !!!
+Tsup = Ti;
 To = (Tinf + Tsup)/2;
 precision = 1e-4; % three significant figures.
-a = 1 + precision;
-while abs(a) > precision
-    a = log(To/Ti)/log(rKcc) + Rg*(Ti - To)*etaT/( hI - hsBase('h',To)*(nM)'/Mfg );
-    if a > 0
-        Tsup = To;
-    elseif a < 0;
+while Tsup-Tinf > precision
+    a = log(To/Ti)/log(rKcc) + Rg*etaT*(Ti - To)/( hfI - hsBase('h',To)*(nM)' );
+    if a < 0
         Tinf = To;
+    elseif a > 0;
+        Tsup = To;
     else
         break
     end
-    To = (Tinf+Tsup)/2;
+    To = (Tinf + Tsup)/2;
 end
 
 hO = (hsBase('h',To) - hsBase('h',273.15))*(nM)'/Mfg;
