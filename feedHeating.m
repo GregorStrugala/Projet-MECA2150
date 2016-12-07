@@ -1,4 +1,3 @@
-
 function[state,WmovAdd,Wop,pumpExtractLossEn,pumpExtractLossEx,turbineLossEn,turbineLossEx,indexDeaerator]=feedHeating(state,pmax,eta_siP,eta_siT,eta_mec,nF,nR,dTpinch,deaeratorON)
 %stateO est une structure condensee contenant les etats compris entre 7 a 1
 
@@ -39,8 +38,7 @@ for index=1:nF
         %determination of the state of the bled steam
         [state(4+2*nR,index)]=bleed(index,hBleed,state(4,1),eta_siT);
         
-    else % nR~=0 and index~=nF
-        
+    else % nR~=0 and index~=nF 
         %determination of the enthalpy of the bled steam;
         
         %NOTE : dans la formule pour hBleed, on ne divise pas par (nF+1).
@@ -61,7 +59,7 @@ for index=1:nF
         deaeratorOFF=1;
         [state(5+2*nR,index), ~]=deaerator(state(4+2*nR,index),Tsat);
         %state that correspond to the out of the valve. There is no valve so we put this equals to 0
-        %state(6+2*nR,indexDeaerator)=0;
+        state(6+2*nR,indexDeaerator).h=0;%necessaire pour bleedFraction
     else
         %condensation of the bled steam in the heater : exchange with the fluid
         %coming from the extracting pump
