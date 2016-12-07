@@ -68,12 +68,10 @@ while Tsup-Tinf > precision
     To = (Tinf + Tsup)/2;
 end
 
-hO = (hsBase('h',To) - hsBase('h',273.15))*(nM)'/Mfg;
-sO = (hsBase('s',To) - hsBase('s',273.15))*(nM)'/Mfg;
+hO = (hsBase('h',To) - hsBase('h',273.15))*(nM)';
+sO = (hsBase('s',To) - hsBase('s',273.15))*(nM)';
 T0 = 273.15 + 15;
-h0 = hsBase('h',T0)*(nM)'/sum(nM);
-s0 = hsBase('s',T0)*(nM)'/sum(nM);
-eO = (hO - h0) - T0*(sO - s0);
+eO = ( (hsBase('h',To) - hsBase('h',T0)) - T0*(hsBase('s',To) - hsBase('s',T0)) )*(nM)';
 
 stateO.p = pO;
 stateO.T = To;
