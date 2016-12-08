@@ -1,4 +1,4 @@
-function steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deaeratorON,diagrams,pieChart)
+function steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deaeratorON,fuel,excessAir,TflueGas,Tambiant,diagrams,pieChart)
 %NEWSTRUCT
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
 %   STEAMPOWERPLANT(deltaT, Triver, Tmax, steamPressure, Pe, n) displays a table
@@ -92,6 +92,11 @@ if nR==0 && nF==0
     [state(2),Wop,pumpLossEn,pumpLossEx] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
     [~,Qh,steamGenLossEn] = steamGenerator(state(2),Tmax,eta_gen);
     
+    % Warning message %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    if isnan(state(4).x)||state(4).x<0.88
+        warning('Warning. The quality must be between x=[0.88, 1] to have a better efficiency.')
+    end
+    
     %determination of the work over a cycle
     Wmcy =Wmov+Wop; % note: Wmov<0, Wop>0
     %Wmcy2=Qh-abs(Qc);
@@ -138,16 +143,23 @@ elseif  nR > 0 && nF == 0
     %We begin the cycle at the state (3)
     pOut = XSteam('psat_T',Tcond);
     [state, Wmov,QreHeat,turbineLossEn,turbineLossEx]=reHeating(state,state(3),0.15,pOut,eta_siT,eta_mec,eta_gen,nF,nR);
-    [state(1),Qc,~,condenserLossEx] = condenser(state(6));
+    [state(1),Qc,condenserLossEn,condenserLossEx] = condenser(state(6));
     [state(2),Wop,pumpLossEn,pumpLossEx] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
     [~,QsteamGen,~] = steamGenerator(state(2),Tmax,eta_gen);
     
+    % Warning message %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    if isnan(state(6).x)||state(6).x<0.88
+        warning('Warning. The quality must be between x=[0.88, 1] to have a better efficiency.')
+    end
+   
     %TO BE MODIFIED !!!
     %determination of the work over a cycle
     Wmcy =Wmov+Wop; % note: Wmov<0, Wop>0
     Qh=QreHeat+QsteamGen;
     %Wmcy2=Qh-abs(Qc);
     %lossEn
+     steamGenLossEn=abs(Qh*(1-eta_gen)/eta_gen);
+     lossEn=[steamGenLossEn, condenserLossEn, turbineLossEn+pumpLossEn];
     
     %lossEx
     lossEx=[turbineLossEn+pumpLossEn,turbineLossEx+pumpLossEx,condenserLossEx];
@@ -191,66 +203,80 @@ else
         pOut = XSteam('psat_T',Tcond);
         [state,WmovTurb,QreHeat,turbineLossEn,turbineLossEx]=reHeating(state,state(3),0.18,pOut,eta_siT,eta_mec,eta_gen,nF,nR);
     end
-    [state(9+2*nR),Qc,~,condenserLossEx]=condenser(state(8+2*nR));
+    [state(9+2*nR),Qc,condenserLossEn,condenserLossEx]=condenser(state(8+2*nR));
     [state,WmovAdd,WopExtractPump,extractPumpLossEn,extractPumpLossEx,turbineBleedLossEn,turbineBleedLossEx,indexDeaerator]=feedHeating(state,steamPressure,eta_siP,eta_siT,eta_mec,nF,nR,dTpinch,deaeratorON); %to do energetic and exergetic analysis
     [state(2),WopFeedPump,feedPumpLossEn,feedPumpLossEx]=feedPump(state(1),steamPressure,eta_siP,eta_mec);
     [~,QsteamGen,~]=steamGenerator(state(2),Tmax,eta_gen);
-    [X]=bleedFraction(state,nF,nR,indexDeaerator)
-     
+    [X]=bleedFraction(state,nF,nR,indexDeaerator);
+    
+    % Warning message %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    if isnan(state(8+2*nR).x)||state(8+2*nR).x<0.88
+        warning('Warning. The quality must be between x=[0.88, 1] to have a better efficiency.')
+    end
+
+if indexDeaerator~=0
     %work done on the cycle
     Wmov=WmovTurb+WmovAdd*X; %turbine (note : Wmov is line vector; X is column vector)
-    Wop=(1+sum(X))*(WopFeedPump+WopExtractPump);%pumps (feed pump and extracting pump)
-    
+    Wop=(1+sum(X))*(WopFeedPump+WopExtractPump(2))+(1+sum(X(1:indexDeaerator-1)))*(WopExtractPump(1));%pumps (feed pump and extracting pump)
     %determination of the work over a cycle
     Wmcy=Wmov+Wop;%note: Wmov<0, Wop>0
     Qh=QreHeat+QsteamGen;
-    Wmcy2=(1+sum(X))*Qh-abs(Qc);
+    %Wmcy2=(1+sum(X))*Qh-abs(Qc);
     
     %lossEn
-    if indexDeaerator~=0
-        extractPumpLossEn=(1+sum(X(1:indexDeaerator-1)))*extractPumpLossEn;
-        pumpLossEn=(feedPumpLossEn)*(1+sum(X))+extractPumpLossEn;
-    else
-        pumpLossEn=(feedPumpLossEn+extractPumpLossEn)*(1+sum(X));
-    end
     turbineLossEn=turbineLossEn+turbineBleedLossEn*X;
+    extractPumpLossEn=(1+sum(X(1:indexDeaerator-1)))*extractPumpLossEn(1)+(1+sum(X))*extractPumpLossEn(2);
+    pumpLossEn=(feedPumpLossEn)*(1+sum(X))+extractPumpLossEn;
+    steamGenLossEn=abs(Qh*(1-eta_gen)/eta_gen);
     
     %lossEx
-    if indexDeaerator~=0
-        extractPumpLossEx=(1+sum(X(1:indexDeaerator-1)))*extractPumpLossEx;
-        pumpLossEx=(feedPumpLossEx)*(1+sum(X))+extractPumpLossEx;
-    else
-        pumpLossEx=(feedPumpLossEx+extractPumpLossEx)*(1+sum(X));
-    end
-    %pumpLossEx2=(pumpLossEx+extractPumpLossEx)*(1+sum(X))
+    extractPumpLossEx=(1+sum(X(1:indexDeaerator-1)))*extractPumpLossEx(1)+(1+sum(X))*extractPumpLossEx(2);
+    pumpLossEx=(feedPumpLossEx)*(1+sum(X))+extractPumpLossEx;
     turbineLossEx=turbineLossEx+turbineBleedLossEx*X;
+else
+    %work done on the cycle
+    Wmov=WmovTurb+WmovAdd*X; %turbine (note : Wmov is line vector; X is column vector)
+    Wop=(1+sum(X))*(WopFeedPump+WopExtractPump(1));%pumps (feed pump and extracting pump)
+    %determination of the work over a cycle
+    Wmcy=Wmov+Wop;%note: Wmov<0, Wop>0
+    Qh=QreHeat+QsteamGen;
+    %Wmcy2=(1+sum(X))*Qh-abs(Qc)
     
+    %lossEn
+    turbineLossEn=turbineLossEn+turbineBleedLossEn*X;
+    steamGenLossEn=abs(Qh*(1-eta_gen)/eta_gen);
+    pumpLossEn=(feedPumpLossEn+extractPumpLossEn(1))*(1+sum(X));
+    
+    %lossEx
+    turbineLossEx=turbineLossEx+turbineBleedLossEx*X;
+    pumpLossEx=(feedPumpLossEx+extractPumpLossEx(1))*(1+sum(X));
+end
 end
 
 %% FLOW RATES
 %determination of the mass flow rate of vapour
 if nR==0 && nF==0
     mVapourSteamGen=Pe/abs(eta_mec*Wmcy);
-    [eta_combex,eta_gen,mc,e_exh,ec,ef,LHV]=combustion('CH4',1.05,120+273.15,15+273.15,0.01,mVapourSteamGen*(state(3).h-state(2).h));
+    [eta_combex,eta_gen,mFuel,eExh,eFuel,eFlueGas,LHV]=combustion(fuel,excessAir,TflueGas+273.15,Tambiant+273.15,0.01,mVapourSteamGen*(state(3).h-state(2).h));
     er=0.04;
-    mf=eta_combex*mc*ec/(ef-er);
+    mFlueGas=eta_combex*mFuel*eFuel/(eFlueGas-er);
 elseif nR~=0 && nF==0
     mVapourSteamGen=Pe/abs(eta_mec*Wmcy);
-    [eta_combex,eta_gen,mc,e_exh,ec,ef,LHV]=combustion('CH4',1.05,120+273.15,15+273.15,0.01,mVapourSteamGen*((state(3).h-state(2).h)+state(5).h-state(4,1).h));
+    [eta_combex,eta_gen,mFuel,eExh,eFuel,eFlueGas,LHV]=combustion(fuel,excessAir,TflueGas+273.15,Tambiant+273.15,0.01,mVapourSteamGen*((state(3).h-state(2).h)+state(5).h-state(4,1).h));
     er=0.04;
-    mf=eta_combex*mc*ec/(ef-er);
+    mFlueGas=eta_combex*mFuel*eFuel/(eFlueGas-er);
 else
     er=0.04;
     %definition of the different flow rate
-    mVapourCond=Pe/abs(eta_mec*Wmcy);
-    mVapourBleed=mVapourCond*X
-    mVapourSteamGen=(1+sum(X))*mVapourCond;
+    mVapourCond=Pe/abs(eta_mec*Wmcy)
+    mVapourBleed=mVapourCond*X;
+    mVapourSteamGen=(1+sum(X))*mVapourCond
     if nR==0
-        [eta_combex,eta_gen,mc,e_exh,ec,ef,LHV]=combustion('CH4',1.05,120+273.15,15+273.15,0.01,mVapourSteamGen*(state(3).h-state(2).h));
-    else 
-        [eta_combex,eta_gen,mc,e_exh,ec,ef,LHV]=combustion('CH4',1.05,120+273.15,15+273.15,0.01,mVapourSteamGen*((state(3).h-state(2).h)+state(5).h-state(4,1).h));
+        [eta_combex,eta_gen,mFuel,eExh,eFuel,eFlueGas,LHV]=combustion(fuel,excessAir,TflueGas+273.15,Tambiant+273.15,0.01,mVapourSteamGen*(state(3).h-state(2).h));
+    else
+        [eta_combex,eta_gen,mFuel,eExh,eFuel,eFlueGas,LHV]=combustion(fuel,excessAir,TflueGas+273.15,Tambiant+273.15,0.01,mVapourSteamGen*((state(3).h-state(2).h))+mVapourCond*(1+sum(X)-X(end))*(state(5).h-state(4,1).h));
     end
-    mf=eta_combex*mc*ec/(ef-er);
+    mFlueGas=eta_combex*mFuel*eFuel/(eFlueGas-er);
 end
 
 %% EFFICIENCIES
@@ -262,7 +288,7 @@ if nR==0 && nF==0 %R-H cycle
     eta_cyclen=abs(Wmcy)/(Qh);%NOTE : Wmcy<0
     %eta_cyclen2=(Qh-abs(Qc))/(Qh);
     %total energetic efficiency of the plant
-    eta_toten=Pe/(mc*LHV)
+    eta_toten=Pe/(mFuel*LHV);
     %eta_toten2=eta_gen*eta_mec*eta_cyclen
     
     %EXERGY
@@ -271,20 +297,24 @@ if nR==0 && nF==0 %R-H cycle
     %exegertic efficiency of the cycle (R-H, feed-heating)
     eta_cyclex=abs(Wmcy)/(eOsteamGen-eIsteamGen);
     %total exergetic efficiency of the plant
-    eta_totex=Pe/(mc*ec);
+    eta_totex=Pe/(mFuel*eFuel);
     %efficiency related to exergy output at the stack
-    eta_chimnex=(ef-e_exh)/(ef-er);
+    eta_chimnex=(eFlueGas-eExh)/(eFlueGas-er);
     %exergetic efficiency of the heat transfer (flue gas/working fluid)
-    eta_transex=mVapourSteamGen*(eOsteamGen-eIsteamGen)/(mf*(ef-e_exh));
-    %eta_transex2=mVapourSteamGen*(eOsteamGen-eIsteamGen)/(eta_combex*eta_chimnex*mc*ec);
+    eta_transex=mVapourSteamGen*(eOsteamGen-eIsteamGen)/(mFlueGas*(eFlueGas-eExh));
+    %eta_transex2=mVapourSteamGen*(eOsteamGen-eIsteamGen)/(eta_combex*eta_chimnex*mFuel*eFuel);
     %exergetic efficiency of the steam generator
-    eta_gex=mVapourSteamGen*(eOsteamGen-eIsteamGen)/(mc*ec);
+    eta_gex=mVapourSteamGen*(eOsteamGen-eIsteamGen)/(mFuel*eFuel);
     %eta_gex2=eta_transex*eta_chimnex*eta_combex;
-
-elseif nR~=0 && nF ==0 %reheating only  
+    
+elseif nR~=0 && nF ==0 %reheating only
     %ENERGY
-    eta_cyclen=abs(Wmcy)/(Qh);
+    %energetic efficiency of the cycle
+    eta_cyclen=abs(Wmcy)/(Qh);%NOTE : Wmcy<0
     %eta_cyclen2=(Qh-abs(Qc))/(Qh);
+    %total energetic efficiency of the plant
+    eta_toten=Pe/(mFuel*LHV)
+    %eta_toten2=eta_gen*eta_mec*eta_cyclen
     
     %EXERGY
     eIsteamGen1=exergy(state(2));
@@ -294,14 +324,14 @@ elseif nR~=0 && nF ==0 %reheating only
     %exegertic efficiency of the cycle (R-H, feed-heating)
     eta_cyclex=abs(Wmcy)/(eOsteamGen1+eOsteamGen2-(eIsteamGen1+eIsteamGen2));
     %total exergetic efficiency of the plant
-    eta_totex=Pe/(mc*ec);
+    eta_totex=Pe/(mFuel*eFuel);
     %efficiency related to exergy output at the stack
-    eta_chimnex=(ef-e_exh)/(ef-er);
+    eta_chimnex=(eFlueGas-eExh)/(eFlueGas-er);
     %exergetic efficiency of the heat transfer (flue gas/working fluid)
-    eta_transex=mVapourSteamGen*(eOsteamGen1+eOsteamGen2-(eIsteamGen1+eIsteamGen2))/(mf*(ef-e_exh));
-    %eta_transex2=mVapourSteamGen*(eOsteamGen1+eOsteamGen2-(eIsteamGen1+eIsteamGen2))/(eta_combex*eta_chimnex*mc*ec);
+    eta_transex=mVapourSteamGen*(eOsteamGen1+eOsteamGen2-(eIsteamGen1+eIsteamGen2))/(mFlueGas*(eFlueGas-eExh));
+    %eta_transex2=mVapourSteamGen*(eOsteamGen1+eOsteamGen2-(eIsteamGen1+eIsteamGen2))/(eta_combex*eta_chimnex*mFuel*eFuel);
     %exergetic efficiency of the steam generator
-    eta_gex=mVapourSteamGen*(eOsteamGen1+eOsteamGen2-(eIsteamGen1+eIsteamGen2))/(mc*ec);
+    eta_gex=mVapourSteamGen*(eOsteamGen1+eOsteamGen2-(eIsteamGen1+eIsteamGen2))/(mFuel*eFuel);
     eta_gex2=eta_transex*eta_chimnex*eta_combex;
     
 else %feed-heating or combining
@@ -311,7 +341,7 @@ else %feed-heating or combining
     eta_cyclen=abs(Wmcy)/((1+sum(X))*Qh);%NOTE : Wmcy<0
     eta_cyclen2=((1+sum(X))*Qh-abs(Qc))/((1+sum(X))*Qh);
     %total energetic efficiency of the plant
-    eta_toten=Pe/(mc*LHV);
+    eta_toten=Pe/(mFuel*LHV);
     %eta_toten2=eta_gen*eta_mec*eta_cyclen;
     
     %EXERGY
@@ -320,14 +350,14 @@ else %feed-heating or combining
     %exegertic efficiency of the cycle (R-H, feed-heating)
     eta_cyclex=abs(Wmcy)/((1+sum(X))*(eOsteamGen-eIsteamGen));
     %total exergetic efficiency of the plant
-    eta_totex=Pe/(mc*ec);
+    eta_totex=Pe/(mFuel*eFuel);
     %efficiency related to exergy output at the stack
-    eta_chimnex=(ef-e_exh)/(ef-er);
+    eta_chimnex=(eFlueGas-eExh)/(eFlueGas-er);
     %exergetic efficiency of the heat transfer (flue gas/working fluid)
-    eta_transex=mVapourSteamGen*(eOsteamGen-eIsteamGen)/(mf*(ef-e_exh));
-    eta_transex2=mVapourSteamGen*(eOsteamGen-eIsteamGen)/(eta_combex*eta_chimnex*mc*ec);
+    eta_transex=mVapourSteamGen*(eOsteamGen-eIsteamGen)/(mFlueGas*(eFlueGas-eExh));
+    eta_transex2=mVapourSteamGen*(eOsteamGen-eIsteamGen)/(eta_combex*eta_chimnex*mFuel*eFuel);
     %exergetic efficiency of the steam generator
-    eta_gex=mVapourSteamGen*(eOsteamGen-eIsteamGen)/(mc*ec);
+    eta_gex=mVapourSteamGen*(eOsteamGen-eIsteamGen)/(mFuel*eFuel);
     eta_gex2=eta_transex*eta_chimnex*eta_combex;
 end
 %energetic efficiency of the steam generator
@@ -353,9 +383,9 @@ if pieChart
         legend(txt);
         
         % lossEx :
-        combLossEx=mc*ec*(1-eta_combex);
-        chimneyLossEx=mf*(ef-er)-mf*(ef-e_exh);
-        transLossEx=mf*(ef-e_exh)-mVapourSteamGen*(state(3).e-state(2).e);
+        combLossEx=mFuel*eFuel*(1-eta_combex);
+        chimneyLossEx=mFlueGas*(eFlueGas-er)-mFlueGas*(eFlueGas-eExh);
+        transLossEx=mFlueGas*(eFlueGas-eExh)-mVapourSteamGen*(state(3).e-state(2).e);
         steamGenLossEx=[combLossEx, chimneyLossEx, transLossEx];
         
         %Exergy pie chart
@@ -373,11 +403,21 @@ if pieChart
         %%%%%%%%%%%%%%%%%%%%%%%% REHEATING ONLY %%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif nF==0 && nR ~=0
         %Energy
+        %Energy pie chart
+        figure(1);
+        h = pie([mVapourSteamGen*lossEn,Pe]);
+        hText = findobj(h,'Type','text'); % text object handles
+        percentValues = get(hText,'String'); % percent values
+        txt = {'Steam generator losses: ';'Condenser loss: ';'Mechanical losses: ';'Effective power: '};
+        combinedtxt = strcat(txt,percentValues);
+        set(hText,{'String'},combinedtxt);
+        legend(txt);
         
         %lossEx :
-        combLossEx=mc*ec*(1-eta_combex);
-        chimneyLossEx=mf*(ef-er)-mf*(ef-e_exh);
-        transLossEx=mf*(ef-e_exh)-(mVapourSteamGen*(state(3).e-state(2).e+state(5).e-state(4,1).e));
+        combLossEx=mFuel*eFuel*(1-eta_combex);
+        %combLossEx=mf*(ef-er)*(1/eta_combex-1);
+        chimneyLossEx=mFlueGas*(eFlueGas-er)-mFlueGas*(eFlueGas-eExh);
+        transLossEx=mFlueGas*(eFlueGas-eExh)-(mVapourSteamGen*(state(3).e-state(2).e+state(5).e-state(4,1).e));
         steamGenLossEx=[combLossEx, chimneyLossEx, transLossEx];
         
         %Exergy
@@ -395,47 +435,90 @@ if pieChart
         %%%%%%%%%%%%%%%%%%%% COMBINING, FEEDHEATING ONLY %%%%%%%%%%%%%%%%%%
     else
         er=0.04;
+        %Energy
+        
+        lossEn=[mVapourSteamGen*steamGenLossEn, mVapourCond*condenserLossEn, mVapourCond*(turbineLossEn+pumpLossEn)];
+        %Energy pie chart
+        figure(1);
+        h = pie([lossEn,Pe]);
+        hText = findobj(h,'Type','text'); % text object handles
+        percentValues = get(hText,'String'); % percent values
+        txt = {'Steam generator losses: ';'Condenser loss: ';'Mechanical losses: ';'Effective power: '};
+        combinedtxt = strcat(txt,percentValues);
+        set(hText,{'String'},combinedtxt);
+        legend(txt);
         
         %lossEx :
-        mecLossEn=(pumpLossEn+turbineLossEn)*mVapourCond%OK
-        pumpTurbLossEx=(pumpLossEx+turbineLossEx)*mVapourCond%OK
-        condenserLossEx=mVapourCond*condenserLossEx
-        if nF==0
-            transLossEx=mf*(ef-e_exh)-(mVapourSteamGen*(state(3).e-state(2).e))
+        mecLossEn=(pumpLossEn+turbineLossEn)*mVapourCond;%OK
+        pumpTurbLossEx=(pumpLossEx+turbineLossEx)*mVapourCond;%OK
+        condenserLossEx=mVapourCond*condenserLossEx;
+        if nR==0
+            transLossEx=mFlueGas*(eFlueGas-eExh)-(mVapourSteamGen*(state(3).e-state(2).e));
         else
-            transLossEx=mf*(ef-e_exh)-(mVapourSteamGen*(state(3).e-state(2).e+state(5).e-state(4,1).e))
+            transLossEx=mFlueGas*(eFlueGas-eExh)-(mVapourSteamGen*(state(3).e-state(2).e)+mVapourCond*(1+sum(X)-X(end))*(state(5).e-state(4,1).e));
         end
-        
-        combLossEx=mc*ec*(1-eta_combex)
-        chimneyLossEx=mf*(ef-er)-mf*(ef-e_exh)
-        %transLossEx=mf*(ef-e_exh)-mVapourSteamGen*(state(3).e-state(2).e);
-        
-        diffExergyHeatingFluid=0;
-        for i=1:nF
-            if i==nF
-                diffExergyHeatingFluid=diffExergyHeatingFluid+X(i)*abs(state(5+2*nR,i).e-state(4+2*nR,i).e);
-            elseif i==1 && nF>1
-                diffExergyHeatingFluid=diffExergyHeatingFluid+abs(sum(X)*state(6+2*nR,i).e-(X(i)*state(4+2*nR,i).e+(sum(X)-X(i))*state(6+2*nR,i+1).e));
-            else
-                diffExergyHeatingFluid=diffExergyHeatingFluid+abs((sum(X(i+1:end))+X(i))*state(5+2*nR,i).e-(X(i)*state(4+2*nR,i).e+(sum(X(i+1:end)))*state(6+2*nR,i+1).e));
+        %combLossEx=mf*(ef-er)*(1/eta_combex-1)
+        combLossEx=mFuel*eFuel*(1-eta_combex);
+        %combLossEx=mFuel*eFuel-mf*(ef-er)
+        chimneyLossEx=mFlueGas*(eFlueGas-er)-mFlueGas*(eFlueGas-eExh);
+              
+        if indexDeaerator==0
+            diffExergyHeatingFluid=0;
+            for i=1:nF
+                if i==1 && nF==1
+                    diffExergyHeatingFluid=diffExergyHeatingFluid+X(i)*abs(state(6+2*nR,i).e-state(4+2*nR,i).e);
+                elseif i==nF && i~=1
+                    diffExergyHeatingFluid=diffExergyHeatingFluid+X(i)*abs(state(5+2*nR,i).e-state(4+2*nR,i).e);
+                elseif i==1 && nF>1
+                    diffExergyHeatingFluid=diffExergyHeatingFluid+abs(sum(X)*state(6+2*nR,i).e-(X(i)*state(4+2*nR,i).e+(sum(X)-X(i))*state(6+2*nR,i+1).e));
+                
+                else
+                    diffExergyHeatingFluid=diffExergyHeatingFluid+abs((sum(X(i+1:end))+X(i))*state(5+2*nR,i).e-(X(i)*state(4+2*nR,i).e+(sum(X(i+1:end)))*state(6+2*nR,i+1).e));
+                end
             end
+            heatLossEx=mVapourCond*diffExergyHeatingFluid-mVapourSteamGen*abs(state(1).e-state(10+2*nR).e);
+        else
+            diffExergyHeatingFluid=zeros(1,3);
+            for i=1:nF
+                if i==nF && i>indexDeaerator%condition to be sure
+                    diffExergyHeatingFluid(3)=diffExergyHeatingFluid(3)+(X(i)*abs(state(5+2*nR,i).e-state(4+2*nR,i).e));
+                elseif i==1 && i<indexDeaerator%%condition to be sure
+                    %diffExergyHeatingFluid=diffExergyHeatingFluid+(abs(sum(X(i:indexDeaerator-1)))*state(5+2*nR,i).e-(X(i)*state(4+2*nR,i).e)+sum(X(i+1:indexDeaerator-1))*state(6+2*nR,i+1).e)
+                    diffExergyHeatingFluid(1)=diffExergyHeatingFluid(1)+abs(sum(X(i:indexDeaerator-1))*state(6+2*nR,i).e-(X(i)*state(4+2*nR,i).e+sum(X(i+1:indexDeaerator-1))*state(6+2*nR,i+1).e));
+                elseif i<indexDeaerator && i~=1
+                    diffExergyHeatingFluid(1)=diffExergyHeatingFluid(1)+abs(sum(X(i:indexDeaerator-1))*state(5+2*nR,i).e-(X(i)*state(4+2*nR,i).e+sum(X(i+1:indexDeaerator-1))*state(6+2*nR,i+1).e));
+                elseif i==indexDeaerator
+                    diffExergyHeatingFluid(2)=abs(0-(X(i)*state(4+2*nR,i).e+sum(X(i+1:end))*state(6+2*nR,i+1).e));
+                elseif i>indexDeaerator
+                    diffExergyHeatingFluid(3)=diffExergyHeatingFluid(3)+abs((sum(X(i:end)))*state(5+2*nR,i).e-(X(i)*state(4+2*nR,i).e+sum(X(i+1:end))*state(6+2*nR,i+1).e));
+                else
+                    %do nothing
+                end
+            end
+            heatEx=zeros(1,3);
+%             heatEx(1)=mVapourCond*(diffExergyHeatingFluid(1))-(mVapourCond*(1+sum(1:indexDeaerator-1))*abs(state(11+2*nR,indexDeaerator).e-state(10+2*nR).e));
+%             heatEx(2)=mVapourCond*(diffExergyHeatingFluid(2))-abs(mVapourSteamGen*state(5+2*nR,indexDeaerator).e-mVapourCond*(1+sum(X(1:indexDeaerator-1)))*(state(11+2*nR,indexDeaerator).e));
+%             heatEx(3)=mVapourCond*(diffExergyHeatingFluid(3))-mVapourSteamGen*abs(state(1).e-state(11+2*nR,indexDeaerator+1).e);
+            heatEx(1)=mVapourCond*(diffExergyHeatingFluid(1));
+            heatEx(2)=mVapourCond*(diffExergyHeatingFluid(2));
+            heatEx(3)=mVapourCond*(diffExergyHeatingFluid(3));
+            heatLossEx=sum(heatEx)-mVapourCond*((1+sum(X))*abs(state(1).e)-(1+sum(1:indexDeaerator-1))*state(10+2*nR,1).e);
         end
-        heatLossEx=mVapourCond*diffExergyHeatingFluid-mVapourSteamGen*abs(state(1).e-state(10+2*nR,1).e);
         %lossEx in the steam generator : combex, chimnex, transex
         steamGenLossEx=[combLossEx, chimneyLossEx, transLossEx];
         %lossEx total:
         lossEx=[mecLossEn,pumpTurbLossEx,condenserLossEx,heatLossEx,steamGenLossEx];
         
-%         %Exergy
-%         figure(2);
-%         h = pie([lossEx,Pe]);
-%         hText = findobj(h,'Type','text'); % text object handles
-%         percentValues = get(hText,'String'); % percent values
-%         txt = {'Mechanical losses: ';'Irreversibilities in the turbine and pumps: ';'Condenser loss: ';'Heat transfer irreversibilities in the feed-water heater: ';'Combustion irreversibility: ';'Chimney loss: ';'Heat transfer irreversibility in the steam generator: ';'Effective power: '};
-%         %txt = {'Mechanical: ';'turbine and pumps: ';'condenser :';'combex: ';'chimnex: ';'transex: ';'Effective power: '};
-%         combinedtxt = strcat(txt,percentValues);
-%         set(hText,{'String'},combinedtxt);
-%         legend(txt);
+        %Exergy
+        figure(2);
+        h = pie([lossEx,Pe]);
+        hText = findobj(h,'Type','text'); % text object handles
+        percentValues = get(hText,'String'); % percent values
+        txt = {'Mechanical losses: ';'Irreversibilities in the turbine and pumps: ';'Condenser loss: ';'Heat transfer irreversibilities in the feed-water heater: ';'Combustion irreversibility: ';'Chimney loss: ';'Heat transfer irreversibility in the steam generator: ';'Effective power: '};
+        %txt = {'Mechanical: ';'turbine and pumps: ';'condenser :';'combex: ';'chimnex: ';'transex: ';'Effective power: '};
+        combinedtxt = strcat(txt,percentValues);
+        set(hText,{'String'},combinedtxt);
+        legend(txt);
     end
 end
 
@@ -462,7 +545,7 @@ end
 % % end
 % disp(T)
 % fprintf('\n')
-% 
+%
 % %fprintf('Wmcy = %f kJ/kg\n\n',Wmcy)
 
 %% DIAGRAMS : TS and HS
