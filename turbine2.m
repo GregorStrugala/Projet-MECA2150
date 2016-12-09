@@ -69,7 +69,7 @@ while Tsup-Tinf > precision
 end
 
 hO = (hsBase('h',To) - hsBase('h',273.15))*(nM)';
-sO = (hsBase('s',To) - hsBase('s',273.15))*(nM)';
+sO = (hsBase('s',To) - hsBase('s',273.15))*(nM)' - Rg*log(1/1.01325);
 T0 = 273.15 + 15;
 eO = ( (hsBase('h',To) - hsBase('h',T0)) - T0*(hsBase('s',To) - hsBase('s',T0)) )*(nM)';
 

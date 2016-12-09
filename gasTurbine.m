@@ -1,6 +1,6 @@
-function state = gasTurbine(Pe,pa,Ta,Tf,r,kcc,etaC,etaT,fuel)
+function state = gasTurbine(Pe,pa,Ta,Tf,r,kcc,etaC,etaT,kmec,fuel)
 %GASTURBINE characterises a power cycle that uses a gas turbine.
-%   GASTURBINE(Pe,pa,Ta,Tf,r,kcc,etaC,etaT) displays state, energy
+%   state = GASTURBINE(Pe,pa,Ta,Tf,r,kcc,etaC,etaT) displays state, energy
 %   and exergy charts for the given parameters.
 %   +-------- Mandatory parameters --------+ +--- Optionnal parameters ---+
 %   |                                      | |                            |
@@ -10,10 +10,14 @@ function state = gasTurbine(Pe,pa,Ta,Tf,r,kcc,etaC,etaT,fuel)
 %   |   Tf: Temperature at the output      | |  etaT: polytropic          |
 %   |       of the combustion chamber.     | |        efficiency of the   |
 %   |   r: compression pressure ratio.     | |        turbine             |
-%   |   kcc: combustion chamber pressure   | +---- Default value = 1 -----+
+%   |   kcc: combustion chamber pressure   | +----- Default value = 1 ----+
 %   |        ratio.                        | |                            |
-%   |                                      | | fuel: string containing the|
-%   +--------------------------------------+ | fuel used for the comb-    |
+%   |                                      | |  kmec: mechanical          |
+%   +--------------------------------------+ |        efficiency          |
+%                                            +----- Default value = 0 ----+
+%                                            |                            |
+%                                            | fuel: string containing the|
+%                                            | fuel used for the comb-    |
 %                                            | ustion (see available ones |
 %                                            | in combustion function)    |
 %                                            +--- Default value = 'CH4' --+
@@ -29,11 +33,16 @@ else
         case 6
             etaC = 1;
             etaT = 1;
+            kmec = 0;
             fuel = 'CH4';
         case 7
             etaT = 1;
+            kmec = 0;
             fuel = 'CH4';
         case 8
+            kmec = 0;
+            fuel = 'CH4';
+        case 9
             fuel = 'CH4';
     end
 end
@@ -50,22 +59,84 @@ state(stateNumber).e = [];
 state(1).p = pa;
 state(1).T = Ta;
 state(1).h = AirProp('h',Ta) - AirProp('h',273.15);
-state(1).s = AirProp('s',Ta) - AirProp('s',273.15);
+R = 8.314472;
+MCO2 = 44.008;
+MH2O = 18.01494;
+MO2 = 31.998;
+MN2 = 28.014;
+M = [MCO2 MH2O MO2 MN2];
+Mair = 0.21*MO2 + 0.79*MN2;
+Ra = R/Mair; % gas constant of the air
+state(1).s = AirProp('s',Ta) - AirProp('s',273.15) - Ra*log(1/1.01325);
 state(1).e = 0;
 
 % Compression
 state(2) = compressor(state(1),r,etaC);
 
 % Combustion
-[state(3),n,~] = combustionChamber(state(2),fuel,Tf,kcc);
+[state(3),n,lambda,ma1,LHV] = combustionChamber(state(2),fuel,Tf,r,kcc);
 
 % Expansion
 state(4) = turbine2(state(3),r,kcc,n,etaT);
 
 % Put states in a table
-M = (reshape(struct2array(state),5,stateNumber))';
+Array = (reshape(struct2array(state),5,stateNumber))';
 fprintf('\n')
-disp(array2table(M,'VariableNames',{'p','T','h','s','e'}))
+disp(array2table(Array,'VariableNames',{'p','T','h','s','e'}))
 
+%% (T,S) Diagram %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+T1 = state(1).T;    s1 = state(1).s;
+T2 = state(2).T;    s2 = state(2).s;
+T3 = state(3).T;    s3 = state(3).s;
+T4 = state(4).T;    s4 = state(4).s;
+
+T12 = T1:T2;    s12 = zeros(size(T12));
+s12(1) = s1;
+for i=2:length(T12)-1
+    s12(i) = AirProp('s',T12(i)) - AirProp('s',273.15) - etaC*(AirProp('h',T12(i)) -...
+        AirProp('h',T1))*log(T12(i)/T1)/(T12(i) - T1) + Ra*log(1.01325);
 end
+s12(end) = s2;
 
+T23 = T2:1:T3;    s23 = zeros(size(T23));
+s23(1) = s2;
+nM = n.*M/sum(n.*M);
+Rg = R*sum(n)/(n*M');
+for i=2:length(T23)-1
+    s23(i) = (hsBase('s',T23(i)) - hsBase('s',273.15))*(nM)' - Rg*log(r*kcc/1.01325);
+end
+s23(end) = s3;
+plot(s12,T12,s23,T23)
+hold on
+plot(s1,T1,'o',s2,T2,'o',s3,T3,'o')
+str = {'1','2','3'};
+text([s1 s2 s3],[T1 T2 T3],str,'HorizontalAlignment','right')
+hold off
+
+%% Energetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+h1 = state(1).h;
+h2 = state(2).h;
+h3 = state(3).h;
+h4 = state(4).h;
+Wmov = h3 - h4;
+Wop = h2 - h1;
+ma = Pe/( (1 - kmec)*Wmov*(h2 + LHV/(lambda*ma1))/h3 - (1 + kmec)*Wop ); % CHECK
+mc = ma/(lambda*ma1);
+mg = ma + mc;
+Pprim = mc*LHV;
+%CompLoss = (1-etaC)*ma*Wop;
+%TurbLoss = (1/etaT - 1)*mg*Wmov;
+Qexh = mg*h4 - ma*h1; % OK
+MecLoss = kmec*(ma*Wop + mg*Wmov);
+%Pmcy = mg*Wmov - ma*Wop;
+%pie([Pe MecLoss Qexh Pprim])
+
+    function base = hsBase(prop,T)% if size(T) = 1 x n, then size(base) = n x 4.
+        switch prop
+            case 'h'
+                base = [enthalpy('CO2',T)' enthalpy('H2O',T)' enthalpy('O2',T)' enthalpy('N2',T)'];
+            case 's'
+                base = [entropy('CO2',T)' entropy('H2O',T)' entropy('O2',T)' entropy('N2',T)'];
+        end
+    end
+end

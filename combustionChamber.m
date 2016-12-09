@@ -1,11 +1,13 @@
-function [stateO,n,lambda] = combustionChamber(stateI,fuel,Tf,kcc)
+function [stateO,n,lambda,ma1,LHV] = combustionChamber(stateI,fuel,Tf,r,kcc)
 %COMBUSTIONCHAMBER computes parameters corresponding to the combustion in a
 %power cycle using a gas turbine.
-%   [stateO,n,lambda] = combustionChamber(stateI,fuel,Tf,kcc) returns the
-%   state after the combustion, the composition of the flue gas and the
-%   excess air coefficient. StateI is the input state, fuel is a string
-%   containing the chemical formula of the fuel used for the combustion, Tf
-%   is the output temperature, and kcc is the pressure ratio pOut/pIn <1.
+%   [stateO,n,lambda,ma1,LHV] = combustionChamber(stateI,fuel,Tf,r,kcc)
+%   returns the state after the combustion, the composition of the flue
+%   gas, the excess air coefficient, the air-demand and lower heating
+%   values. StateI is the input state, fuel is a string containing the
+%   chemical formula of the fuel used for the combustion, Tf is the output
+%   temperature, r is the pressure ratio of the compressor and kcc is the
+%   pressure ratio pOut/pIn < 1.
 
 pI = stateI.p;
 Ti = stateI.T;
@@ -65,15 +67,14 @@ switch fuel % the parameters depending on lambda are assigned in a function that
         baseException = MException(msgID,msg);
         throw(baseException)
 end
-ma = ( (32 + 3.76*28)*(1 + (y-2*x)/4) )/(nC + y + 16*x); % [kg_air/kg_fuel]
 MCO2 = 44.008;
 MH2O = 18.01494;
 MO2 = 31.998;
 MN2 = 28.014;
+ma1 = ( (MO2 + 3.76*MN2)*(1 + (y-2*x)/4) )/(nC + y + 16*x); % [kg_air/kg_fuel]
 M = [MCO2 MH2O MO2 MN2];
-Mair = 0.21*MO2 + 0.79*MN2;
-ha = (0.21*MO2*enthalpy('O2',Ti) + 0.79*MN2*enthalpy('N2',Ti))/Mair; % kJ/kg (of air)
-precision = 1e-4;
+ha = AirProp('h',Ti) - AirProp('h',273.15); % kJ/kg (of air)
+precision = 1e-6;
 lambdaOld = lambda + precision + 1; % be sure to enter the while loop
 while abs(lambda - lambdaOld) > precision
     [nO2,nN2] = productsCoeff(fuel,lambda);
@@ -82,7 +83,7 @@ while abs(lambda - lambdaOld) > precision
     hO = hsBase('h',Tf)*(nM)'/sum(nM);
     hf = hO - (hsBase('h',273.15)*(nM)'/sum(nM));
     lambdaOld = lambda;
-    lambda = (LHV - hf)/(ma*(hf - ha));
+    lambda = (LHV - hf)/(ma1*(hf - ha));
 end
 
 [nO2,nN2] = productsCoeff(fuel,lambda);
@@ -90,7 +91,8 @@ n = [nCO2 nH2O nO2 nN2];
 nM = n.*M;
 hO = (hsBase('h',Tf) - hsBase('h',273.15))*(nM)'/sum(nM);
 h0 = hsBase('h',T0)*(nM)'/sum(nM);
-sO = (hsBase('s',Tf) - hsBase('s',273.15))*(nM)'/sum(nM);
+Rg = 8.314472*sum(n)/(n*M');
+sO = (hsBase('s',Tf) - hsBase('s',273.15))*(nM)'/sum(nM) - Rg*log(r*kcc/1.01325);
 s0 = hsBase('s',T0)*(nM)'/sum(nM);
 eO = (hO - h0) - T0*(sO - s0);
 
