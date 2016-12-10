@@ -52,8 +52,8 @@ while abs(a) > precision
 end
 
 hO = AirProp('h',To) - AirProp('h',273.15);
-sO = AirProp('s',To) - AirProp('s',273.15) - Ra*log(r/1.01325);
-eO = AirProp('e',To);
+sO = AirProp('s',To) - AirProp('s',273.15) - Ra*log(r);
+eO = AirProp('e',To,r);
 
 stateO.p = pO;
 stateO.T = To;

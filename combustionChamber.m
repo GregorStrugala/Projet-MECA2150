@@ -90,11 +90,12 @@ end
 n = [nCO2 nH2O nO2 nN2];
 nM = n.*M;
 hO = (hsBase('h',Tf) - hsBase('h',273.15))*(nM)'/sum(nM);
-h0 = hsBase('h',T0)*(nM)'/sum(nM);
 Rg = 8.314472*sum(n)/(n*M');
-sO = (hsBase('s',Tf) - hsBase('s',273.15))*(nM)'/sum(nM) - Rg*log(r*kcc/1.01325);
+sO = (hsBase('s',Tf) - hsBase('s',273.15))*(nM)'/sum(nM) - Rg*log(r*kcc);
+
+h0 = hsBase('h',T0)*(nM)'/sum(nM);
 s0 = hsBase('s',T0)*(nM)'/sum(nM);
-eO = (hO - h0) - T0*(sO - s0);
+eO = (hO - h0 + hsBase('h',273.15)*(nM)'/sum(nM)) - T0*(sO - s0 + hsBase('s',273.15)*(nM)'/sum(nM));
 
 stateO.p = pO;
 stateO.T = To;
