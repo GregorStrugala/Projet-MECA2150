@@ -1,13 +1,13 @@
-function [stateO,n,lambda,ma1,LHV] = combustionChamber(stateI,fuel,Tf,r,kcc)
+function [stateO,n,lambda,ma1,LHV,ec] = combustionChamber(stateI,fuel,Tf,r,kcc)
 %COMBUSTIONCHAMBER computes parameters corresponding to the combustion in a
 %power cycle using a gas turbine.
-%   [stateO,n,lambda,ma1,LHV] = combustionChamber(stateI,fuel,Tf,r,kcc)
+%   [stateO,n,lambda,ma1,LHV,ec] = combustionChamber(stateI,fuel,Tf,r,kcc)
 %   returns the state after the combustion, the composition of the flue
 %   gas, the excess air coefficient, the air-demand and lower heating
-%   values. StateI is the input state, fuel is a string containing the
-%   chemical formula of the fuel used for the combustion, Tf is the output
-%   temperature, r is the pressure ratio of the compressor and kcc is the
-%   pressure ratio pOut/pIn < 1.
+%   values, and the fuel exergy. StateI is the input state, fuel is a
+%   string containing the chemical formula of the fuel used for the
+%   combustion, Tf is the output temperature, r is the pressure ratio of
+%   the compressor and kcc is the pressure ratio pOut/pIn < 1.
 
 pI = stateI.p;
 Ti = stateI.T;
