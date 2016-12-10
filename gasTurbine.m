@@ -90,28 +90,36 @@ T2 = state(2).T;    s2 = state(2).s;
 T3 = state(3).T;    s3 = state(3).s;
 T4 = state(4).T;    s4 = state(4).s;
 
-T12 = T1:T2;    s12 = zeros(size(T12));
+T12 = T1:T2;
+s12 = AirProp('s',T12) - AirProp('s',273.15) - etaC*(AirProp('h',T12) -...
+    AirProp('h',T1)).*log(T12./T1)./(T12 - T1) + Ra*log(1.01325);
 s12(1) = s1;
-for i=2:length(T12)-1
-    s12(i) = AirProp('s',T12(i)) - AirProp('s',273.15) - etaC*(AirProp('h',T12(i)) -...
-        AirProp('h',T1))*log(T12(i)/T1)/(T12(i) - T1) + Ra*log(1.01325);
-end
 s12(end) = s2;
 
-T23 = T2:1:T3;    s23 = zeros(size(T23));
-s23(1) = s2;
+T23 = T2:T3;
 nM = n.*M/sum(n.*M);
 Rg = R*sum(n)/(n*M');
-for i=2:length(T23)-1
-    s23(i) = (hsBase('s',T23(i)) - hsBase('s',273.15))*(nM)' - Rg*log(r*kcc/1.01325);
-end
+s23 = nM*(hsBase('s',T23) - hsBase('s',273.15*ones(size(T23))))' - Rg*log(r*kcc/1.01325);
+s23(1) = s2;
 s23(end) = s3;
-plot(s12,T12,s23,T23)
-hold on
-plot(s1,T1,'o',s2,T2,'o',s3,T3,'o')
-str = {'1','2','3'};
-text([s1 s2 s3],[T1 T2 T3],str,'HorizontalAlignment','right')
-hold off
+
+T34 = T4:T3;
+s34 = nM*(hsBase('s',T34) - hsBase('s',273.15*ones(size(T34))))' - log(T34./T3).*(...
+    nM*(hsBase('h',T3*ones(size(T34))) - hsBase('h',T34))' )./(etaT*(T3 - T34)) - Rg*log(r*kcc/1.01325);
+
+% plot(s12,T12,s23,T23,s34,T34)
+% hold on
+% plot(s1,T1,'o',s2,T2,'o',s3,T3,'o',s4,T4,'o')
+% str = {'1','2','3','4'};
+% text([s1 s2 s3 s4],[T1 T2 T3 T4],str,'HorizontalAlignment','right')
+% hold off
+
+%% (H,S) Diagram %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+h12 = AirProp('h',T12) - AirProp('h',273.15);
+h23 = nM*(hsBase('h',T23) - hsBase('h',273.15*ones(size(T23))))';
+h34 = nM*(hsBase('h',T34) - hsBase('h',273.15*ones(size(T34))))';
+plot(s12,h12,s23,h23,s34,h34)
 
 %% Energetic analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 h1 = state(1).h;
