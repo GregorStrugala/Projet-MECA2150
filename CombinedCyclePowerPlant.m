@@ -55,19 +55,19 @@ Tcond=Triver+deltaT;
 
 %% %%%%%%%%%%%%%%%%%%%%%% STEAM CYCLE  %%%%%%%%%%%%%%%%%%%%%%%%%
 stateNumber = 9;
-state(stateNumber).p = []; %preallocation
-state(stateNumber).T = [];
-state(stateNumber).x = [];
-state(stateNumber).h = [];
-state(stateNumber).s = [];
-state(stateNumber).e = [];
+state(stateNumber).p = 0; %preallocation
+state(stateNumber).T = 0;
+state(stateNumber).x = 0;
+state(stateNumber).h = 0;
+state(stateNumber).s = 0;
+state(stateNumber).e = 0;
 for i=1:stateNumber-1
-    state(i).p = [];
-    state(i).T = [];
-    state(i).x = [];
-    state(i).h = [];
-    state(i).s = [];
-    state(i).e = [];
+    state(i).p = 0;
+    state(i).T = 0;
+    state(i).x = 0;
+    state(i).h = 0;
+    state(i).s = 0;
+    state(i).e = 0;
 end
 
 % Given parameters
@@ -123,8 +123,8 @@ T = array2table(M,'VariableNames',{'p','T','x','h','s','e'});
 %         end
 %     end
 % end
-disp(T)
 fprintf('\n')
+disp(T)
 
 %fprintf('Wmcy = %f kJ/kg\n\n',Wmcy)
 end
