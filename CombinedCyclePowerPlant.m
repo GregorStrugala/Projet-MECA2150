@@ -1,4 +1,4 @@
-function [ output_args ] = CombinedCyclePowerPlant(deltaT,Triver,LPsteamPressure,HPsteamPressure,dTpinch, dTapproach,PeGT,PeST)
+function [ output_args ] = combinedCyclePowerPlant(deltaT,Triver,LPsteamPressure,HPsteamPressure,dTpinch, dTapproach,PeGT,PeST)
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
 %   STEAMPOWERPLANT(deltaT, Triver, Tmax, steamPressure, Pe, n) displays a table
 %   with the values of the variables p, T, x, h, s at the differents states
