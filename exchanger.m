@@ -1,5 +1,6 @@
-function [stateO] = exchanger(stateI,eta_ex,Tmax)
-%EXCHANGER computes the state variation after that the fluid is passing through the exchanger.
+function [stateO] = exchanger(stateI,Tmax,dTpinch)
+%EXCHANGER computes the state variation after that the fluid is passing
+%through the exchanger.
 %   stateO = EXCHANGER(stateI,dT) finds the new values of
 %   the state variables contained in stateI, where stateI is a struct with
 %   fields {p,T,x,h,s}. The values of the state variable need to be
@@ -30,7 +31,7 @@ hI = stateI.h;
 sI = stateI.s;
 
 pO=pI;
-To=Ti+eta_ex*abs(Tmax-Ti);
+To=Tmax-dTpinch;
 hO=XSteam('h_pt',pO,To);
 sO=XSteam('s_pt',pO,To);
 xO=nan;
@@ -40,6 +41,6 @@ stateO.T = To;
 stateO.x = xO;
 stateO.h = hO;
 stateO.s = sO;
-
+stateO.e = exergy(stateO);
 end
 

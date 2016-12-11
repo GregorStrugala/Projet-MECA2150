@@ -1,36 +1,143 @@
-function[state]=feedHeating(state,pmax,eta_siP,eta_siT,n)
+function[state,WmovAdd,Wop,extractPumpLossEn,extractPumpLossEx,turbineLossEn,turbineLossEx,indexDeaerator]=feedHeating(state,pmax,eta_siP,eta_siT,eta_mec,nF,nR,dTpinch,deaeratorON)
 %stateO est une structure condensee contenant les etats compris entre 7 a 1
 
 % TO DO energetic and exergetic analysis !
 
-
-
 %% State calculation
-for i=1:n
-    hPurge=i*abs(state(3).h-state(4).h)/(n+1)+state(4).h;
-    
-    [state(6)]=extractionPump(state(5),0.5,pmax,eta_siP);
-    [state(7+5*(i-1))]=bleed(hPurge,state(3),eta_siT);
-    [state(8+5*(i-1)),~,~,~,~]=condenser(state(7+5*(i-1)));
-    %[state(9+5*(i-1))]=subcooler(state(8+5*(i-1)),20);%20 est le dT. A mettre
-    %en argument de la fonction ? FAUX voir page 68 livre de ref
-    if i==1
-        [state(9)]=subcooler(state(8),state(5).T);
-        outCondenser=state(5);
-        [state(10)]=valve(state(9),outCondenser);
-        [state(11)]=exchanger(state(6),0.5,state(8).T);
+deaeratorOFF=0;
+indexDeaerator=0;
+%preallocations
+WmovAdd=zeros(1,nF);
+Wop=zeros(1,2);
+turbineLossEn=zeros(1,nF);
+turbineLossEx=zeros(1,nF);
+extractPumpLossEn=zeros(1,2);
+extractPumpLossEx=zeros(1,2);
+
+dPfeedPump=0.5;
+
+for index=1:nF
+    if nR==0  %no reheating
+        
+        %determination of the enthalpy of the bled steam
+        hBleed=index*abs(state(3+2*nR).h-state(8+2*nR).h)/(nF+1)+state(8+2*nR).h;
+        %work done by the bled steam (Wmov<0)
+        WmovAdd(index)=hBleed-state(3+2*nR).h;
+        %determination of the state of the bled steam
+        [state(4+2*nR,index)]=bleed(index,hBleed,state(3),eta_siT);
+        %turbine lossEn of the bled steam
+        turbineLossEn(index)=abs(WmovAdd(index)*(1-eta_mec));
+        %turbine lossEx of the bled steam
+        turbineLossEx(index)=abs(state(4+2*nR,index).e-state(3+2*nR).e)-abs(WmovAdd(index));
+        
+    elseif nR~=0 && index==nF %reheating and index==nF
+        
+        %determination of the enthalpy of the bled steam
+        hBleed=state(4,1).h; %le dernier soutirage a lieu au niveau du reheating (voir p.89)
+        %work done by the bled steam at the last bleed (Wmov<0)
+        WmovAdd(index)=hBleed-state(3).h;
+        %determination of the state of the bled steam
+        [state(4+2*nR,index)]=bleed(index,hBleed,state(4,1),eta_siT);
+        
+    else % nR~=0 and index~=nF 
+        %determination of the enthalpy of the bled steam;
+        
+        %NOTE : dans la formule pour hBleed, on ne divise pas par (nF+1).
+        %Et c'est volontaire! Si nR~=0 alors on a un soutirage au niveau de
+        %la rechauffe (lors de la detente partielle de la turbine) donc il reste (nF-1) soutirage sur l'expansion totale
+        %dans la turbine. On a donc (...)/((nF-1)+1) = /nF :)
+        hBleed=index*abs(state(3+2*nR).h-state(8+2*nR).h)/(nF)+state(8+2*nR).h;
+        
+        %work done by the bled steam
+        WmovAdd(index)=hBleed-state(3+2*nR).h;
+        %determination of the state of the bled steam
+        [state(4+2*nR,index)]=bleed(index,hBleed,state(3+2*nR),eta_siT);
+    end
+    Tsat=XSteam('Tsat_p',state(4+2*nR,index).p);
+    if deaeratorON && Tsat>120 && nF>2 %condition supp necessaire ???
+        indexDeaerator=index;
+        deaeratorON=0;
+        deaeratorOFF=1;
+        [state(5+2*nR,index), ~]=deaerator(state(4+2*nR,index),Tsat);
+        %state that correspond to the out of the valve. There is no valve so we put this equals to 0
+        state(6+2*nR,indexDeaerator).h=0;%necessaire pour bleedFraction
+        state(6+2*nR,indexDeaerator).e=0;%necessaire pour heatLossEx
     else
-        %[state(9+5*(i-1))]=subcooler(state(8+5*(i-1)),state(8+5*(i-2)).T);
-        previousHeater=state(10+5*(i-1)-7-1);
-        [state(10+5*(i-1)-1-1)]=valve(state(9+5*(i-1)-1),previousHeater);
-        [state(11+5*(i-1)-1-1)]=exchanger(state(11+5*(i-2)-1),0.5,state(8+5*(i-1)-1).T);
+        %condensation of the bled steam in the heater : exchange with the fluid
+        %coming from the extracting pump
+        [state(5+2*nR,index),~,~,~]=condenser(state(4+2*nR,index));
+        %exergetic loss of this function are take into account in
+        %diffHeatingExergy : exchange with heating fluid (fluid coming from
+        %the turbine and the heated fluid : fluid coming from the
+        %extracting pump).
+        
+        if index==1 %case of the first feed heating (adding a subcooler)
+            [state(6+2*nR,index)]=subcooler(state(5+2*nR,index),state(9+2*nR).T,dTpinch);
+            
+            %diffHeatingExergy(index)=state(6+2*nR,index).e-state(4+2*nR,index).e;
+            %isenthalpic expansion in the valve
+            inCondenser=state(8+2*nR);
+            [state(7+2*nR,index)]=valve(state(6+2*nR,index),inCondenser);
+        elseif index==indexDeaerator
+            %... do nothing
+        else %case of 'typical' feed heating (no subcooler)
+            %isenthalpic expansion in the valve
+            previousHeater=state(5+2*nR,index-1);%to determine the pressure and the temperature of the out state
+            [state(6+2*nR,index)]=valve(state(5+2*nR,index),previousHeater);
+            %diffHeatingExergy(index)=state(5+2*nR,index).e-state(4+2*nR,index).e;
+        end
     end
 end
-%[state(6)]=extractionPump(state(5),0.5,pmax,eta_siP);
-%0.3 est la fraction du dP que doit faire la pompe d'extraction ? Mettre en
-% %argument ? 30 est pmax
-%[state(1)]=exchanger(state(6),0.9,state(8+4*(n-1)).T);%est le "rendement avec les echangeurs"
-%[state(1)]=exchanger(state(6),0.9,state(8+5*(n-1)).T);
-state(1)=state(11+5*(n-1));
+%determination of the output of the extracting pump: if there is a
+%deaerator, then the pressure at the output of the extracting pump must be
+%equal to the pressure coming from the turbine (bled steam) into the
+%deaerator.
+if Tsat>120 && deaeratorOFF %if there is a deaerator
+    %compression ratio
+    dPextract=(state(4+2*nR,index).p)/pmax;
+    [state(10+2*nR),WopExtract,PumpLossEn,PumpLossEx]=extractionPump(state(9+2*nR),dPextract,pmax,eta_siP,eta_mec);
+    Wop(1)=WopExtract;
+   extractPumpLossEn(1)=PumpLossEn;
+    extractPumpLossEx(1)=PumpLossEx;
+elseif deaeratorON && Tsat<120 %no deaerator
+    %compression ratio
+    dP=(1-dPfeedPump);
+    %out of the extracting pump after heaters
+    [state(10+2*nR),WopExtract,PumpLossEn,PumpLossEx]=extractionPump(state(9+2*nR),dP,pmax,eta_siP,eta_mec);
+    Wop(1)=WopExtract;
+    extractPumpLossEn(1)=PumpLossEn;
+    extractPumpLossEx(1)=PumpLossEx;
+else %no deaerator
+    %compression ratio
+    dP=(1-dPfeedPump);
+    %out of the extracting pump after heaters
+    [state(10+2*nR),WopExtract,PumpLossEn,PumpLossEx]=extractionPump(state(9+2*nR),dP,pmax,eta_siP,eta_mec);
+    Wop(1)=WopExtract;
+    extractPumpLossEn(1)=PumpLossEn;
+    extractPumpLossEx(1)=PumpLossEx;
+end
 
+%calculation of the state of the fluid coming from the extracting pump
+%after each exchange with the fuid coming from the turbine in the different
+%heater.
+for index=1:(nF+1)
+    if index == 1 %case of the first feed heating : exchange with the subcooler
+        outSubcooler = state(6+2*nR,index);
+        %[state(11+2*nR,index)]=exchanger(state(10+2*nR),outSubcooler.T,dTpinch);
+        [state(11+2*nR,index)]=exchanger(state(10+2*nR),outSubcooler.T,3);
+    elseif index == nF+1 %last exchanger before the feed pump (state(11+2*nR,nF+1)=state(1))
+        outHeater=state(5+2*nR,index-1);
+        [state(1)]=exchanger(state(11+2*nR,index-1),outHeater.T,dTpinch);
+    elseif index == indexDeaerator+1
+        dPoutDeae=1-(dPfeedPump+dPextract);
+        %mettre extracting pump --> donne le nouvel etat
+        [state(11+2*nR,index),WopExtract,PumpLossEn, PumpLossEx]=extractionPump(state(5+2*nR,indexDeaerator),dPoutDeae,pmax,eta_siP,eta_mec);
+        Wop(2)=WopExtract;
+        extractPumpLossEn(2)=PumpLossEn;
+        extractPumpLossEx(2)=PumpLossEx;
+    else %case of 'typical' feed heating exchange with a heater(no subcooler)
+        outHeater=state(5+2*nR,index-1);
+        [state(11+2*nR,index)]=exchanger(state(11+2*nR,index-1),outHeater.T,dTpinch);
+    end
+end
 end

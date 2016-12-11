@@ -6,7 +6,6 @@ function[T,s,h]=CompressionExpansionPlot(stateI,stateO,eta_si,compression,expans
 %     plot(stateI.s,stateI.T,'o')
 %     text(stateI.s,stateI.T,'1')
 
-
 if compression == 1
     p=stateI.p:abs((stateO.p-stateI.p))*0.1:stateO.p;
     hs=zeros(1,length(p));

@@ -1,4 +1,4 @@
-function [stateO,Wmov,eO,turbineLoss,ExLoss,eta_turbex] = turbine(stateI,pOut,eta_siT,turbineEfficiency)
+function [stateO,Wmov,lossEn,lossEx] = turbine(stateI,pOut,eta_siT,turbineEfficiency)
 %TO BE REWRITTEN IN CASE OF X IS NOT DEFINE !!!
 %TURBINE computes the state variation after an expansion through a turbine.
 %   stateO = TURBINE(stateI,Tcond,eta_siT) finds the new values of the
@@ -45,6 +45,7 @@ Ti = stateI.T;%Tmax
 xI = stateI.x;
 hI = stateI.h;
 sI = stateI.s;
+eI = stateI.e;
 
 pO = pOut; %Attention robustesse !!! Pas vrai si x pas déf.
 %To = XSteam('Tsat_p',pO); pas assez robuste :)
@@ -92,14 +93,17 @@ stateO.x = xO;
 stateO.h = hO;
 stateO.s = sO;
 
+
 %% Energetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Wmov = hO-hI; % Work done by the expansion
-turbineLoss=abs(Wmov*(1-turbineEfficiency))
+lossEn=abs(Wmov*(1-turbineEfficiency));
 %% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-eI=exergy(stateI);
+%eI=exergy(stateI);
 eO=exergy(stateO);
+stateO.e = eO;
 
-eta_turbex=abs(Wmov/(eI-eO));
+%eta_turbex=abs(Wmov/(eI-eO));
 
-ExLoss = eO-eI; % Exergy loss due to irreversibilities in the turbine.
+%eta_turbex=Wmov/(eO-eI) --> losses = (1-eta_turbex)
+lossEx = abs(eO-eI)-abs(Wmov); % Exergy loss due to irreversibilities in the turbine.
 end
