@@ -22,7 +22,7 @@ function varargout = gasTurbineGUI(varargin)
 
 % Edit the above text to modify the response to help gasTurbineGUI
 
-% Last Modified by GUIDE v2.5 12-Dec-2016 23:12:20
+% Last Modified by GUIDE v2.5 13-Dec-2016 10:08:15
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -90,7 +90,6 @@ function Pe_ENTRY_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of Pe_ENTRY as text
 %        str2double(get(hObject,'String')) returns contents of Pe_ENTRY as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function Pe_ENTRY_CreateFcn(hObject, eventdata, handles)
@@ -294,3 +293,58 @@ function start_PB_Callback(hObject, eventdata, handles)
 % hObject    handle to start_PB (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+Pe = str2double(get(handles.Pe_ENTRY,'String'));
+Ta = str2double(get(handles.Ta_ENTRY,'String')) + 273.15;
+Tf = str2double(get(handles.Tf_ENTRY,'String')) + 273.15;
+r = str2double(get(handles.r_ENTRY,'String'));
+kcc = str2double(get(handles.kcc_ENTRY,'String'));
+etaC = str2double(get(handles.etaC_ENTRY,'String'));
+etaT = str2double(get(handles.etaT_ENTRY,'String'));
+kmec = str2double(get(handles.kmec_ENTRY,'String'));
+fuel = str2double(get(handles.fuel_ENTRY,'String'));
+%gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec);
+
+function [Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,fuel] = inputArgs(handles)
+Pe = str2double(get(handles.Pe_ENTRY,'String'));
+Ta = str2double(get(handles.Ta_ENTRY,'String')) + 273.15;
+Tf = str2double(get(handles.Tf_ENTRY,'String')) + 273.15;
+r = str2double(get(handles.r_ENTRY,'String'));
+kcc = str2double(get(handles.kcc_ENTRY,'String'));
+etaC = str2double(get(handles.etaC_ENTRY,'String'));
+etaT = str2double(get(handles.etaT_ENTRY,'String'));
+kmec = str2double(get(handles.kmec_ENTRY,'String'));
+fuel = get(handles.fuel_ENTRY,'String');
+
+% --- Executes on button press in exPie_PB.
+function exPie_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to exPie_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,fuel] = inputArgs(handles);
+gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,{'ExPie'},fuel);
+
+
+% --- Executes on button press in enPie_PB.
+function enPie_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to enPie_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,fuel] = inputArgs(handles);
+gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,{'EnPie'},fuel);
+
+
+% --- Executes on button press in ts_PB.
+function ts_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to ts_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,fuel] = inputArgs(handles);
+gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,{'ts'},fuel);
+
+% --- Executes on button press in hs_PB.
+function hs_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to hs_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,fuel] = inputArgs(handles);
+gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,{'hs'},fuel);

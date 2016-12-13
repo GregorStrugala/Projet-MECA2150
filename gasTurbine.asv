@@ -1,4 +1,4 @@
-function [state,mg,nM,MecLoss,CombLoss,CompLoss,TurbLoss] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,diagrams,fuel)
+function [state,mg,n,MecLoss,CombLoss,CompLoss,TurbLoss] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,diagrams,fuel)
 %GASTURBINE characterises a power cycle that uses a gas turbine.
 %   state = GASTURBINE(Pe,Ta,Tf,r,kcc,etaC,etaT) displays state, energy
 %   and exergy charts for the given parameters.
@@ -83,14 +83,6 @@ state(2) = compressor(state(1),r,etaC);
 % Expansion
 state(4) = turbine2(state(3),r,kcc,n,etaT);
 
-R = 8.314472;
-MCO2 = 44.008;
-MH2O = 18.01494;
-MO2 = 31.998;
-MN2 = 28.014;
-M = [MCO2 MH2O MO2 MN2];
-nM = n.*M/sum(n.*M);
-
 %% Table & Diagrams %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(diagrams,'all')
     all = 1;
@@ -106,6 +98,12 @@ if  any(ismember('StateTable',diagrams))||all
 end
 
 if any(ismember({'ts','hs'},diagrams))||all
+    R = 8.314472;
+    MCO2 = 44.008;
+    MH2O = 18.01494;
+    MO2 = 31.998;
+    MN2 = 28.014;
+    M = [MCO2 MH2O MO2 MN2];
     Mair = 0.21*MO2 + 0.79*MN2;
     Ra = R/Mair; % gas constant of the air
     
@@ -121,6 +119,7 @@ if any(ismember({'ts','hs'},diagrams))||all
     s12(end) = s2;
     
     T23 = T2:T3;
+    nM = n.*M/sum(n.*M);
     Rg = R*sum(n)/(n*M');
     s23 = nM*(hsBase('s',T23) - hsBase('s',273.15*ones(size(T23))))' - Rg*log(r*kcc/1.01325);
     s23(1) = s2;
