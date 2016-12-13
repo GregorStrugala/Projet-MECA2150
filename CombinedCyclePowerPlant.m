@@ -53,8 +53,6 @@ eta_siP=0.85;
 %temperature of condensation
 Tcond=Triver+deltaT;
 
-%% %%%%%%%%%%%%%%%%%%%%%% STEAM CYCLE  %%%%%%%%%%%%%%%%%%%%%%%%%
-
 % STEAM STATE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 stateNumberSteam = 6;
 stateSteam(stateNumberSteam).p = []; %preallocation
@@ -82,7 +80,6 @@ for i=1:stateNumberSteam-1
     %     state(i).h = 0;
     %     state(i).s = 0;
     %     state(i).e = 0;
-end
 
 % Given parameters :
 stateSteam(1).T=Tcond;
@@ -178,7 +175,6 @@ end
 
 % %% stateSteam display in table
 % M = (reshape(struct2array(stateSteam),6,6))';
-%
 % T = array2table(M,'VariableNames',{'p','T','x','h','s','e'});
 % % stateIndex = cell(stateNumber+3*nF+2*nR,1);
 % % for i = 1:length(stateIndex)
