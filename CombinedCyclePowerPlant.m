@@ -53,7 +53,8 @@ eta_siP=0.85;
 %temperature of condensation
 Tcond=Triver+deltaT;
 
-% STEAM STATE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% STEAM STATE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 stateNumberSteam = 6;
 stateSteam(stateNumberSteam).p = []; %preallocation
 stateSteam(stateNumberSteam).T = [];
@@ -61,12 +62,7 @@ stateSteam(stateNumberSteam).x = [];
 stateSteam(stateNumberSteam).h = [];
 stateSteam(stateNumberSteam).s = [];
 stateSteam(stateNumberSteam).e = [];
-% state(stateNumber).p = 0; %preallocation
-% state(stateNumber).T = 0;
-% state(stateNumber).x = 0;
-% state(stateNumber).h = 0;
-% state(stateNumber).s = 0;
-% state(stateNumber).e = 0;
+
 for i=1:stateNumberSteam-1
     stateSteam(i).p = [];
     stateSteam(i).T = [];
@@ -74,13 +70,7 @@ for i=1:stateNumberSteam-1
     stateSteam(i).h = [];
     stateSteam(i).s = [];
     stateSteam(i).e = [];
-    %     state(i).p = 0;
-    %     state(i).T = 0;
-    %     state(i).x = 0;
-    %     state(i).h = 0;
-    %     state(i).s = 0;
-    %     state(i).e = 0;
-
+end
 % Given parameters :
 stateSteam(1).T=Tcond;
 stateSteam(1).p=XSteam('psat_T',Tcond);
@@ -114,7 +104,7 @@ pInf=stateSteam(5).p;
 r = 1;
 while abs(r) > 0.1
     pGuess = (pSup+pInf)/2;
-    fprintf('pGuess = %f\n',pGuess)
+    %fprintf('pGuess = %f\n',pGuess)
     r = XSteam('h_pT',pGuess,stateSteam(8).T)-(stateSteam(3).h-eta_siT*(stateSteam(3).h-XSteam('h_ps',pGuess,stateSteam(3).s)));
     if r < 0
         pSup = pGuess;
@@ -144,6 +134,7 @@ TmaxLP=stateSteam(6,2).T+dTpinch;
 [stateSteam(4),QsupLP] = superheater(stateSteam(2,3),TmaxLP,dTpinch);
 
 % GAS STATE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 stateNumberGas = 4;
 stateGas(stateNumberGas).p = []; %preallocation
 stateGas(stateNumberGas).T = [];
@@ -151,12 +142,7 @@ stateGas(stateNumberGas).x = [];
 stateGas(stateNumberGas).h = [];
 stateGas(stateNumberGas).s = [];
 stateGas(stateNumberGas).e = [];
-% state(stateNumber).p = 0; %preallocation
-% state(stateNumber).T = 0;
-% state(stateNumber).x = 0;
-% state(stateNumber).h = 0;
-% state(stateNumber).s = 0;
-% state(stateNumber).e = 0;
+
 for i=1:stateNumberSteam-1
     stateGas(i).p = [];
     stateGas(i).T = [];
@@ -164,50 +150,49 @@ for i=1:stateNumberSteam-1
     stateGas(i).h = [];
     stateGas(i).s = [];
     stateGas(i).e = [];
-    %     state(i).p = 0;
-    %     state(i).T = 0;
-    %     state(i).x = 0;
-    %     state(i).h = 0;
-    %     state(i).s = 0;
-    %     state(i).e = 0;
 end
 
+%% FLOW RATE CALCULATION
+% function F = flowRate(x)
+%     F=[mGas*(hgLP-hgHP)-(x(1)*(state(2,3).h-state(2,2).h)+x(1)*(state(4).h-state(2,3).h)+x(2)*(state(9,2).h-state(2,2).h));
+%        mGas*(h4g-hgHP)-x(2)*(state(3).h-state(6,3).h);
+%       ];
+% end
+% x0 = [10,30];  % Make a starting guess at the solution
+% %options = optimoptions('fsolve','Display','iter'); % Option to display output
+% [x,~] = fsolve(@flowRate,x0); % Call solver
+% mSteamLP=x(1);
+% mSteamHP=x(2);
+% mSteamTot=mSteamLP+mSteamHP;
 
-% %% stateSteam display in table
-% M = (reshape(struct2array(stateSteam),6,6))';
-% T = array2table(M,'VariableNames',{'p','T','x','h','s','e'});
-% % stateIndex = cell(stateNumber+3*nF+2*nR,1);
-% % for i = 1:length(stateIndex)
-% %     if i<5
-% %         stateIndex(i) = {num2str(i)};
-% %     elseif 5<=i && i<5+2*nR
-% %         if mod(i,2)~=0
-% %             stateIndex(i) = {[num2str((5+i)/2) ',' nums2str((i-3)/2)]};
-% %         else
-% %             stateIndex(i) =
-% %         end
-% %     end
-% % end
-% disp(T)
-% fprintf('\n')
+%% EXHAUST TEMPERATURE CALCULATION
 
-%  state1=state(1)
- state2=stateSteam(2,1)
- state2prime=stateSteam(2,2)
-state2prime2=stateSteam(2,3)
-%  state3=state(3)
-%  state5=state(5)
-% % state8=state(8)
-% state9=state(6,1)
-% state9prime=stateSteam(6,2)
-% state9prime2=state(6,3)
+
+%% stateSteam display in table
+M = (reshape(struct2array(stateSteam),6,10))';
+T = array2table(M,'VariableNames',{'p','T','x','h','s','e'});
+length(struct2array(stateSteam))
+% stateIndex = cell(stateNumber+3*nF+2*nR,1);
+% for i = 1:length(stateIndex)
+%     if i<5
+%         stateIndex(i) = {num2str(i)};
+%     elseif 5<=i && i<5+2*nR
+%         if mod(i,2)~=0
+%             stateIndex(i) = {[num2str((5+i)/2) ',' nums2str((i-3)/2)]};
+%         else
+%             stateIndex(i) =
+%         end
+%     end
+% end
+disp(T)
+fprintf('\n')
 %fprintf('Wmcy = %f kJ/kg\n\n',Wmcy)
 
 %% T-Q diagram
 HRSG_q=[stateSteam(3).h, stateSteam(6,3).h, stateSteam(6,2).h, stateSteam(4).h,stateSteam(2,3).h, stateSteam(2,2).h,stateSteam(2,1).h]
 mSteamHP=50;
 mSteamLP=8;
-Q=[0,mSteamHP*QsupHP,mSteamHP*QevapHP,mSteamHP*QecoHP+mSteamLP*QsupLP,mSteamLP*QevapLP,(mSteamHP+mSteamLP)*QecoLP]
+Q=[0,mSteamHP*QsupHP,mSteamHP*QevapHP,mSteamHP*QecoHP+mSteamLP*QsupLP,mSteamLP*QevapLP,(mSteamTot)*QecoLP]
 Qtot=sum(Q);
 for i=1:length(Q)
     Qtransfer(i)=sum(Q(1:i));
