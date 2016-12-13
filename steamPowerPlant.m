@@ -86,6 +86,7 @@ if nR==0 && nF==0
     state(3).h = XSteam('h_pT',steamPressure,Tmax);
     state(3).e = exergy(state(3));
     
+    
     % We begin the cycle at the state(3)
     [state(4),Wmov,turbineLossEn,turbineLossEx] = turbine(state(3),state(1).p,eta_siT,eta_mec);
     [state(1),Qc,condenserLossEn,condenserLossEx] = condenser(state(4));
@@ -552,9 +553,9 @@ end
 if diagrams
     %T-s diagram
     %figure(3)
-    Ts_diagram(state,eta_siP,eta_siT,nF,nR,deaeratorON,indexDeaerator)
+    Ts_diagramSteam(state,eta_siP,eta_siT,nF,nR,deaeratorON,indexDeaerator)
     %figure(1);
     %h-s diagram
-    %hs_diagram(state(1),state(2),state(3),state(4),0.8,0.88)
+    %hs_diagramSteam(state(1),state(2),state(3),state(4),0.8,0.88)
 end
 end
