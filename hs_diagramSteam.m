@@ -1,4 +1,4 @@
-function [ ] = hs_diagram(state1,state2,state3,state4,eta_siP, eta_siT)
+function [ ] = hs_diagramSteam(state1,state2,state3,state4,eta_siP, eta_siT)
 %function
 global state
 T=0.01:0.1:373.945;

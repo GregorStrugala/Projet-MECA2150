@@ -1,4 +1,4 @@
-function [ ] = Ts_diagram(state,eta_siP,eta_siT,nF,nR,deaeratorON,indexDeaerator)
+function [ ] = Ts_diagramSteam(state,eta_siP,eta_siT,nF,nR,deaeratorON,indexDeaerator)
 %Note : changer les noms des variables, peu coherent
 %mettre commentaires
 %Faire un beau graphe !
