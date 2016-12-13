@@ -80,6 +80,7 @@ for i=1:stateNumberSteam-1
     %     state(i).h = 0;
     %     state(i).s = 0;
     %     state(i).e = 0;
+end
 
 % Given parameters :
 stateSteam(1).T=Tcond;
@@ -219,5 +220,14 @@ plot(Qtransfer/Qtot, HRSGt)
 %% DIAGRAMS : TS and HS
 %Ts_diagramCombined(stateSteam,eta_siP,eta_siT)
 
+    function x = fgProp(prop,T,nM)
+        switch prop
+            case 'h'
+                base = [enthalpy('CO2',T) enthalpy('H2O',T) enthalpy('O2',T) enthalpy('N2',T)];
+            case 's'
+                base = [entropy('CO2',T) entropy('H2O',T) entropy('O2',T) entropy('N2',T)];
+        end
+        x = base*nM';
+    end
 end
 
