@@ -46,6 +46,7 @@ end
 % State calculations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 indexDeaerator=0;
 X=0;
+CCPP=0;
 %efficiencies
 eta_mec=0.98;
 eta_gen=0.945;
@@ -146,7 +147,7 @@ elseif  nR > 0 && nF == 0
     
     %We begin the cycle at the state (3)
     pOut = XSteam('psat_T',Tcond);
-    [state, Wmov,QreHeat,turbineLossEn,turbineLossEx]=reHeating(state,state(3),0.15,pOut,eta_siT,eta_mec,eta_gen,nF,nR);
+    [state, Wmov,QreHeat,turbineLossEn,turbineLossEx]=reHeating(state,state(3),0.15,pOut,eta_siT,eta_mec,eta_gen,nF,nR,CCPP);
     [state(1),Qc,condenserLossEn,condenserLossEx] = condenser(state(6));
     [state(2),Wop,pumpLossEn,pumpLossEx] = feedPump(state(1),steamPressure,eta_siP,eta_mec);
     [~,QsteamGen,~] = steamGenerator(state(2),Tmax,eta_gen);
@@ -205,7 +206,7 @@ else
         [state(8),WmovTurb,turbineLossEn,turbineLossEx]=turbine(state(3),state(8).p,eta_siT,eta_mec);
     else %case with re-heating
         pOut = XSteam('psat_T',Tcond);
-        [state,WmovTurb,QreHeat,turbineLossEn,turbineLossEx]=reHeating(state,state(3),0.18,pOut,eta_siT,eta_mec,eta_gen,nF,nR);
+        [state,WmovTurb,QreHeat,turbineLossEn,turbineLossEx]=reHeating(state,state(3),0.18,pOut,eta_siT,eta_mec,eta_gen,nF,nR,CCPP);
     end
     [state(9+2*nR),Qc,condenserLossEn,condenserLossEx]=condenser(state(8+2*nR));
     [state,WmovAdd,WopExtractPump,extractPumpLossEn,extractPumpLossEx,turbineBleedLossEn,turbineBleedLossEx,indexDeaerator]=feedHeating(state,steamPressure,eta_siP,eta_siT,eta_mec,nF,nR,dTpinch,deaeratorON); %to do energetic and exergetic analysis

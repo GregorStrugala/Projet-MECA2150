@@ -45,7 +45,7 @@ function [] = combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTap
 % State calculations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Pe=225e3;
 Ta=15;
-Tf=1400;
+Tf=1150;
 r=18;
 etaC=0.9;
 etaT=0.9;
@@ -53,8 +53,7 @@ kcc=0.95;
 kmec=0.015;
 fuel='CH4';
 %call to the gasTurbine function:
-[stateGas,mGas,nM,gasTurbMecLoss,gasTurbCombLossEx,gasTurbCompLossEx,gasTurbLossEx] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,'[]',fuel);
-stateGas(4).h
+[stateGas,mGas,nM,gasTurbMecLoss,gasTurbCombLossEx,gasTurbCompLossEx,gasTurbLossEx] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,'ts',fuel);
 %efficiencies
 eta_mec=0.98;
 %eta_gen=0.945;
@@ -132,7 +131,7 @@ LPsteamPressure=pGuess;
 
 %TOTAL steamflow :
 [stateSteam(1),~,condenserLossEn,condenserLossEx] = condenser(stateSteam(5));
-[stateSteam(2,1),Wop,feedPumpLossEn,feedPumpLossEx] = feedPump(stateSteam(1,1),LPsteamPressure,eta_siP,eta_mec);
+[stateSteam(2,1),Wop,feedPumpLossEn,feedPumpLossEx] = feedPump(stateSteam(1),LPsteamPressure,eta_siP,eta_mec);
 [stateSteam(2,2),QecoLP,dExEcoLP] = economizer(stateSteam(2,1));
 
 %HP steamflow :
@@ -253,7 +252,7 @@ chimneyLossEx=mGas*eGexhaust;
 dExSuperHP=abs(stateSteam(3).e-stateSteam(6,3).e);
 heatedFluidExergy=mSteamTot*(dExEcoLP)+mSteamLP*(dExEvapLP+dExSuperLP)+mSteamHP*(dExEcoHP+dExEvapHP+dExSuperHP);
 transLossEx=mGas*(stateGas(4).e-eGexhaust)-(heatedFluidExergy);
-lossEx=[mecLoss,condenserLossEx,rotorIrr,chimneyLossEx,transLossEx,gasTurbCombLossEx]
+lossEx=[mecLoss,condenserLossEx,rotorIrr,chimneyLossEx,transLossEx,gasTurbCombLossEx];
 
 figure(2);
 h = pie([PeGT,PeST,lossEx]);
@@ -289,7 +288,7 @@ hold on
 plot([0,QsteamTransfer(3)/QsteamTot, QsteamTransfer(5)/QsteamTot,1],Tgas);
 
 %% DIAGRAMS : TS and HS
-%Ts_diagramCombined(stateSteam,eta_siP,eta_siT)
+Ts_diagramCombined(stateSteam,eta_siP,eta_siT,'2P')
 
 %Function that calculates the enthalpy of gas for a given temperature
 function x = fgProp(prop,T,nM)
