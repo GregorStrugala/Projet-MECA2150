@@ -85,9 +85,9 @@ state(2) = compressor(state(1),r,etaC);
 % Expansion
 state(4) = turbine2(state(3),r,kcc,n,etaT);
 
-% switch back to degrees
+stateCelsius = state;
 for i=1:4
-    state(i).T = state(i).T - 273.15;
+    stateCelsius(i).T = state(i).T - 273.15;
 end
 
 R = 8.314472;
@@ -107,7 +107,7 @@ end
 % State table
 if  any(ismember('StateTable',diagrams))||all
     % Put states in a table
-    Array = (reshape(struct2array(state),5,stateNumber))';
+    Array = (reshape(struct2array(stateCelsius),5,stateNumber))';
     fprintf('\n')
     disp(array2table(Array,'VariableNames',{'p','T','h','s','e'}))
 end
@@ -116,10 +116,10 @@ if any(ismember({'ts','hs'},diagrams))||all
     Mair = 0.21*MO2 + 0.79*MN2;
     Ra = R/Mair; % gas constant of the air
     
-    T1 = state(1).T;    s1 = state(1).s;
-    T2 = state(2).T;    s2 = state(2).s;
-    T3 = state(3).T;    s3 = state(3).s;
-    T4 = state(4).T;    s4 = state(4).s;
+    T1 = state(1).T;    s1 = state(1).s;    Tc1 = stateCelsius(1).T;  
+    T2 = state(2).T;    s2 = state(2).s;    Tc2 = stateCelsius(2).T;
+    T3 = state(3).T;    s3 = state(3).s;    Tc3 = stateCelsius(3).T;
+    T4 = state(4).T;    s4 = state(4).s;    Tc4 = stateCelsius(4).T;
     
     T12 = T1:T2;
     s12 = AirProp('s',T12) - AirProp('s',273.15) - etaC*(AirProp('h',T12) -...
@@ -133,6 +133,7 @@ if any(ismember({'ts','hs'},diagrams))||all
     s23(1) = s2;
     s23(end) = s3;
     
+    
     T34 = T4:T3;
     s34 = nM*(hsBase('s',T34) - hsBase('s',273.15*ones(size(T34))))' - log(T34./T3).*(...
         nM*(hsBase('h',T3*ones(size(T34))) - hsBase('h',T34))' )./(etaT*(T3 - T34)) - Rg*log(r*kcc/1.01325);
@@ -140,12 +141,15 @@ end
 
 % (T,s) Diagram
 if any(ismember('ts',diagrams))||all
+    T12 = T12 - 273.15; % display temperature in °C
+    T23 = T23 - 273.15;
+    T34 = T34 - 273.15;
     figure
     plot(s12,T12,s23,T23,s34,T34)
     hold on
-    plot(s1,T1,'o',s2,T2,'o',s3,T3,'o',s4,T4,'o')
+    plot(s1,Tc1,'o',s2,Tc2,'o',s3,Tc3,'o',s4,Tc4,'o')
     str = {'1','2','3','4'};
-    text([s1 s2 s3 s4],[T1 T2 T3 T4],str,'HorizontalAlignment','right')
+    text([s1 s2 s3 s4],[Tc1 Tc2 Tc3 Tc4],str,'HorizontalAlignment','right')
     hold off
 end
 
