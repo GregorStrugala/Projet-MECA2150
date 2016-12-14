@@ -294,8 +294,8 @@ function start_PB_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 Pe = str2double(get(handles.Pe_ENTRY,'String'));
-Ta = str2double(get(handles.Ta_ENTRY,'String')) + 273.15;
-Tf = str2double(get(handles.Tf_ENTRY,'String')) + 273.15;
+Ta = str2double(get(handles.Ta_ENTRY,'String'));
+Tf = str2double(get(handles.Tf_ENTRY,'String'));
 r = str2double(get(handles.r_ENTRY,'String'));
 kcc = str2double(get(handles.kcc_ENTRY,'String'));
 etaC = str2double(get(handles.etaC_ENTRY,'String'));
@@ -306,8 +306,8 @@ fuel = str2double(get(handles.fuel_ENTRY,'String'));
 
 function [Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,fuel] = inputArgs(handles)
 Pe = str2double(get(handles.Pe_ENTRY,'String'));
-Ta = str2double(get(handles.Ta_ENTRY,'String')) + 273.15;
-Tf = str2double(get(handles.Tf_ENTRY,'String')) + 273.15;
+Ta = str2double(get(handles.Ta_ENTRY,'String'));
+Tf = str2double(get(handles.Tf_ENTRY,'String'));
 r = str2double(get(handles.r_ENTRY,'String'));
 kcc = str2double(get(handles.kcc_ENTRY,'String'));
 etaC = str2double(get(handles.etaC_ENTRY,'String'));

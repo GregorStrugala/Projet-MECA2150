@@ -85,6 +85,11 @@ state(2) = compressor(state(1),r,etaC);
 % Expansion
 state(4) = turbine2(state(3),r,kcc,n,etaT);
 
+% switch back to degrees
+for i=1:4
+    state(i).T = state(i).T - 273.15;
+end
+
 R = 8.314472;
 MCO2 = 44.008;
 MH2O = 18.01494;
