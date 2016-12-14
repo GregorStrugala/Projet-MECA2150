@@ -1,4 +1,4 @@
-function [stateO,Q] = superheater(stateI,Tmax,dTpinch)
+function [stateO,Q,dExSuper] = superheater(stateI,Tmax,dTpinch)
 %TO BE REWRITE CASE OF X IS NOT DEFINE !!!
 %CONDENSER computes the state variation after an isohtermal ad isobaric
 %condensation.
@@ -58,4 +58,7 @@ eO=exergy(stateO);
 stateO.e = eO;
 
 Q=stateO.h-stateI.h;
+
+%% Exergetic difference for the heated fluid
+dExSuper=eO-eI;
 end
