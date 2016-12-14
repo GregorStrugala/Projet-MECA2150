@@ -54,7 +54,10 @@ eta_siP=0.85;
 
 %temperature of condensation
 Tcond=Triver+deltaT;
-
+if nF==0
+    nF = 0;
+end
+disp(nR)
 if nR==0 && nF==0
     %% %%%%%%%%%%%%%%%%%%%%%% RANKINE-HIRN CYCLE  %%%%%%%%%%%%%%%%%%%%%%%%%
     stateNumber = 4;
