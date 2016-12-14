@@ -22,7 +22,7 @@ function varargout = steamGUI(varargin)
 
 % Edit the above text to modify the response to help steamGUI
 
-% Last Modified by GUIDE v2.5 14-Dec-2016 18:08:50
+% Last Modified by GUIDE v2.5 14-Dec-2016 20:49:32
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -71,3 +71,319 @@ function varargout = steamGUI_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
+
+function [Tambiant,Triver,deltaT,Tmax,dTpinch,TflueGas,Pe,nF,nR,deGazing,steamPressure,fuel,lambda] = inputArgs(hObject,eventdata,handles)
+Tambiant = str2double(get(handles.Tambiant_ET,'string'));
+Triver = str2double(get(handles.Triver_ET,'string'));
+deltaT = str2double(get(handles.deltaT_ET,'string'));
+Tmax = str2double(get(handles.Tmax_ET,'string'));
+dTpinch = str2double(get(handles.dTpinch_ET,'string'));
+TflueGas = str2double(get(handles.TflueGas_ET,'string'));
+Pe = str2double(get(handles.Pe_ET,'string'));
+nF = str2double(get(handles.nF_ET,'string'));
+nR = str2double(get(handles.nR_ET,'string'));
+deGazing = get(handles.deaerator_CB,'Value');
+steamPressure = str2double(get(handles.steamPressure_ET,'string'));
+fuel = get(handles.fuel_ET,'string');
+lambda = str2double(get(handles.lambda_ET,'string'));
+
+function Tambiant_ET_Callback(hObject, eventdata, handles)
+% hObject    handle to Tambiant_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of Tambiant_ET as text
+%        str2double(get(hObject,'String')) returns contents of Tambiant_ET as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function Tambiant_ET_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Tambiant_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function Triver_ET_Callback(hObject, eventdata, handles)
+% hObject    handle to Triver_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of Triver_ET as text
+%        str2double(get(hObject,'String')) returns contents of Triver_ET as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function Triver_ET_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Triver_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function Tmax_ET_Callback(hObject, eventdata, handles)
+% hObject    handle to Tmax_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of Tmax_ET as text
+%        str2double(get(hObject,'String')) returns contents of Tmax_ET as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function Tmax_ET_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Tmax_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function dTpinch_ET_Callback(hObject, eventdata, handles)
+% hObject    handle to dTpinch_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of dTpinch_ET as text
+%        str2double(get(hObject,'String')) returns contents of dTpinch_ET as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function dTpinch_ET_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to dTpinch_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function TflueGas_ET_Callback(hObject, eventdata, handles)
+% hObject    handle to TflueGas_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of TflueGas_ET as text
+%        str2double(get(hObject,'String')) returns contents of TflueGas_ET as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function TflueGas_ET_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to TflueGas_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function deltaT_ET_Callback(hObject, eventdata, handles)
+% hObject    handle to deltaT_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of deltaT_ET as text
+%        str2double(get(hObject,'String')) returns contents of deltaT_ET as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function deltaT_ET_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to deltaT_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function Pe_ET_Callback(hObject, eventdata, handles)
+% hObject    handle to Pe_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of Pe_ET as text
+%        str2double(get(hObject,'String')) returns contents of Pe_ET as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function Pe_ET_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Pe_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function nF_ET_Callback(hObject, eventdata, handles)
+% hObject    handle to nF_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of nF_ET as text
+%        str2double(get(hObject,'String')) returns contents of nF_ET as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function nF_ET_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to nF_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function nR_ET_Callback(hObject, eventdata, handles)
+% hObject    handle to nR_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of nR_ET as text
+%        str2double(get(hObject,'String')) returns contents of nR_ET as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function nR_ET_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to nR_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function steamPressure_ET_Callback(hObject, eventdata, handles)
+% hObject    handle to steamPressure_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of steamPressure_ET as text
+%        str2double(get(hObject,'String')) returns contents of steamPressure_ET as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function steamPressure_ET_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to steamPressure_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function fuel_ET_Callback(hObject, eventdata, handles)
+% hObject    handle to fuel_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of fuel_ET as text
+%        str2double(get(hObject,'String')) returns contents of fuel_ET as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function fuel_ET_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to fuel_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function lambda_ET_Callback(hObject, eventdata, handles)
+% hObject    handle to lambda_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of lambda_ET as text
+%        str2double(get(hObject,'String')) returns contents of lambda_ET as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function lambda_ET_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to lambda_ET (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in deaerator_CB.
+function deaerator_CB_Callback(hObject, eventdata, handles)
+% hObject    handle to deaerator_CB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of deaerator_CB
+
+
+% --- Executes on button press in ts_PB.
+function ts_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to ts_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Tambiant,Triver,deltaT,Tmax,dTpinch,TflueGas,Pe,nF,nR,deGazing,steamPressure,fuel,lambda] = inputArgs(hObject,eventdata,handles);
+steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,1,0)
+
+
+% --- Executes on button press in Pie_PB.
+function Pie_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to Pie_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Tambiant,Triver,deltaT,Tmax,dTpinch,TflueGas,Pe,nF,nR,deGazing,steamPressure,fuel,lambda] = inputArgs(hObject,eventdata,handles);
+steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,0,1)
