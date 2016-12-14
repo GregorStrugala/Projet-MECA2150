@@ -4,9 +4,9 @@ function [state,mg,nM,MecLoss,CombLoss,CompLoss,TurbLoss] = gasTurbine(Pe,Ta,Tf,
 %   and exergy charts for the given parameters.
 %   +-------- Mandatory parameters --------+ +--- Optionnal parameters ---+
 %   |                                      | |                            |
-%   |   Pe: power produced [W]             | |  etaC: polytropic          |
+%   |   Pe: power produced [kW]            | |  etaC: polytropic          |
 %   |   Ta: temperature of the input air,  | |        efficiency of the   |
-%   |       in Kelvin.                     | |        compressor          |
+%   |       in °C.                         | |        compressor          |
 %   |   Tf: Temperature at the output      | |  etaT: polytropic          |
 %   |       of the combustion chamber.     | |        efficiency of the   |
 %   |   r: compression pressure ratio.     | |        turbine             |
@@ -68,6 +68,8 @@ state(stateNumber).s = [];
 state(stateNumber).e = [];
 
 % provided data
+Ta = Ta + 273.15; % switch to Kelvin
+Tf = Tf + 273.15;
 state(1).p = 1; % 1 bar for the inlet air.
 state(1).T = Ta;
 state(1).h = AirProp('h',Ta) - AirProp('h',273.15);
