@@ -43,9 +43,9 @@ function [] = combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTap
 % end
 
 % State calculations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Pe=230e3;
-Ta=15+273;
-Tf=1400+273;
+Pe=225e3;
+Ta=15;
+Tf=1400;
 r=18;
 etaC=0.9;
 etaT=0.9;
@@ -53,11 +53,11 @@ kcc=0.95;
 kmec=0.015;
 fuel='CH4';
 %call to the gasTurbine function:
-[stateGas,mGas,nM,MecLoss,CombLoss,CompLoss,TurbLoss] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,'[]',fuel);
+[stateGas,mGas,nM,gasTurbMecLoss,gasTurbCombLossEx,gasTurbCompLossEx,gasTurbLossEx] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,'[]',fuel);
 stateGas(4).h
 %efficiencies
 eta_mec=0.98;
-eta_gen=0.945;
+%eta_gen=0.945;
 eta_siT=0.89;
 eta_siP=0.85;
 
@@ -95,7 +95,7 @@ stateSteam(6,3).p=HPsteamPressure;
 stateSteam(6,3).T=XSteam('Tsat_p',HPsteamPressure);
 
 %definition of the state(3) : complete!
-ToGasTurbine=stateGas(4).T-273.15
+ToGasTurbine=stateGas(4).T;
 stateSteam(3).T=ToGasTurbine-dTapproach;
 stateSteam(3).p=HPsteamPressure;
 stateSteam(3).x=nan;
@@ -105,7 +105,7 @@ stateSteam(3).e = exergy(stateSteam(3));
 
 %We begin the cycle at the state(3)
 %HP part:
-[stateSteam(5),Wmov,turbineLossEn,turbineLossEx] = turbine(stateSteam(3),stateSteam(1).p,eta_siT,eta_mec);
+[stateSteam(5),WmovHP,turbineLossEnHP,turbineLossExHP] = turbine(stateSteam(3),stateSteam(1).p,eta_siT,eta_mec);
 
 %define the LPstreamPressure: imposing the steam quality of the LP
 %expansion
@@ -131,55 +131,36 @@ end
 LPsteamPressure=pGuess;
 
 %TOTAL steamflow :
-[stateSteam(1),Qc,condenserLossEn,condenserLossEx] = condenser(stateSteam(5));
-[stateSteam(2,1),Wop,pumpLossEn,pumpLossEx] = feedPump(stateSteam(1,1),LPsteamPressure,eta_siP,eta_mec);
-[stateSteam(2,2),QecoLP] = economizer(stateSteam(2,1));
+[stateSteam(1),~,condenserLossEn,condenserLossEx] = condenser(stateSteam(5));
+[stateSteam(2,1),Wop,feedPumpLossEn,feedPumpLossEx] = feedPump(stateSteam(1,1),LPsteamPressure,eta_siP,eta_mec);
+[stateSteam(2,2),QecoLP,dExEcoLP] = economizer(stateSteam(2,1));
 
 %HP steamflow :
-[stateSteam(6,1),Wop,pumpLossEn,pumpLossEx] = feedPump(stateSteam(2,2),HPsteamPressure,eta_siP,eta_mec);
-[stateSteam(6,2),QecoHP] = economizer(stateSteam(6,1));
-[stateSteam(6,3),QevapHP] = evaporator(stateSteam(6,2));
+[stateSteam(6,1),WopHP,pumpLossEnHP,pumpLossExHP] = feedPump(stateSteam(2,2),HPsteamPressure,eta_siP,eta_mec);
+[stateSteam(6,2),QecoHP,dExEcoHP] = economizer(stateSteam(6,1));
+[stateSteam(6,3),QevapHP,dExEvapHP] = evaporator(stateSteam(6,2));
 QsupHP=stateSteam(3).h-stateSteam(6,3).h;
 %no superheater function because state(3) is already define !
 
 %LP steamflow :
-[stateSteam(2,3),QevapLP] = evaporator(stateSteam(2,2));
+[stateSteam(2,3),QevapLP,dExEvapLP] = evaporator(stateSteam(2,2));
 TmaxLP=stateSteam(6,2).T+dTpinch;
-[stateSteam(4),QsupLP] = superheater(stateSteam(2,3),TmaxLP,dTpinch);
+[stateSteam(4),QsupLP,dExSuperLP] = superheater(stateSteam(2,3),TmaxLP,dTpinch);
+[~,WmovLP,turbineLossEnLP,turbineLossExLP] = turbine(stateSteam(4),stateSteam(1).p,eta_siT,eta_mec);
+steamWmov=[WmovLP,WmovHP];
+steamTurbineLossEn=[turbineLossEnLP,turbineLossEnHP];
+steamTurbineLossEx=[turbineLossExLP,turbineLossExHP];
 
 % GAS STATE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% stateNumberGas = 4;
-% stateGas(stateNumberGas).p = []; %preallocation
-% stateGas(stateNumberGas).T = [];
-% stateGas(stateNumberGas).x = [];
-% stateGas(stateNumberGas).h = [];
-% stateGas(stateNumberGas).s = [];
-% stateGas(stateNumberGas).e = [];
-% 
-% for i=1:stateNumberSteam-1
-%     stateGas(i).p = [];
-%     stateGas(i).T = [];
-%     stateGas(i).x = [];
-%     stateGas(i).h = [];
-%     stateGas(i).s = [];
-%     stateGas(i).e = [];
-% end
 
+TgEcoLP=stateSteam(2,2).T+dTpinch;
+hGecoLP = fgProp('h',TgEcoLP+273.17,nM);
 
-TgEcoLP=stateSteam(2,2).T+dTpinch
-hGecoLP = fgProp('h',TgEcoLP+273.17,nM)
-
-TgEcoHP=stateSteam(6,2).T+dTpinch
-hGecoHP = fgProp('h',TgEcoHP+273.15,nM)
-
-
+TgEcoHP=stateSteam(6,2).T+dTpinch;
+hGecoHP = fgProp('h',TgEcoHP+273.15,nM);
 
 
 %% FLOW RATE CALCULATION
-% h4g=2000;
-% hgLP=700;
-% hgHP=1500;
-
 
 function F = flowRate(x)
 h2prime2=stateSteam(2,3).h;
@@ -188,7 +169,7 @@ h3=stateSteam(3).h;
 h4=stateSteam(4).h;
 h6=stateSteam(6,1).h;
 h6prime=stateSteam(6,2).h;
-h6prime2=stateSteam(6,3).h;
+%h6prime2=stateSteam(6,3).h;
 F=[mGas*(hGecoHP-hGecoLP)-(x(1)*(h2prime2-h2prime)+x(1)*(h4-h2prime2)+x(2)*(h6prime-h6));
    mGas*(stateGas(4).h-hGecoHP)-(x(2)*(h3-h6prime));];
 end
@@ -200,21 +181,20 @@ mSteamLP=x(1);
 mSteamHP=x(2);
 mSteamTot=mSteamLP+mSteamHP;
 
-%% EXHAUST TEMPERATURE CALCULATION
-%works for kelvin 
-hGexhaust=mSteamTot*(stateSteam(2,1).h-stateSteam(2,2).h)/mGas+hGecoLP;
-hGuess = fgProp('h',50+273.15,nM)
 
-Tsup=TgEcoLP+273.15
+%% EXHAUST TEMPERATURE CALCULATION
+hGexhaust=mSteamTot*(stateSteam(2,1).h-stateSteam(2,2).h)/mGas+hGecoLP;
+
+Tsup=TgEcoLP;
 Tinf=Ta;
 r = 1;
 n=1;
 nmax=50;
 while abs(r) > 0.01 && n<nmax
-    Tguess = (Tsup+Tinf)/2
-    fprintf('Tguess = %f\n',Tguess)
-    hGuess = fgProp('h',Tguess,nM)
-    r = hGexhaust-(hGuess)
+    Tguess = (Tsup+Tinf)/2;
+    %fprintf('Tguess = %f\n',Tguess)
+    hGuess = fgProp('h',Tguess+273.15,nM);
+    r = hGexhaust-(hGuess);
     if r < 0
         Tsup = Tguess;
     elseif r > 0
@@ -222,11 +202,14 @@ while abs(r) > 0.01 && n<nmax
     else
         break
     end
-    n=n+1
+    n=n+1;
 end
-Texhaust=Tguess-273.15;
+TgExhaust=Tguess;
+%sGexhaust = fgProp('s',TgExhaust+273.15,nM);
+eGexhaust=fgProp('e',TgExhaust+273.15,nM);
 
 %% stateSteam display in table
+
 % M = (reshape(struct2array(stateSteam),6,10))';
 % T = array2table(M,'VariableNames',{'p','T','x','h','s','e'});
 % length(struct2array(stateSteam))
@@ -245,34 +228,87 @@ Texhaust=Tguess-273.15;
 % disp(T)
 % fprintf('\n')
 % %fprintf('Wmcy = %f kJ/kg\n\n',Wmcy)
+%% PIE CHART %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% T-Q diagram
+%Energy pie chart
+mecLoss=gasTurbMecLoss+steamTurbineLossEn*x'+mSteamTot*feedPumpLossEn+mSteamHP*pumpLossEnHP;
+condenserLossEn=mSteamTot*condenserLossEn;
+chimneyLoss=mGas*abs(stateGas(1).h-hGexhaust);
+lossEn=[mecLoss,condenserLossEn,chimneyLoss];
+PeST=(abs(steamWmov*x')-(mSteamTot*Wop+mSteamHP*WopHP))*eta_mec;
+
+figure(1);
+h = pie([PeGT,PeST,lossEn]);
+hText = findobj(h,'Type','text'); % text object handles
+percentValues = get(hText,'String'); % percent values
+txt = {'GT effective power ';'ST effective power';'Mechanical losses ';'Condenser loss ';'Chimney loss '};
+combinedtxt = strcat(txt,percentValues);
+set(hText,{'String'},combinedtxt);
+legend(txt);
+
+%Exergy pie chart
+rotorIrr=gasTurbCompLossEx+gasTurbLossEx+steamTurbineLossEx*x'+mSteamTot*feedPumpLossEx+mSteamHP*pumpLossExHP;
+condenserLossEx=mSteamTot*condenserLossEx;
+chimneyLossEx=mGas*eGexhaust;
+dExSuperHP=abs(stateSteam(3).e-stateSteam(6,3).e);
+heatedFluidExergy=mSteamTot*(dExEcoLP)+mSteamLP*(dExEvapLP+dExSuperLP)+mSteamHP*(dExEcoHP+dExEvapHP+dExSuperHP);
+transLossEx=mGas*(stateGas(4).e-eGexhaust)-(heatedFluidExergy);
+lossEx=[mecLoss,condenserLossEx,rotorIrr,chimneyLossEx,transLossEx,gasTurbCombLossEx]
+
+figure(2);
+h = pie([PeGT,PeST,lossEx]);
+hText = findobj(h,'Type','text'); % text object handles
+percentValues = get(hText,'String'); % percent values
+txt = {'GT effective power ';'ST effective power';'Mechanical losses ';'Condenser loss ';'Rotor unit irreversibilities ';'Chimney loss ';'Heat transfer irreversibilities ';'Combustion irreversibilities '};
+combinedtxt = strcat(txt,percentValues);
+set(hText,{'String'},combinedtxt);
+legend(txt);
+
+%% T-Q diagram %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %HRSG_q=[stateSteam(3).h, stateSteam(6,3).h, stateSteam(6,2).h, stateSteam(4).h,stateSteam(2,3).h, stateSteam(2,2).h,stateSteam(2,1).h]
 mSteamHP=50;
 mSteamLP=8;
-Q=[0,mSteamHP*QsupHP,mSteamHP*QevapHP,mSteamHP*QecoHP+mSteamLP*QsupLP,mSteamLP*QevapLP,(mSteamLP+mSteamHP)*QecoLP];
-Qtot=sum(Q);
-for i=1:length(Q)
-    Qtransfer(i)=sum(Q(1:i));
+Qsteam=[0,mSteamHP*QsupHP,mSteamHP*QevapHP,mSteamHP*QecoHP+mSteamLP*QsupLP,mSteamLP*QevapLP,(mSteamLP+mSteamHP)*QecoLP];
+QsteamTot=sum(Qsteam);
+
+QsteamTransfer=zeros(1,length(Qsteam));
+for i=1:length(Qsteam)
+    QsteamTransfer(i)=sum(Qsteam(1:i));
 end
+
+Tgas=[stateGas(4).T,TgEcoHP,TgEcoLP,TgExhaust];
+% Qgas=[0,stateGas(4).h-hGecoHP,stateGas(4).h-hGecoLP,stateGas(4).h-hGexhaust];
+% QgasTot=sum(Qgas);
+% for i=1:length(Qgas)
+%      QgasTransfer(i)=sum(Qgas(1:i));
+% end
 HRSGt=[stateSteam(3).T, stateSteam(6,3).T, stateSteam(6,2).T,stateSteam(2,3).T, stateSteam(2,2).T,stateSteam(2,1).T];
-%plot(Qtransfer/Qtot, HRSGt);
+plot(QsteamTransfer/QsteamTot, HRSGt);
+hold on 
+plot([0,QsteamTransfer(3)/QsteamTot, QsteamTransfer(5)/QsteamTot,1],Tgas);
 
 %% DIAGRAMS : TS and HS
 %Ts_diagramCombined(stateSteam,eta_siP,eta_siT)
 
+%Function that calculates the enthalpy of gas for a given temperature
 function x = fgProp(prop,T,nM)
     T0 = 273.15;
         switch prop
             case 'h'
                 base = [enthalpy('CO2',T) enthalpy('H2O',T) enthalpy('O2',T) enthalpy('N2',T)];
                 base0 = [enthalpy('CO2',T0) enthalpy('H2O',T0) enthalpy('O2',T0) enthalpy('N2',T0)];
+                x = (base - base0)*nM';
             case 's'
                 base = [entropy('CO2',T) entropy('H2O',T) entropy('O2',T) entropy('N2',T)];
                 base0 = [entropy('CO2',T0) entropy('H2O',T0) entropy('O2',T0) entropy('N2',T0)];
+                x = (base - base0)*nM';
+            case 'e'
+                T0 = 273.15 + 15;
+                deltaH = fgProp('h',T,nM) - fgProp('h',T0,nM);
+                deltaS = fgProp('s',T,nM) - fgProp('s',T0,nM);
+                x = deltaH - T0*deltaS;
         end
-        x = (base - base0)*nM';
+        
     end
 end
-
-
