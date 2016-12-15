@@ -1,6 +1,6 @@
 function [stateCelsius,mg,nM,MecLoss,CombLoss,CompLoss,TurbLoss] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,diagrams,fuel)
 %GASTURBINE characterises a power cycle that uses a gas turbine.
-%   state = GASTURBINE(Pe,Ta,Tf,r,kcc,etaC,etaT) displays state, energy
+%   stateCelsius,mg,nM,MecLoss,ComLoss,CompLoss,TurbLoss = GASTURBINE(Pe,Ta,Tf,r,kcc,etaC,etaT) displays state, energy
 %   and exergy charts for the given parameters.
 %   +-------- Mandatory parameters --------+ +--- Optionnal parameters ---+
 %   |                                      | |                            |
