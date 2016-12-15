@@ -45,7 +45,7 @@ function [] = combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTap
 % State calculations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Pe=225e3;
 Ta=15;
-Tf=1150;
+Tf=1250;
 r=18;
 etaC=0.9;
 etaT=0.9;
@@ -53,7 +53,8 @@ kcc=0.95;
 kmec=0.015;
 fuel='CH4';
 %call to the gasTurbine function:
-[stateGas,mGas,nM,gasTurbMecLoss,gasTurbCombLossEx,gasTurbCompLossEx,gasTurbLossEx] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,'ts',fuel);
+[stateGas,mGas,nM,gasTurbMecLoss,gasTurbCombLossEx,gasTurbCompLossEx,gasTurbLossEx] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,{'StateTable'},fuel);
+
 %efficiencies
 eta_mec=0.98;
 %eta_gen=0.945;
@@ -177,9 +178,11 @@ x0 = [10,30];  % Make a starting guess at the solution
 [x,~] = fsolve(@flowRate,x0); % Call solver
 %[x,~] = fsolve(@(x) flowRate(x,state), x0);
 mSteamLP=x(1);
+fprintf('mSteamLP = %f\n',x(1))
 mSteamHP=x(2);
+fprintf('mSteamHP = %f\n',x(2))
 mSteamTot=mSteamLP+mSteamHP;
-
+fprintf('mSteamTot = %f\n',x(1)+x(2))
 
 %% EXHAUST TEMPERATURE CALCULATION
 hGexhaust=mSteamTot*(stateSteam(2,1).h-stateSteam(2,2).h)/mGas+hGecoLP;
@@ -288,8 +291,9 @@ hold on
 plot([0,QsteamTransfer(3)/QsteamTot, QsteamTransfer(5)/QsteamTot,1],Tgas);
 
 %% DIAGRAMS : TS and HS
-Ts_diagramCombined(stateSteam,eta_siP,eta_siT,'2P')
+%Ts_diagramCombined(stateSteam,eta_siP,eta_siT,'2P')
 
+%% FGPROP FUNCTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Function that calculates the enthalpy of gas for a given temperature
 function x = fgProp(prop,T,nM)
     T0 = 273.15;
@@ -308,6 +312,5 @@ function x = fgProp(prop,T,nM)
                 deltaS = fgProp('s',T,nM) - fgProp('s',T0,nM);
                 x = deltaH - T0*deltaS;
         end
-        
-    end
+end
 end

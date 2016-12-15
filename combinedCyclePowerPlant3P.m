@@ -53,8 +53,7 @@ kcc=0.95;
 kmec=0.015;
 fuel='CH4';
 %call to the gasTurbine function:
-[stateGas,mGas,nM,gasTurbMecLoss,gasTurbCombLossEx,gasTurbCompLossEx,gasTurbLossEx] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,'[]',fuel);
-stateGas(4).T
+[stateGas,mGas,nM,gasTurbMecLoss,gasTurbCombLossEx,gasTurbCompLossEx,gasTurbLossEx] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,{'[]'},fuel);
 %efficiencies
 eta_mec=0.954;
 eta_gen=0.945;
@@ -101,8 +100,8 @@ stateSteam(6).T=stateSteam(10,3).T;
 
 %definition of the state(3) : complete!
 %ToGasTurbine=stateGas(4).T
-ToGasTurbine=615;
-stateGas(4).T
+ToGasTurbine=stateGas(4).T;
+
 stateSteam(3).T=ToGasTurbine-dTapproach;
 stateSteam(5).T=stateSteam(3).T;
 stateSteam(3).p=HPsteamPressure;
@@ -141,7 +140,7 @@ while abs(r) > 0.01 && n<nmax
        end
     n=n+1;
 end
-IPsteamPressure=pGuessIP
+IPsteamPressure=pGuessIP;
 stateSteam(5).p=IPsteamPressure;
 stateSteam(5).h=XSteam('h_pT',IPsteamPressure,stateSteam(5).T);
 stateSteam(5).s=XSteam('s_pT',IPsteamPressure,stateSteam(5).T);
@@ -168,7 +167,7 @@ while abs(r) > 0.01 && n<nmax
        end
     n=n+1;
 end
-LPsteamPressure=pGuessLP
+LPsteamPressure=pGuessLP;
 stateSteam(6).p=LPsteamPressure;
 
 
@@ -205,30 +204,144 @@ TmaxLP=stateSteam(9,4).T+dTpinch;
 [stateSteam(6),QsupLP,dExSuperLP] = superheater(stateSteam(8),TmaxLP,dTpinch);
 %not necessary to compute out superheater for stateSteam(3). Already define
 
+% GAS STATE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%state
-state1=stateSteam(1)
-state21=stateSteam(2,1)
-state22=stateSteam(2,2)
-state23=stateSteam(2,3)
-state3=stateSteam(3)
-state41=stateSteam(4,1)
-state42=stateSteam(4,2)
-state5=stateSteam(5)
-state6=stateSteam(6)
-state7=stateSteam(7)
-state8=stateSteam(8)
-state91=stateSteam(9,1)
-state92=stateSteam(9,2)
-state93=stateSteam(9,3)
-state94=stateSteam(9,4)
-state101=stateSteam(10,1)
-state102=stateSteam(10,2)
-state103=stateSteam(10,3)
+TgEcoLP=stateSteam(2,2).T+dTpinch;
+hGecoLP = fgProp('h',TgEcoLP+273.17,nM);
 
+TgEcoIP=stateSteam(9,2).T+dTpinch;
+hGecoIP = fgProp('h',TgEcoIP+273.15,nM);
 
+TgEcoHP=stateSteam(10,2).T+dTpinch;
+hGecoHP = fgProp('h',TgEcoHP+273.15,nM);
 
+%% FLOW RATE CALCULATION
+
+function F = flowRate(x)
+    
+h2p2=stateSteam(2,3).h;
+h2p=stateSteam(2,2).h;
+h3=stateSteam(3).h;
+h4=stateSteam(4).h;
+h5=stateSteam(5).h;
+%h6=stateSteam(6,1).h;
+h6prime=stateSteam(6,2).h;
+h8=stateSteam(8).h;
+h9=stateSteam(9,1).h;
+h9p=stateSteam(9,2).h;
+h9p2=stateSteam(9,3).h;
+h94=stateSteam(9,4).h;
+h10=stateSteam(10,1).h;
+h10p=stateSteam(10,2).h;
+
+F=[mGas*(hGecoIP-hGecoLP)-((x(3)+x(2))*(h9p-h9)+x(1)*(h8-h2p));
+   mGas*(hGecoHP-hGecoIP)-(x(3)*(h10p-h10)+x(2)*(h94-h9p)+x(1)*(h6-h8));
+   mGas*(stateGas(4).h-hGecoHP)-(x(3)*(h3-h10p+h5-h4)+x(2)*(h5-h94));];
+end
+x0 = [10,10,70];  % Make a starting guess at the solution
+%options = optimoptions('fsolve','Display','iter'); % Option to display output
+[x,~] = fsolve(@flowRate,x0); % Call solver
+%[x,~] = fsolve(@(x) flowRate(x,state), x0);
+mSteamLP=x(1);
+fprintf('mSteamLP = %f\n',x(1))
+mSteamIP=x(2);
+fprintf('mSteamIP = %f\n',x(2))
+mSteamHP=x(3);
+fprintf('mSteamHP = %f\n',x(3))
+mSteamTot=mSteamLP+mSteamIP+mSteamHP;
+fprintf('mSteamTot = %f\n',x(1)+x(2)+x(3))
+
+%% EXHAUST TEMPERATURE CALCULATION
+hGexhaust=mSteamTot*(stateSteam(2,1).h-stateSteam(2,2).h)/mGas+hGecoLP;
+
+Tsup=TgEcoLP;
+Tinf=Ta;
+r = 1;
+n=1;
+nmax=50;
+while abs(r) > 0.01 && n<nmax
+    Tguess = (Tsup+Tinf)/2;
+    %fprintf('Tguess = %f\n',Tguess)
+    hGuess = fgProp('h',Tguess+273.15,nM);
+    r = hGexhaust-(hGuess);
+    if r < 0
+        Tsup = Tguess;
+    elseif r > 0
+        Tinf = Tguess;
+    else
+        break
+    end
+    n=n+1;
+end
+TgExhaust=Tguess;
+%sGexhaust = fgProp('s',TgExhaust+273.15,nM);
+eGexhaust=fgProp('e',TgExhaust+273.15,nM);
+
+%% T-Q diagram %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% %HRSG_q=[stateSteam(3).h, stateSteam(6,3).h, stateSteam(6,2).h, stateSteam(4).h,stateSteam(2,3).h, stateSteam(2,2).h,stateSteam(2,1).h]
+% mSteamHP=50;
+% mSteamLP=8;
+% Qsteam=[0,mSteamHP*QsupHP,mSteamHP*QevapHP,mSteamHP*QecoHP+mSteamLP*QsupLP,mSteamLP*QevapLP,(mSteamLP+mSteamHP)*QecoLP];
+% QsteamTot=sum(Qsteam);
+% 
+% QsteamTransfer=zeros(1,length(Qsteam));
+% for i=1:length(Qsteam)
+%     QsteamTransfer(i)=sum(Qsteam(1:i));
+% end
+% 
+% Tgas=[stateGas(4).T,TgEcoHP,TgEcoLP,TgExhaust];
+% % Qgas=[0,stateGas(4).h-hGecoHP,stateGas(4).h-hGecoLP,stateGas(4).h-hGexhaust];
+% % QgasTot=sum(Qgas);
+% % for i=1:length(Qgas)
+% %      QgasTransfer(i)=sum(Qgas(1:i));
+% % end
+% HRSGt=[stateSteam(3).T, stateSteam(6,3).T, stateSteam(6,2).T,stateSteam(2,3).T, stateSteam(2,2).T,stateSteam(2,1).T];
+% plot(QsteamTransfer/QsteamTot, HRSGt);
+% hold on 
+% plot([0,QsteamTransfer(3)/QsteamTot, QsteamTransfer(5)/QsteamTot,1],Tgas);
+
+% %state
+% state1=stateSteam(1)
+% state21=stateSteam(2,1)
+% state22=stateSteam(2,2)
+% state23=stateSteam(2,3)
+% state3=stateSteam(3)
+% state41=stateSteam(4,1)
+% state42=stateSteam(4,2)
+% state5=stateSteam(5)
+% state6=stateSteam(6)
+% state7=stateSteam(7)
+% state8=stateSteam(8)
+% state91=stateSteam(9,1)
+% state92=stateSteam(9,2)
+% state93=stateSteam(9,3)
+% state94=stateSteam(9,4)
+% state101=stateSteam(10,1)
+% state102=stateSteam(10,2)
+% state103=stateSteam(10,3)
 
 %% DIAGRAMS : TS and HS
-Ts_diagramCombined(stateSteam,eta_siP,eta_siT,'3P');
+%Ts_diagramCombined(stateSteam,eta_siP,eta_siT,'3P');
+
+%% FGPROP FUNCTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Function that calculates the enthalpy of gas for a given temperature
+function x = fgProp(prop,T,nM)
+    T0 = 273.15;
+        switch prop
+            case 'h'
+                base = [enthalpy('CO2',T) enthalpy('H2O',T) enthalpy('O2',T) enthalpy('N2',T)];
+                base0 = [enthalpy('CO2',T0) enthalpy('H2O',T0) enthalpy('O2',T0) enthalpy('N2',T0)];
+                x = (base - base0)*nM';
+            case 's'
+                base = [entropy('CO2',T) entropy('H2O',T) entropy('O2',T) entropy('N2',T)];
+                base0 = [entropy('CO2',T0) entropy('H2O',T0) entropy('O2',T0) entropy('N2',T0)];
+                x = (base - base0)*nM';
+            case 'e'
+                T0 = 273.15 + 15;
+                deltaH = fgProp('h',T,nM) - fgProp('h',T0,nM);
+                deltaS = fgProp('s',T,nM) - fgProp('s',T0,nM);
+                x = deltaH - T0*deltaS;
+        end
+end
 end
