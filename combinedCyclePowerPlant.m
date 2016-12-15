@@ -58,7 +58,7 @@ fuel='CH4';
 %efficiencies
 eta_mec=0.98;
 %eta_gen=0.945;
-eta_siT=0.89;
+eta_siT=0.85;
 eta_siP=0.85;
 
 %temperature of condensation
@@ -249,7 +249,7 @@ set(hText,{'String'},combinedtxt);
 legend(txt);
 
 %Exergy pie chart
-rotorIrr=gasTurbCompLossEx+gasTurbLossEx+steamTurbineLossEx*x'+mSteamTot*feedPumpLossEx+mSteamHP*pumpLossExHP;
+rotorIrr=gasTurbCompLossEx+gasTurbLossEx+steamTurbineLossEx*x'+mSteamTot*feedPumpLossEx+mSteamHP*pumpLossExHP
 condenserLossEx=mSteamTot*condenserLossEx;
 chimneyLossEx=mGas*eGexhaust;
 dExSuperHP=abs(stateSteam(3).e-stateSteam(6,3).e);
@@ -269,9 +269,8 @@ legend(txt);
 %% T-Q diagram %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %HRSG_q=[stateSteam(3).h, stateSteam(6,3).h, stateSteam(6,2).h, stateSteam(4).h,stateSteam(2,3).h, stateSteam(2,2).h,stateSteam(2,1).h]
-mSteamHP=50;
-mSteamLP=8;
-Qsteam=[0,mSteamHP*QsupHP,mSteamHP*QevapHP,mSteamHP*QecoHP+mSteamLP*QsupLP,mSteamLP*QevapLP,(mSteamLP+mSteamHP)*QecoLP];
+
+Qsteam=[0,mSteamHP*QsupHP,mSteamHP*QevapHP,mSteamHP*QecoHP+mSteamLP*QsupLP,mSteamLP*QevapLP,(mSteamTot)*QecoLP];
 QsteamTot=sum(Qsteam);
 
 QsteamTransfer=zeros(1,length(Qsteam));
