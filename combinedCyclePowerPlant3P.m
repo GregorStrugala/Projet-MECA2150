@@ -1,4 +1,4 @@
-function [] = combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,PeGT,diagrams)
+function [] = combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,PeGT,steamDiagrams,gasDiagrams)
 close all;
 %COMBINEDCYCLEPOWERPLANT3P characterises a power combined cycle with 3
 %pressure levels
@@ -68,7 +68,7 @@ kcc=0.95;
 kmec=0.015;
 
 %call to the gasTurbine function:
-[stateGas,mGas,nM,GTmecLoss,GTcombLossEx,GTcompLossEx,GTturbLossEx] = gasTurbine(PeGT,Ta,Tf,r,kcc,etaC,etaT,kmec,{'[]'},fuel);
+[stateGas,mGas,nM,GTmecLoss,GTcombLossEx,GTcompLossEx,GTturbLossEx] = gasTurbine(PeGT,Ta,Tf,r,kcc,etaC,etaT,kmec,gasDiagrams,fuel);
 
 %efficiencies
 eta_mec=0.954;
@@ -308,14 +308,14 @@ TgExhaust=Tguess;
 eGexhaust=fgProp('e',TgExhaust+273.15,nM);
 
 %% Table & Diagrams %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if strcmp(diagrams,'all')
+if strcmp(steamDiagrams,'all')
     all = 1;
 else
     all = 0;
 end
 
 % State table
-if any(ismember('StateTable',diagrams))||all
+if any(ismember('StateTable',steamDiagrams))||all
 M = (reshape(struct2array(stateSteam),6,18))';
 T = array2table(M,'VariableNames',{'p','T','x','h','s','e'});
 disp(T)
@@ -324,7 +324,7 @@ end
 
 
 % T-Q diagram 
-if any(ismember('tq',diagrams))||all
+if any(ismember('tq',steamDiagrams))||all
 % %HRSG_q=[stateSteam(3).h, stateSteam(6,3).h, stateSteam(6,2).h, stateSteam(4).h,stateSteam(2,3).h, stateSteam(2,2).h,stateSteam(2,1).h]
 % mSteamHP=80;
 % mSteamIP=12;
@@ -339,6 +339,7 @@ Tgas=[stateGas(4).T,TgEcoHP,TgEcoIP,TgEcoLP,TgExhaust];
 HRSGt=[stateSteam(3).T, stateSteam(10,3).T, stateSteam(10,2).T,stateSteam(9,3).T, stateSteam(9,2).T,stateSteam(2,3).T,stateSteam(2,2).T,stateSteam(2,1).T];
 
 %normalized T-Q diagram
+figure
 plot(QsteamTransfer/QsteamTot, HRSGt);
 hold on 
 plot([0,QsteamTransfer(3)/QsteamTot, QsteamTransfer(5)/QsteamTot,QsteamTransfer(7)/QsteamTot,1],Tgas);
@@ -351,19 +352,20 @@ end
 
 
 % T-S Diagram
-if any(ismember('ts',diagrams))||all
+if any(ismember('ts',steamDiagrams))||all
+    figure
 Ts_diagramCombined(stateSteam,eta_siP,eta_siT,'3P');
 end
 
 % H-S Diagram
-if any(ismember('hs',diagrams))||all
-    
+if any(ismember('hs',steamDiagrams))||all
+    figure
 end
 
 %% Energetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Energy pie chart
-if any(ismember('EnPie',diagrams))||all
+if any(ismember('EnPie',steamDiagrams))||all
 %definition of losses
 mecLoss=GTmecLoss+steamTurbineLossEn*x'+mSteamTot*feedPumpLossEn+(mSteamTot-mSteamLP)*pumpLossEnIP+mSteamHP*pumpLossEnHP;
 condenserLossEn=mSteamTot*condenserLossEn;
@@ -371,7 +373,7 @@ chimneyLoss=mGas*abs(stateGas(1).h-hGexhaust);
 lossEn=[mecLoss,condenserLossEn,chimneyLoss];
 PeST=(abs(steamWmov*x'-(mSteamTot*Wop+(mSteamTot-mSteamLP)*WopIP+mSteamHP*WopHP)))*eta_mec;
 %pie
-figure(1);
+figure
 h = pie([PeGT,PeST,lossEn]);
 hText = findobj(h,'Type','text'); % text object handles
 percentValues = get(hText,'String'); % percent values
@@ -384,7 +386,7 @@ end
 %% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Exergy pie chart
-if any(ismember('ExPie',diagrams))||all
+if any(ismember('ExPie',steamDiagrams))||all
 %definition of lossex
 rotorIrr=GTcompLossEx+GTturbLossEx+steamTurbineLossEx*x'+mSteamTot*feedPumpLossEx+(mSteamTot-mSteamLP)*pumpLossExIP+mSteamHP*pumpLossExHP;
 condenserLossEx=mSteamTot*condenserLossEx;
@@ -396,7 +398,9 @@ dExSupHP=abs(stateSteam(3).e-stateSteam(10,3).e);
 heatedFluidExergy=mSteamTot*(dExEcoLP)+(mSteamTot-mSteamLP)*(dExEcoIP)+mSteamLP*(dExEvapLP+dExSupLP1+dExSupLP2)+mSteamIP*(dExEvapIP+dExSupIP+dExReHeatIP)+mSteamHP*(dExEcoHP+dExEvapHP+dExSupHP+dExReHeatHP);
 transLossEx=mGas*(stateGas(4).e-eGexhaust)-(heatedFluidExergy);
 lossEx=[mecLoss,condenserLossEx,rotorIrr,chimneyLossEx,transLossEx,GTcombLossEx];
-figure(2);
+
+% pie
+figure
 h = pie([PeGT,PeST,lossEx]);
 hText = findobj(h,'Type','text'); % text object handles
 percentValues = get(hText,'String'); % percent values
