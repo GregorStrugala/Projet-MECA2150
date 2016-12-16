@@ -22,7 +22,7 @@ function varargout = steamGUI(varargin)
 
 % Edit the above text to modify the response to help steamGUI
 
-% Last Modified by GUIDE v2.5 14-Dec-2016 20:49:32
+% Last Modified by GUIDE v2.5 16-Dec-2016 15:35:52
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -387,3 +387,12 @@ function Pie_PB_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 [Tambiant,Triver,deltaT,Tmax,dTpinch,TflueGas,Pe,nF,nR,deGazing,steamPressure,fuel,lambda] = inputArgs(hObject,eventdata,handles);
 steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,0,1)
+
+
+% --- Executes on button press in pushbutton6.
+function pushbutton6_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+main
+close steamGUI

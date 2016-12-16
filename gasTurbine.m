@@ -170,7 +170,6 @@ h4 = state(4).h;
 Wmov = h3 - h4;
 Wop = h2 - h1;
 ma = Pe/( (1 - kmec)*Wmov*(h2 + LHV/(lambda*ma1))/h3 - (1 + kmec)*Wop ); % CHECK
-disp(lambda*ma1)
 mc = ma/(lambda*ma1);
 mg = ma + mc;
 Pprim = mc*LHV;
