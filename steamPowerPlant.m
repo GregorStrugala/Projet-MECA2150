@@ -95,8 +95,12 @@ if nR==0 && nF==0
     [~,Qh,steamGenLossEn] = steamGenerator(state(2),Tmax,eta_gen);
     
     % Warning message %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if isnan(state(4).x)||state(4).x<0.88
-        warning('Warning. The quality must be between x=[0.88, 1] to have a better efficiency.')
+    if state(4).x<0.88
+        warning('Warning. The quality must be between x > 0.88 to not destroy turbine blades. You should decrease the steam pressure at the inlet of the turbine.')
+        diagrams={'[]'};
+    elseif isnan(state(4).x)
+         warning('Warning. The quality must be between x < 1 to have a better efficiency. You should increase the steam pressure at the inlet of the turbine.')
+         diagrams={'[]'};
     end
     
     %determination of the work over a cycle
@@ -150,8 +154,12 @@ elseif  nR > 0 && nF == 0
     [~,QsteamGen,~] = steamGenerator(state(2),Tmax,eta_gen);
     
     % Warning message %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if isnan(state(6).x)||state(6).x<0.88
-        warning('Warning. The quality must be between x=[0.88, 1] to have a better efficiency.')
+    if state(4).x<0.88
+        warning('Warning. The quality must be between x > 0.88 to not destroy turbine blades. You should decrease the steam pressure at the inlet of the turbine.')
+        diagrams={'[]'};
+    elseif isnan(state(4).x)
+         warning('Warning. The quality must be between x < 1 to have a better efficiency. You should increase the steam pressure at the inlet of the turbine.')
+         diagrams={'[]'};
     end
     
     %TO BE MODIFIED !!!
@@ -212,8 +220,12 @@ else
     [X]=bleedFraction(state,nF,nR,indexDeaerator);
     
     % Warning message %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if isnan(state(8+2*nR).x)||state(8+2*nR).x<0.88
-        warning('Warning. The quality must be between x=[0.88, 1] to have a better efficiency.')
+    if state(4).x<0.88
+        warning('Warning. The quality must be between x > 0.88 to not destroy turbine blades. You should decrease the steam pressure at the inlet of the turbine.')
+        diagrams={'[]'};
+    elseif isnan(state(4).x)
+         warning('Warning. The quality must be between x < 1 to have a better efficiency. You should increase the steam pressure at the inlet of the turbine.')
+         diagrams={'[]'};
     end
     
     if indexDeaerator~=0
