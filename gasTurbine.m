@@ -144,7 +144,7 @@ if any(ismember('ts',diagrams))||all
     T12 = T12 - 273.15; % display temperature in °C
     T23 = T23 - 273.15;
     T34 = T34 - 273.15;
-    figure
+    %figure
     plot(s12,T12,s23,T23,s34,T34)
     hold on
     plot(s1,Tc1,'o',s2,Tc2,'o',s3,Tc3,'o',s4,Tc4,'o')

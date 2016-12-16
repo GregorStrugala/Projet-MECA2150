@@ -147,13 +147,13 @@ while abs(r) > 0.01 && n<nmax
     h5=XSteam('h_pT',pGuessIP,stateSteam(5).T);
     h7s=XSteam('h_ps',stateSteam(7).p,XSteam('s_pT',pGuessIP,stateSteam(5).T));
     r=h7-(h5-eta_siT*(h5-h7s));
-       if r > 0
+    if r > 0
         pSupIP = pGuessIP;
     elseif r < 0
         pInfIP = pGuessIP;
     else
         break
-       end
+    end
     n=n+1;
 end
 IPsteamPressure=pGuessIP;
@@ -174,13 +174,13 @@ while abs(r) > 0.01 && n<nmax
     h6=XSteam('h_pT',pGuessLP,stateSteam(6).T);
     h6s=XSteam('h_ps',pGuessLP,stateSteam(5).s);
     r=h6-(h5-eta_siT*(h5-h6s));
-       if r < 0
+    if r < 0
         pSupLP = pGuessLP;
     elseif r > 0
         pInfLP = pGuessLP;
     else
         break
-       end
+    end
     n=n+1;
 end
 LPsteamPressure=pGuessLP;
@@ -251,22 +251,22 @@ hGecoHP = fgProp('h',TgEcoHP+273.15,nM);
 
 %% FLOW RATE CALCULATION
 
-function F = flowRate(x)
-h2p=stateSteam(2,2).h;
-h3=stateSteam(3).h;
-h4=stateSteam(4).h;
-h5=stateSteam(5).h;
-h8=stateSteam(8).h;
-h9=stateSteam(9,1).h;
-h9p=stateSteam(9,2).h;
-h94=stateSteam(9,4).h;
-h10=stateSteam(10,1).h;
-h10p=stateSteam(10,2).h;
-
-F=[mGas*(hGecoIP-hGecoLP)-((x(3)+x(2))*(h9p-h9)+x(1)*(h8-h2p));
-   mGas*(hGecoHP-hGecoIP)-(x(3)*(h10p-h10)+x(2)*(h94-h9p)+x(1)*(h6-h8));
-   mGas*(stateGas(4).h-hGecoHP)-(x(3)*(h3-h10p+h5-h4)+x(2)*(h5-h94));];
-end
+    function F = flowRate(x)
+        h2p=stateSteam(2,2).h;
+        h3=stateSteam(3).h;
+        h4=stateSteam(4).h;
+        h5=stateSteam(5).h;
+        h8=stateSteam(8).h;
+        h9=stateSteam(9,1).h;
+        h9p=stateSteam(9,2).h;
+        h94=stateSteam(9,4).h;
+        h10=stateSteam(10,1).h;
+        h10p=stateSteam(10,2).h;
+        
+        F=[mGas*(hGecoIP-hGecoLP)-((x(3)+x(2))*(h9p-h9)+x(1)*(h8-h2p));
+            mGas*(hGecoHP-hGecoIP)-(x(3)*(h10p-h10)+x(2)*(h94-h9p)+x(1)*(h6-h8));
+            mGas*(stateGas(4).h-hGecoHP)-(x(3)*(h3-h10p+h5-h4)+x(2)*(h5-h94));];
+    end
 
 x0 = [10,10,70];  % Make a starting guess at the solution
 %options = optimoptions('fsolve','Display','iter'); % Option to display output
@@ -316,45 +316,45 @@ end
 
 % State table
 if any(ismember('StateTable',steamDiagrams))||all
-M = (reshape(struct2array(stateSteam),6,18))';
-T = array2table(M,'VariableNames',{'p','T','x','h','s','e'});
-disp(T)
-fprintf('\n')
+    M = (reshape(struct2array(stateSteam),6,18))';
+    T = array2table(M,'VariableNames',{'p','T','x','h','s','e'});
+    disp(T)
+    fprintf('\n')
 end
 
 
-% T-Q diagram 
+% T-Q diagram
 if any(ismember('tq',steamDiagrams))||all
-% %HRSG_q=[stateSteam(3).h, stateSteam(6,3).h, stateSteam(6,2).h, stateSteam(4).h,stateSteam(2,3).h, stateSteam(2,2).h,stateSteam(2,1).h]
-% mSteamHP=80;
-% mSteamIP=12;
-% mSteamLP=10;
-Qsteam=[0,(mSteamHP*(QsupHP+QreHeatHP)+mSteamIP*(QreHeatIP)),(mSteamHP*QevapHP),(mSteamLP*QsupLP2+mSteamIP*QsupIP+mSteamHP*QecoHP),(mSteamIP*QevapIP),((mSteamTot-mSteamLP)*QecoIP+mSteamLP*QsupLP1),(mSteamLP*QevapLP),(mSteamTot*QecoLP)];
-QsteamTot=sum(Qsteam);
-QsteamTransfer=zeros(1,length(Qsteam));
-for i=1:length(Qsteam)
-    QsteamTransfer(i)=sum(Qsteam(1:i));
-end
-Tgas=[stateGas(4).T,TgEcoHP,TgEcoIP,TgEcoLP,TgExhaust];
-HRSGt=[stateSteam(3).T, stateSteam(10,3).T, stateSteam(10,2).T,stateSteam(9,3).T, stateSteam(9,2).T,stateSteam(2,3).T,stateSteam(2,2).T,stateSteam(2,1).T];
-
-%normalized T-Q diagram
-figure
-plot(QsteamTransfer/QsteamTot, HRSGt);
-hold on 
-plot([0,QsteamTransfer(3)/QsteamTot, QsteamTransfer(5)/QsteamTot,QsteamTransfer(7)/QsteamTot,1],Tgas);
-
-%no normalized T-Q diagram
-% plot(QsteamTransfer, HRSGt);
-% hold on 
-% plot([0,QsteamTransfer(3), QsteamTransfer(5),QsteamTransfer(7),QsteamTransfer(8)],Tgas);
+    % %HRSG_q=[stateSteam(3).h, stateSteam(6,3).h, stateSteam(6,2).h, stateSteam(4).h,stateSteam(2,3).h, stateSteam(2,2).h,stateSteam(2,1).h]
+    % mSteamHP=80;
+    % mSteamIP=12;
+    % mSteamLP=10;
+    Qsteam=[0,(mSteamHP*(QsupHP+QreHeatHP)+mSteamIP*(QreHeatIP)),(mSteamHP*QevapHP),(mSteamLP*QsupLP2+mSteamIP*QsupIP+mSteamHP*QecoHP),(mSteamIP*QevapIP),((mSteamTot-mSteamLP)*QecoIP+mSteamLP*QsupLP1),(mSteamLP*QevapLP),(mSteamTot*QecoLP)];
+    QsteamTot=sum(Qsteam);
+    QsteamTransfer=zeros(1,length(Qsteam));
+    for i=1:length(Qsteam)
+        QsteamTransfer(i)=sum(Qsteam(1:i));
+    end
+    Tgas=[stateGas(4).T,TgEcoHP,TgEcoIP,TgEcoLP,TgExhaust];
+    HRSGt=[stateSteam(3).T, stateSteam(10,3).T, stateSteam(10,2).T,stateSteam(9,3).T, stateSteam(9,2).T,stateSteam(2,3).T,stateSteam(2,2).T,stateSteam(2,1).T];
+    
+    %normalized T-Q diagram
+    figure
+    plot(QsteamTransfer/QsteamTot, HRSGt);
+    hold on
+    plot([0,QsteamTransfer(3)/QsteamTot, QsteamTransfer(5)/QsteamTot,QsteamTransfer(7)/QsteamTot,1],Tgas);
+    
+    %no normalized T-Q diagram
+    % plot(QsteamTransfer, HRSGt);
+    % hold on
+    % plot([0,QsteamTransfer(3), QsteamTransfer(5),QsteamTransfer(7),QsteamTransfer(8)],Tgas);
 end
 
 
 % T-S Diagram
 if any(ismember('ts',steamDiagrams))||all
-    figure
-Ts_diagramCombined(stateSteam,eta_siP,eta_siT,'3P');
+    %figure
+    Ts_diagramCombined(stateSteam,eta_siP,eta_siT,'3P');
 end
 
 % H-S Diagram
@@ -366,54 +366,54 @@ end
 
 %Energy pie chart
 if any(ismember('EnPie',steamDiagrams))||all
-%definition of losses
-mecLoss=GTmecLoss+steamTurbineLossEn*x'+mSteamTot*feedPumpLossEn+(mSteamTot-mSteamLP)*pumpLossEnIP+mSteamHP*pumpLossEnHP;
-condenserLossEn=mSteamTot*condenserLossEn;
-chimneyLoss=mGas*abs(stateGas(1).h-hGexhaust);
-lossEn=[mecLoss,condenserLossEn,chimneyLoss];
-PeST=(abs(steamWmov*x'-(mSteamTot*Wop+(mSteamTot-mSteamLP)*WopIP+mSteamHP*WopHP)))*eta_mec;
-%pie
-figure
-h = pie([PeGT,PeST,lossEn]);
-hText = findobj(h,'Type','text'); % text object handles
-percentValues = get(hText,'String'); % percent values
-txt = {'GT effective power ';'ST effective power';'Mechanical losses ';'Condenser loss ';'Chimney loss '};
-combinedtxt = strcat(txt,percentValues);
-set(hText,{'String'},combinedtxt);
-legend(txt);
+    %definition of losses
+    mecLoss=GTmecLoss+steamTurbineLossEn*x'+mSteamTot*feedPumpLossEn+(mSteamTot-mSteamLP)*pumpLossEnIP+mSteamHP*pumpLossEnHP;
+    condenserLossEn=mSteamTot*condenserLossEn;
+    chimneyLoss=mGas*abs(stateGas(1).h-hGexhaust);
+    lossEn=[mecLoss,condenserLossEn,chimneyLoss];
+    PeST=(abs(steamWmov*x'-(mSteamTot*Wop+(mSteamTot-mSteamLP)*WopIP+mSteamHP*WopHP)))*eta_mec;
+    %pie
+    figure
+    h = pie([PeGT,PeST,lossEn]);
+    hText = findobj(h,'Type','text'); % text object handles
+    percentValues = get(hText,'String'); % percent values
+    txt = {'GT effective power ';'ST effective power';'Mechanical losses ';'Condenser loss ';'Chimney loss '};
+    combinedtxt = strcat(txt,percentValues);
+    set(hText,{'String'},combinedtxt);
+    legend(txt);
 end
 
 %% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Exergy pie chart
 if any(ismember('ExPie',steamDiagrams))||all
-%definition of lossex
-rotorIrr=GTcompLossEx+GTturbLossEx+steamTurbineLossEx*x'+mSteamTot*feedPumpLossEx+(mSteamTot-mSteamLP)*pumpLossExIP+mSteamHP*pumpLossExHP;
-condenserLossEx=mSteamTot*condenserLossEx;
-chimneyLossEx=mGas*eGexhaust;
-
-dExReHeatIP=abs(stateSteam(5).e-stateSteam(9,4).e);
-dExReHeatHP=abs(stateSteam(6).e-stateSteam(4).e);
-dExSupHP=abs(stateSteam(3).e-stateSteam(10,3).e);
-heatedFluidExergy=mSteamTot*(dExEcoLP)+(mSteamTot-mSteamLP)*(dExEcoIP)+mSteamLP*(dExEvapLP+dExSupLP1+dExSupLP2)+mSteamIP*(dExEvapIP+dExSupIP+dExReHeatIP)+mSteamHP*(dExEcoHP+dExEvapHP+dExSupHP+dExReHeatHP);
-transLossEx=mGas*(stateGas(4).e-eGexhaust)-(heatedFluidExergy);
-lossEx=[mecLoss,condenserLossEx,rotorIrr,chimneyLossEx,transLossEx,GTcombLossEx];
-
-% pie
-figure
-h = pie([PeGT,PeST,lossEx]);
-hText = findobj(h,'Type','text'); % text object handles
-percentValues = get(hText,'String'); % percent values
-txt = {'GT effective power ';'ST effective power';'Mechanical losses ';'Condenser loss ';'Rotor unit irreversibilities ';'Chimney loss ';'Heat transfer irreversibilities ';'Combustion irreversibilities '};
-combinedtxt = strcat(txt,percentValues);
-set(hText,{'String'},combinedtxt);
-legend(txt);
+    %definition of lossex
+    rotorIrr=GTcompLossEx+GTturbLossEx+steamTurbineLossEx*x'+mSteamTot*feedPumpLossEx+(mSteamTot-mSteamLP)*pumpLossExIP+mSteamHP*pumpLossExHP;
+    condenserLossEx=mSteamTot*condenserLossEx;
+    chimneyLossEx=mGas*eGexhaust;
+    
+    dExReHeatIP=abs(stateSteam(5).e-stateSteam(9,4).e);
+    dExReHeatHP=abs(stateSteam(6).e-stateSteam(4).e);
+    dExSupHP=abs(stateSteam(3).e-stateSteam(10,3).e);
+    heatedFluidExergy=mSteamTot*(dExEcoLP)+(mSteamTot-mSteamLP)*(dExEcoIP)+mSteamLP*(dExEvapLP+dExSupLP1+dExSupLP2)+mSteamIP*(dExEvapIP+dExSupIP+dExReHeatIP)+mSteamHP*(dExEcoHP+dExEvapHP+dExSupHP+dExReHeatHP);
+    transLossEx=mGas*(stateGas(4).e-eGexhaust)-(heatedFluidExergy);
+    lossEx=[mecLoss,condenserLossEx,rotorIrr,chimneyLossEx,transLossEx,GTcombLossEx];
+    
+    % pie
+    figure
+    h = pie([PeGT,PeST,lossEx]);
+    hText = findobj(h,'Type','text'); % text object handles
+    percentValues = get(hText,'String'); % percent values
+    txt = {'GT effective power ';'ST effective power';'Mechanical losses ';'Condenser loss ';'Rotor unit irreversibilities ';'Chimney loss ';'Heat transfer irreversibilities ';'Combustion irreversibilities '};
+    combinedtxt = strcat(txt,percentValues);
+    set(hText,{'String'},combinedtxt);
+    legend(txt);
 end
 
 %% FGPROP FUNCTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Function that calculates the enthalpy of gas for a given temperature
-function x = fgProp(prop,T,nM)
-    T0 = 273.15;
+    function x = fgProp(prop,T,nM)
+        T0 = 273.15;
         switch prop
             case 'h'
                 base = [enthalpy('CO2',T) enthalpy('H2O',T) enthalpy('O2',T) enthalpy('N2',T)];
@@ -429,7 +429,7 @@ function x = fgProp(prop,T,nM)
                 deltaS = fgProp('s',T,nM) - fgProp('s',T0,nM);
                 x = deltaH - T0*deltaS;
         end
-end
+    end
 end
 
 % %state
