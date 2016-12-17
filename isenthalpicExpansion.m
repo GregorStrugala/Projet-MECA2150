@@ -5,6 +5,7 @@ p=linspace(stateLP.p,stateHP.p,length(T));
 p=fliplr(p);
 T=fliplr(T);
 s=zeros(1,length(p));
+h=ones(1,length(p));
 for i=1:length(p)
     if i==1
         s(i)=stateHP.s;
@@ -14,5 +15,5 @@ for i=1:length(p)
      s(i)=XSteam('s_ph',p(i),stateHP.h);
     end
  end
-h=stateHP.h;
+h=stateHP.h*h;
 end
