@@ -229,20 +229,20 @@ end
 
 % T-Q diagram
 
-    %HRSG_q=[stateSteam(3).h, stateSteam(6,3).h, stateSteam(6,2).h, stateSteam(4).h,stateSteam(2,3).h, stateSteam(2,2).h,stateSteam(2,1).h]
-    Qsteam=[0,mSteamHP*QsupHP,mSteamHP*QevapHP,mSteamHP*QecoHP+mSteamLP*QsupLP,mSteamLP*QevapLP,(mSteamTot)*QecoLP];
-    QsteamTot=sum(Qsteam)
-    QsteamTot2=mSteamHP*(stateSteam(3).h-stateSteam(2,1).h)+mSteamLP*(stateSteam(4).h-stateSteam(2,1).h)
-    
-    QsteamTransfer=zeros(1,length(Qsteam));
-    for i=1:length(Qsteam)
-        QsteamTransfer(i)=sum(Qsteam(1:i));
-    end
-    
-    Tgas=[stateGas(4).T,TgEcoHP,TgEcoLP,TgExhaust];
-    HRSGt=[stateSteam(3).T, stateSteam(6,3).T, stateSteam(6,2).T,stateSteam(2,3).T, stateSteam(2,2).T,stateSteam(2,1).T];
-    if any(ismember('tq',steamDiagrams))||all
-    %figure
+%HRSG_q=[stateSteam(3).h, stateSteam(6,3).h, stateSteam(6,2).h, stateSteam(4).h,stateSteam(2,3).h, stateSteam(2,2).h,stateSteam(2,1).h]
+Qsteam=[0,mSteamHP*QsupHP,mSteamHP*QevapHP,mSteamHP*QecoHP+mSteamLP*QsupLP,mSteamLP*QevapLP,(mSteamTot)*QecoLP];
+QsteamTot=sum(Qsteam);
+%QsteamTot2=mSteamHP*(stateSteam(3).h-stateSteam(2,1).h)+mSteamLP*(stateSteam(4).h-stateSteam(2,1).h)
+
+QsteamTransfer=zeros(1,length(Qsteam));
+for i=1:length(Qsteam)
+    QsteamTransfer(i)=sum(Qsteam(1:i));
+end
+
+Tgas=[stateGas(4).T,TgEcoHP,TgEcoLP,TgExhaust];
+HRSGt=[stateSteam(3).T, stateSteam(6,3).T, stateSteam(6,2).T,stateSteam(2,3).T, stateSteam(2,2).T,stateSteam(2,1).T];
+if any(ismember('tq',steamDiagrams))||all
+    figure
     plot(QsteamTransfer/QsteamTot, HRSGt);
     hold on
     plot([0,QsteamTransfer(3)/QsteamTot, QsteamTransfer(5)/QsteamTot,1],Tgas);
@@ -256,18 +256,19 @@ end
 
 % H-S Diagram
 if any(ismember('hs',steamDiagrams))||all
-    %figure
+    figure
+     hs_diagramCombined(stateSteam,eta_siP,eta_siT,'2P');
 end
 
 %% Energetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-    mecLoss=gasTurbMecLoss+steamTurbineLossEn*x'+mSteamTot*feedPumpLossEn+mSteamHP*pumpLossEnHP;
-    condenserLossEn=mSteamTot*condenserLossEn;
-    chimneyLoss=mGas*abs(stateGas(1).h-hGexhaust);
-    lossEn=[mecLoss,condenserLossEn,chimneyLoss];
-    PeST=(abs(steamWmov*x')-(mSteamTot*Wop+mSteamHP*WopHP))*eta_mec;
-    if any(ismember('EnPie',steamDiagrams))||all
+mecLoss=gasTurbMecLoss+steamTurbineLossEn*x'+mSteamTot*feedPumpLossEn+mSteamHP*pumpLossEnHP;
+condenserLossEn=mSteamTot*condenserLossEn;
+chimneyLoss=mGas*abs(stateGas(1).h-hGexhaust);
+lossEn=[mecLoss,condenserLossEn,chimneyLoss];
+PeST=(abs(steamWmov*x')-(mSteamTot*Wop+mSteamHP*WopHP))*eta_mec;
+if any(ismember('EnPie',steamDiagrams))||all
     %Energy pie chart
     %pie
     figure
@@ -282,14 +283,14 @@ end
 %% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-    rotorIrr=gasTurbCompLossEx+gasTurbLossEx+steamTurbineLossEx*x'+mSteamTot*feedPumpLossEx+mSteamHP*pumpLossExHP;
-    condenserLossEx=mSteamTot*condenserLossEx;
-    chimneyLossEx=mGas*eGexhaust;
-    dExSuperHP=abs(stateSteam(3).e-stateSteam(6,3).e);
-    heatedFluidExergy=mSteamTot*(dExEcoLP)+mSteamLP*(dExEvapLP+dExSuperLP)+mSteamHP*(dExEcoHP+dExEvapHP+dExSuperHP);
-    transLossEx=mGas*(stateGas(4).e-eGexhaust)-(heatedFluidExergy);
-    lossEx=[mecLoss,condenserLossEx,rotorIrr,chimneyLossEx,transLossEx,gasTurbCombLossEx];
-    if any(ismember('ExPie',steamDiagrams))||all
+rotorIrr=gasTurbCompLossEx+gasTurbLossEx+steamTurbineLossEx*x'+mSteamTot*feedPumpLossEx+mSteamHP*pumpLossExHP;
+condenserLossEx=mSteamTot*condenserLossEx;
+chimneyLossEx=mGas*eGexhaust;
+dExSuperHP=abs(stateSteam(3).e-stateSteam(6,3).e);
+heatedFluidExergy=mSteamTot*(dExEcoLP)+mSteamLP*(dExEvapLP+dExSuperLP)+mSteamHP*(dExEcoHP+dExEvapHP+dExSuperHP);
+transLossEx=mGas*(stateGas(4).e-eGexhaust)-(heatedFluidExergy);
+lossEx=[mecLoss,condenserLossEx,rotorIrr,chimneyLossEx,transLossEx,gasTurbCombLossEx];
+if any(ismember('ExPie',steamDiagrams))||all
     %Exergy pie chart
     % pie
     figure
@@ -304,15 +305,15 @@ end
 %% Efficiencies
 
 % Steam part
-eta_toten=PeST/(mGas*(stateGas(4).h-hGexhaust))
-eta_cyclen=PeST/(eta_mec*(QsteamTot))
-eta_cyclen2=(QsteamTot-abs(Qc)*mSteamTot)/QsteamTot
+eta_toten=PeST/(mGas*(stateGas(4).h-hGexhaust));
+eta_cyclen=PeST/(eta_mec*(QsteamTot));
+eta_cyclen2=(QsteamTot-abs(Qc)*mSteamTot)/QsteamTot;
 
 eta_cyclex=PeST/(eta_mec*heatedFluidExergy);
 eta_cyclex2=PeST/(eta_mec*(mSteamLP*(stateSteam(4).e-stateSteam(2,1).e)+mSteamHP*(stateSteam(3).e-stateSteam(2,1).e)));
 eta_totex=PeST/(mGas*(stateGas(4).e-eGexhaust));
-eta_chimnex=(stateGas(4).e-eGexhaust)/stateGas(4).e
-eta_transex=heatedFluidExergy/(mGas*(stateGas(4).e-eGexhaust))
+eta_chimnex=(stateGas(4).e-eGexhaust)/stateGas(4).e;
+eta_transex=heatedFluidExergy/(mGas*(stateGas(4).e-eGexhaust));
 %% FGPROP FUNCTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Function that calculates the enthalpy of gas for a given temperature
     function x = fgProp(prop,T,nM)

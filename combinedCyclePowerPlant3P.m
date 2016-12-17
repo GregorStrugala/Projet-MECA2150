@@ -360,6 +360,7 @@ end
 % H-S Diagram
 if any(ismember('hs',steamDiagrams))||all
     figure
+    hs_diagramCombined(stateSteam,eta_siP,eta_siT,'3P');
 end
 
 %% Energetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

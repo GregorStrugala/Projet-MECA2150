@@ -29,6 +29,50 @@ switch pressureLevel
     %% %%%%%%%%%%%%%%%%%%% COMBINED CYCLE POWER PLANT (2P) %%%%%%%%%%%%%%%%%%%%
     
     case '2P'
+        %Total flow
+        [Tcomp,sComp,~]=CompressionExpansionPlot(state(1),state(2),eta_siP,1,0);
+        hold on
+        plot(sComp,Tcomp,'Color','m','LineStyle','-','LineWidth',1.5)
+        
+        
+        [Tvap1,sVap1,~]=vaporizationCondensationPlot(state(2),state(2,2));
+        hold on
+        plot(sVap1,Tvap1,'Color','m','LineStyle','-','LineWidth',1.5)
+        
+        %LP flow
+        [Tvap2,sVap2,~]=vaporizationCondensationPlot(state(2,2),state(4));
+        hold on
+        plot(sVap2,Tvap2,'Color','r','LineStyle','-','LineWidth',1.5)
+        
+        %expansion in the turbine
+        [T_turb,s_turb,~]=CompressionExpansionPlot(state(4),state(5),eta_siT,0,1);
+        hold on
+        plot(s_turb,T_turb,'Color','m','LineStyle','-','LineWidth',1.5)
+        
+        % PLOT : condensation in the condenser
+        hold on
+        plot(state(5).s,state(5).T,'o')
+        text(state(5).s,state(5).T,'4')
+        if isnan(state(5).x)
+            
+            %To be done
+        else  %case without feedHeating and reHeating
+            plot([state(5).s,state(1).s],[state(5).T,state(1).T],'Color','m','LineStyle','-','LineWidth',1.5)
+        end
+        
+        %HP flow
+        [Tcomp2,sComp2,~]=CompressionExpansionPlot(state(2,2),state(6,1),eta_siP,1,0);
+        hold on
+        plot(sComp2,Tcomp2,'Color','b','LineStyle','-','LineWidth',1.5)
+        
+        [Tvap2,sVap2,~]=vaporizationCondensationPlot(state(6,1),state(3));
+        hold on
+        plot(sVap2,Tvap2,'Color','b','LineStyle','-','LineWidth',1.5)
+        
+        %expansion in the turbine
+        [T_turb,s_turb,~]=CompressionExpansionPlot(state(3),state(4),eta_siT,0,1);
+        hold on
+        plot(s_turb,T_turb,'Color','b','LineStyle','-','LineWidth',1.5)
         %==============================================================================
         %FOR TEST
         hold on
@@ -72,14 +116,11 @@ switch pressureLevel
         text(state(6,3).s,state(6,3).T,'9"')
         
         
-        [T_turb,s_turb,~]=CompressionExpansionPlot(state(3,1),state(5,1),eta_siT,0,1);
-        hold on
-        plot(s_turb,T_turb,'Color','r','LineStyle','-','LineWidth',1.5)
         
     case '3P'
         %% %%%%%%%%%%%%%%%%%%% COMBINED CYCLE POWER PLANT (3P) %%%%%%%%%%%%%%%%%%%%
         %==============================================================================
-        %FOR TEST
+        %POINTS
         hold on
         plot(state(1).s,state(1).T,'o')
         text(state(1).s,state(1).T,'1')
@@ -146,13 +187,76 @@ switch pressureLevel
         hold on
         plot(state(10,3).s,state(10,3).T,'o')
         text(state(10,3).s,state(10,3).T,'103')
- 
-        [T_turb,s_turb,~]=CompressionExpansionPlot(state(3),state(4,2),eta_siT,0,1);
+        
+        %Total flow
+        [Tcomp,sComp,~]=CompressionExpansionPlot(state(1),state(2),eta_siP,1,0);
         hold on
-        plot(s_turb,T_turb,'Color','r','LineStyle','-','LineWidth',1.5)
-        [T_turb,s_turb,~]=CompressionExpansionPlot(state(5),state(7),eta_siT,0,1);
+        plot(sComp,Tcomp,'Color','r','LineStyle','-','LineWidth',1.5)
+        
+        [Tvap1,sVap1,~]=vaporizationCondensationPlot(state(2),state(2,2));
         hold on
-        plot(s_turb,T_turb,'Color','r','LineStyle','-','LineWidth',1.5)
+        plot(sVap1,Tvap1,'Color','m','LineStyle','-','LineWidth',1.5)
+        
+        % PLOT : condensation in the condenser
+    
+        if isnan(state(7).x)
+            
+            %To be done
+        else  %case without feedHeating and reHeating
+            plot([state(7).s,state(1).s],[state(7).T,state(1).T],'Color','m','LineStyle','-','LineWidth',1.5)
+        end
+        
+        [T_turb,s_turb,~]=CompressionExpansionPlot(state(6),state(7),eta_siT,0,1);
+        hold on
+        plot(s_turb,T_turb,'Color','m','LineStyle','-','LineWidth',1.5)
+        
+        %LP flow
+        [Tvap2,sVap2,~]=vaporizationCondensationPlot(state(2,2),state(6));
+        hold on
+        plot(sVap2,Tvap2,'Color','r','LineStyle','-','LineWidth',1.5)
+        
+        %IP flow
+        [Tvap2,sVap2,~]=vaporizationCondensationPlot(state(2,2),state(9,4));
+        hold on
+        plot(sVap2,Tvap2,'Color','c','LineStyle','-','LineWidth',1.5)
+                
+        %HP flow
+        [Tvap2,sVap2,~]=vaporizationCondensationPlot(state(9,2),state(3));
+        hold on
+        plot(sVap2,Tvap2,'Color','b','LineStyle','-','LineWidth',1.5)
+        
+        [T_turb,s_turb,~]=CompressionExpansionPlot(state(3),state(4,1),eta_siT,0,1);
+        hold on
+        plot(s_turb,T_turb,'Color','b','LineStyle','-','LineWidth',1.5)
+        
+        [T_turb,s_turb,~]=CompressionExpansionPlot(state(4,1),state(4,2),eta_siT,0,1);
+        hold on
+        plot(s_turb,T_turb,'Color','b','LineStyle','-.','LineWidth',1.5)
+        
+        % HP +IP flow
+        
+        Tsur2=XSteam('T_ps',state(5).p,state(5).s);
+        Tsur1=XSteam('T_ps',state(5).p,state(9,4).s);
+        
+        T=Tsur1+0.01:(Tsur2-Tsur1)*0.01:Tsur2;
+        s=zeros(1,length(T));
+        %h=zeros(1,length(T));
+        for i=1:length(T)
+            if i == length(T)
+                s(i)=state(5).s;
+                %hPart3(i)=state(5).h;
+            end
+            s(i)=XSteam('s_pt',state(5).p,T(i));
+            %hPart3(i)=XSteam('h_pt',state(5).p,T(i));
+        end
+        plot(s,T,'Color','y','LineStyle','-','LineWidth',1.5)
+        
+        [T_turb,s_turb,~]=CompressionExpansionPlot(state(5),state(6),eta_siT,0,1);
+        hold on
+        plot(s_turb,T_turb,'Color','y','LineStyle','-','LineWidth',1.5)
+        
+        
+        
         
 end
 end
