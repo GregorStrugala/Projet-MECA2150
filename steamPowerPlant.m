@@ -1,4 +1,4 @@
-function steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deaeratorON,fuel,excessAir,TflueGas,Tambiant,diagrams)
+function[]=steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deaeratorON,fuel,excessAir,TflueGas,Tambiant,diagrams)
 %close all;
 %NEWSTRUCT
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
@@ -270,12 +270,16 @@ end
 %% FLOW RATES
 %determination of the mass flow rate of vapour
 if nR==0 && nF==0
+    mVapourBleed=0;
     mVapourSteamGen=Pe/abs(eta_mec*Wmcy);
+    mVapourCond=mVapourSteamGen;
     [eta_combex,eta_gen,mFuel,eExh,eFuel,eFlueGas,LHV]=combustion(fuel,excessAir,TflueGas+273.15,Tambiant+273.15,0.01,mVapourSteamGen*(state(3).h-state(2).h));
     er=0.04;
     mFlueGas=eta_combex*mFuel*eFuel/(eFlueGas-er);
 elseif nR~=0 && nF==0
+    mVapourBleed=0;
     mVapourSteamGen=Pe/abs(eta_mec*Wmcy);
+     mVapourCond=mVapourSteamGen;
     [eta_combex,eta_gen,mFuel,eExh,eFuel,eFlueGas,LHV]=combustion(fuel,excessAir,TflueGas+273.15,Tambiant+273.15,0.01,mVapourSteamGen*((state(3).h-state(2).h)+state(5).h-state(4,1).h));
     er=0.04;
     mFlueGas=eta_combex*mFuel*eFuel/(eFlueGas-er);
