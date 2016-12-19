@@ -22,7 +22,7 @@ function varargout = steamGUI(varargin)
 
 % Edit the above text to modify the response to help steamGUI
 
-% Last Modified by GUIDE v2.5 16-Dec-2016 15:35:52
+% Last Modified by GUIDE v2.5 16-Dec-2016 15:50:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -377,21 +377,21 @@ function ts_PB_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 [Tambiant,Triver,deltaT,Tmax,dTpinch,TflueGas,Pe,nF,nR,deGazing,steamPressure,fuel,lambda] = inputArgs(hObject,eventdata,handles);
-steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,1,0)
+steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,{'ts'})
 
 
-% --- Executes on button press in Pie_PB.
-function Pie_PB_Callback(hObject, eventdata, handles)
-% hObject    handle to Pie_PB (see GCBO)
+% --- Executes on button press in enPie_PB.
+function enPie_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to enPie_PB (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 [Tambiant,Triver,deltaT,Tmax,dTpinch,TflueGas,Pe,nF,nR,deGazing,steamPressure,fuel,lambda] = inputArgs(hObject,eventdata,handles);
-steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,0,1)
+steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,{'EnPie'})
 
 
-% --- Executes on button press in pushbutton6.
-function pushbutton6_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton6 (see GCBO)
+% --- Executes on button press in cycleSelection_PB.
+function cycleSelection_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to cycleSelection_PB (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 main
