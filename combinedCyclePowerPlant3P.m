@@ -156,7 +156,7 @@ while abs(r) > 0.01 && n<nmax
     end
     n=n+1;
 end
-IPsteamPressure=pGuessIP;
+IPsteamPressure=pGuessIP
 stateSteam(5).p=IPsteamPressure;
 stateSteam(5).h=XSteam('h_pT',IPsteamPressure,stateSteam(5).T);
 stateSteam(5).s=XSteam('s_pT',IPsteamPressure,stateSteam(5).T);
@@ -183,7 +183,7 @@ while abs(r) > 0.01 && n<nmax
     end
     n=n+1;
 end
-LPsteamPressure=pGuessLP;
+LPsteamPressure=pGuessLP
 stateSteam(6).p=LPsteamPressure;
 
 
@@ -413,15 +413,15 @@ end
 
 % STEAM PART 
 %energy
-eta_toten=PeST/(mGas*(stateGas(4).h-hGexhaust))
+eta_toten=PeST/(mGas*(stateGas(4).h-hGexhaust));
 eta_cyclen=PeST/(eta_mec*(QsteamTot));
 eta_cyclen=(QsteamTot-abs(Qc)*mSteamTot)/QsteamTot;
 
 %exergy
-eta_cyclex=PeST/(eta_mec*heatedFluidExergy)
-eta_totex=PeST/(mGas*(stateGas(4).e-eGexhaust))
-eta_chimnex=(stateGas(4).e-eGexhaust)/stateGas(4).e
-eta_transex=heatedFluidExergy/(mGas*(stateGas(4).e-eGexhaust))
+eta_cyclex=PeST/(eta_mec*heatedFluidExergy);
+eta_totex=PeST/(mGas*(stateGas(4).e-eGexhaust));
+eta_chimnex=(stateGas(4).e-eGexhaust)/stateGas(4).e;
+eta_transex=heatedFluidExergy/(mGas*(stateGas(4).e-eGexhaust));
 
 %% FGPROP FUNCTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Function that calculates the enthalpy of gas for a given temperature
