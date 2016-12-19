@@ -1,4 +1,4 @@
-function [stateCelsius,mg,nM,MecLoss,CombLoss,CompLoss,TurbLoss] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,diagrams,fuel)
+function [stateCelsius,mg,nM,MecLoss,CombLoss,CompLoss,TurbLoss,ma,mc] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,diagrams,fuel)
 %GASTURBINE characterises a power cycle that uses a gas turbine.
 %   stateCelsius,mg,nM,MecLoss,ComLoss,CompLoss,TurbLoss = GASTURBINE(Pe,Ta,Tf,r,kcc,etaC,etaT) displays state, energy
 %   and exergy charts for the given parameters.

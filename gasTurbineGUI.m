@@ -22,7 +22,7 @@ function varargout = gasTurbineGUI(varargin)
 
 % Edit the above text to modify the response to help gasTurbineGUI
 
-% Last Modified by GUIDE v2.5 13-Dec-2016 10:08:15
+% Last Modified by GUIDE v2.5 19-Dec-2016 21:07:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -331,3 +331,24 @@ function hs_PB_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 [Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,fuel] = inputArgs(handles);
 gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,{'hs'},fuel);
+
+
+% --- Executes on button press in dispFlowRates_PB.
+function dispFlowRates_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to dispFlowRates_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,fuel] = inputArgs(handles);
+[~,mg,~,~,~,~,~,ma,mc] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,{},fuel);
+set(handles.ma_ST,'string',[num2str(ma) ' kg/s']);
+set(handles.mc_ST,'string',[num2str(mc) ' kg/s']);
+set(handles.mg_ST,'string',[num2str(mg) ' kg/s']);
+
+% --- Executes on button press in clearFlowRates_PB.
+function clearFlowRates_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to clearFlowRates_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.ma_ST,'string','-');
+set(handles.mc_ST,'string','-');
+set(handles.mg_ST,'string','-');
