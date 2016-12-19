@@ -287,23 +287,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-% --- Executes on button press in start_PB.
-function start_PB_Callback(hObject, eventdata, handles)
-% hObject    handle to start_PB (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-Pe = str2double(get(handles.Pe_ENTRY,'String'));
-Ta = str2double(get(handles.Ta_ENTRY,'String'));
-Tf = str2double(get(handles.Tf_ENTRY,'String'));
-r = str2double(get(handles.r_ENTRY,'String'));
-kcc = str2double(get(handles.kcc_ENTRY,'String'));
-etaC = str2double(get(handles.etaC_ENTRY,'String'));
-etaT = str2double(get(handles.etaT_ENTRY,'String'));
-kmec = str2double(get(handles.kmec_ENTRY,'String'));
-fuel = str2double(get(handles.fuel_ENTRY,'String'));
-%gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec);
-
 function [Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,fuel] = inputArgs(handles)
 Pe = str2double(get(handles.Pe_ENTRY,'String'));
 Ta = str2double(get(handles.Ta_ENTRY,'String'));
