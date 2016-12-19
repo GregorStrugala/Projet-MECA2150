@@ -1,35 +1,35 @@
-function varargout = combined3PGUI(varargin)
-% COMBINED3PGUI MATLAB code for combined3PGUI.fig
-%      COMBINED3PGUI, by itself, creates a new COMBINED3PGUI or raises the existing
+function varargout = combined2PGUI(varargin)
+% COMBINED2PGUI MATLAB code for combined2PGUI.fig
+%      COMBINED2PGUI, by itself, creates a new COMBINED2PGUI or raises the existing
 %      singleton*.
 %
-%      H = COMBINED3PGUI returns the handle to a new COMBINED3PGUI or the handle to
+%      H = COMBINED2PGUI returns the handle to a new COMBINED2PGUI or the handle to
 %      the existing singleton*.
 %
-%      COMBINED3PGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in COMBINED3PGUI.M with the given input arguments.
+%      COMBINED2PGUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in COMBINED2PGUI.M with the given input arguments.
 %
-%      COMBINED3PGUI('Property','Value',...) creates a new COMBINED3PGUI or raises the
+%      COMBINED2PGUI('Property','Value',...) creates a new COMBINED2PGUI or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before combined3PGUI_OpeningFcn gets called.  An
+%      applied to the GUI before combined2PGUI_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to combined3PGUI_OpeningFcn via varargin.
+%      stop.  All inputs are passed to combined2PGUI_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help combined3PGUI
+% Edit the above text to modify the response to help combined2PGUI
 
-% Last Modified by GUIDE v2.5 19-Dec-2016 15:46:36
+% Last Modified by GUIDE v2.5 19-Dec-2016 15:30:34
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @combined3PGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @combined3PGUI_OutputFcn, ...
+                   'gui_OpeningFcn', @combined2PGUI_OpeningFcn, ...
+                   'gui_OutputFcn',  @combined2PGUI_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -44,26 +44,26 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before combined3PGUI is made visible.
-function combined3PGUI_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before combined2PGUI is made visible.
+function combined2PGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to combined3PGUI (see VARARGIN)
+% varargin   command line arguments to combined2PGUI (see VARARGIN)
 
-% Choose default command line output for combined3PGUI
+% Choose default command line output for combined2PGUI
 handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes combined3PGUI wait for user response (see UIRESUME)
+% UIWAIT makes combined2PGUI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = combined3PGUI_OutputFcn(hObject, eventdata, handles) 
+function varargout = combined2PGUI_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -79,7 +79,7 @@ function PLselection_PB_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 combinedGUI
-close combined3PGUI
+close combined2PGUI
 
 
 
@@ -174,51 +174,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in ts_PB.
-function ts_PB_Callback(hObject, eventdata, handles)
-% hObject    handle to ts_PB (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-[Ta,Triver,deltaT,dTpinch,dTapproach,xOturbineLP,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
-combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,r,PeGT,{'ts'},{})
-
-
-% --- Executes on button press in enPie_PB.
-function enPie_PB_Callback(hObject, eventdata, handles)
-% hObject    handle to enPie_PB (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-[Ta,Triver,deltaT,dTpinch,dTapproach,xOturbineLP,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
-combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,r,PeGT,{'EnPie'},{})
-
-
-% --- Executes on button press in hs_PB.
-function hs_PB_Callback(hObject, eventdata, handles)
-% hObject    handle to hs_PB (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-[Ta,Triver,deltaT,dTpinch,dTapproach,xOturbineLP,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
-combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,r,PeGT,{'hs'},{})
-
-
-% --- Executes on button press in exPie_PB.
-function exPie_PB_Callback(hObject, eventdata, handles)
-% hObject    handle to exPie_PB (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-[Ta,Triver,deltaT,dTpinch,dTapproach,xOturbineLP,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
-combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,r,PeGT,{'ExPie'},{})
-
-
-% --- Executes on button press in tq_PB.
-function tq_PB_Callback(hObject, eventdata, handles)
-% hObject    handle to tq_PB (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-[Ta,Triver,deltaT,dTpinch,dTapproach,xOturbineLP,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
-combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,r,PeGT,{'tq'},{})
-
-
 
 function HPsteamPressure_ET_Callback(hObject, eventdata, handles)
 % hObject    handle to HPsteamPressure_ET (see GCBO)
@@ -242,27 +197,49 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-
-function xOturbineLP_ET_Callback(hObject, eventdata, handles)
-% hObject    handle to xOturbineLP_ET (see GCBO)
+% --- Executes on button press in ts_PB.
+function ts_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to ts_PB (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+[Ta,Triver,deltaT,dTpinch,dTapproach,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
+combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,Ta,Tf,fuel,r,PeGT,{'ts'},{})
 
-% Hints: get(hObject,'String') returns contents of xOturbineLP_ET as text
-%        str2double(get(hObject,'String')) returns contents of xOturbineLP_ET as a double
 
-
-% --- Executes during object creation, after setting all properties.
-function xOturbineLP_ET_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to xOturbineLP_ET (see GCBO)
+% --- Executes on button press in enPie_PB.
+function enPie_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to enPie_PB (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+% handles    structure with handles and user data (see GUIDATA)
+[Ta,Triver,deltaT,dTpinch,dTapproach,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
+combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,Ta,Tf,fuel,r,PeGT,{'EnPie'},{})
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+
+% --- Executes on button press in hs_PB.
+function hs_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to hs_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Ta,Triver,deltaT,dTpinch,dTapproach,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
+combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,Ta,Tf,fuel,r,PeGT,{'hs'},{})
+
+
+% --- Executes on button press in exPie_PB.
+function exPie_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to exPie_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Ta,Triver,deltaT,dTpinch,dTapproach,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
+combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,Ta,Tf,fuel,r,PeGT,{'ExPie'},{})
+
+
+% --- Executes on button press in tq_PB.
+function tq_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to tq_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Ta,Triver,deltaT,dTpinch,dTapproach,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
+combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,Ta,Tf,fuel,r,PeGT,{'tq'},{})
 
 
 
@@ -385,8 +362,8 @@ function tsGT_PB_Callback(hObject, eventdata, handles)
 % hObject    handle to tsGT_PB (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[Ta,Triver,deltaT,dTpinch,dTapproach,xOturbineLP,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
-combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,r,PeGT,{},{'ts'})
+[Ta,Triver,deltaT,dTpinch,dTapproach,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
+combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,Ta,Tf,fuel,r,PeGT,{},{'ts'})
 
 
 % --- Executes on button press in enPieGT_PB.
@@ -394,8 +371,8 @@ function enPieGT_PB_Callback(hObject, eventdata, handles)
 % hObject    handle to enPieGT_PB (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[Ta,Triver,deltaT,dTpinch,dTapproach,xOturbineLP,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
-combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,r,PeGT,{},{'EnPie'})
+[Ta,Triver,deltaT,dTpinch,dTapproach,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
+combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,Ta,Tf,fuel,r,PeGT,{},{'EnPie'})
 
 
 % --- Executes on button press in hsGT_PB.
@@ -403,8 +380,8 @@ function hsGT_PB_Callback(hObject, eventdata, handles)
 % hObject    handle to hsGT_PB (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[Ta,Triver,deltaT,dTpinch,dTapproach,xOturbineLP,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
-combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,r,PeGT,{},{'hs'})
+[Ta,Triver,deltaT,dTpinch,dTapproach,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
+combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,Ta,Tf,fuel,r,PeGT,{},{'hs'})
 
 
 % --- Executes on button press in exPieGT_PB.
@@ -412,16 +389,15 @@ function exPieGT_PB_Callback(hObject, eventdata, handles)
 % hObject    handle to exPieGT_PB (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[Ta,Triver,deltaT,dTpinch,dTapproach,xOturbineLP,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
-combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,r,PeGT,{},{'ExPie'})
+[Ta,Triver,deltaT,dTpinch,dTapproach,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
+combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,Ta,Tf,fuel,r,PeGT,{},{'ExPie'})
 
-function [Ta,Triver,deltaT,dTpinch,dTapproach,xOturbineLP,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles)
+function [Ta,Triver,deltaT,dTpinch,dTapproach,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles)
 Ta = str2double(get(handles.Ta_ET,'string'));
 Triver = str2double(get(handles.Triver_ET,'string'));
 deltaT = str2double(get(handles.deltaT_ET,'string'));
 dTpinch = str2double(get(handles.dTpinch_ET,'string'));
 dTapproach = str2double(get(handles.dTapproach_ET,'string'));
-xOturbineLP = str2double(get(handles.xOturbineLP_ET,'string'));
 Tf = str2double(get(handles.Tf_ET,'string'));
 PeGT = str2double(get(handles.PeGT_ET,'string'));
 HPsteamPressure = str2double(get(handles.HPsteamPressure_ET,'string'));
