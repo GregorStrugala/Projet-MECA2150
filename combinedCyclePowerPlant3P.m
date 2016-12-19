@@ -1,4 +1,4 @@
-function [] = combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,r,PeGT,steamDiagrams,gasDiagrams)
+function [stateSteam,stateGas,mSteamLP,mSteamIP,mSteamHP,mSteamTot,mGas,ma,mc] = combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,r,PeGT,steamDiagrams,gasDiagrams)
 %close all;
 %COMBINEDCYCLEPOWERPLANT3P characterises a power combined cycle with 3
 %pressure levels
@@ -68,7 +68,7 @@ kcc=0.95;
 kmec=0.015;
 
 %call to the gasTurbine function:
-[stateGas,mGas,nM,GTmecLoss,GTcombLossEx,GTcompLossEx,GTturbLossEx] = gasTurbine(PeGT,Ta,Tf,r,kcc,etaC,etaT,kmec,gasDiagrams,fuel);
+[stateGas,mGas,nM,GTmecLoss,GTcombLossEx,GTcompLossEx,GTturbLossEx,ma,mc] = gasTurbine(PeGT,Ta,Tf,r,kcc,etaC,etaT,kmec,gasDiagrams,fuel);
 
 %efficiencies
 eta_mec=0.954;

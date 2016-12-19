@@ -22,7 +22,7 @@ function varargout = combined2PGUI(varargin)
 
 % Edit the above text to modify the response to help combined2PGUI
 
-% Last Modified by GUIDE v2.5 19-Dec-2016 15:30:34
+% Last Modified by GUIDE v2.5 19-Dec-2016 22:03:36
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -391,6 +391,34 @@ function exPieGT_PB_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 [Ta,Triver,deltaT,dTpinch,dTapproach,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
 combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,Ta,Tf,fuel,r,PeGT,{},{'ExPie'})
+
+
+% --- Executes on button press in dispFlowRates_PB.
+function dispFlowRates_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to dispFlowRates_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Ta,Triver,deltaT,dTpinch,dTapproach,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
+[~,~,mSteamLP,mSteamHP,mSteamTot,mGas,ma,mc] = combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,Ta,Tf,fuel,r,PeGT,{},{});
+set(handles.ma_ST,'string',[num2str(ma) ' kg/s']);
+set(handles.mc_ST,'string',[num2str(mc) ' kg/s']);
+set(handles.mg_ST,'string',[num2str(mGas) ' kg/s']);
+set(handles.msLP_ST,'string',[num2str(mSteamLP) ' kg/s']);
+set(handles.msHP_ST,'string',[num2str(mSteamHP) ' kg/s']);
+set(handles.msTot_ST,'string',[num2str(mSteamTot) ' kg/s']);
+
+
+% --- Executes on button press in clearFlowRates_PB.
+function clearFlowRates_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to clearFlowRates_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.ma_ST,'string','-');
+set(handles.mc_ST,'string','-');
+set(handles.mg_ST,'string','-');
+set(handles.msLP_ST,'string','-');
+set(handles.msHP_ST,'string','-');
+set(handles.msTot_ST,'string','-');
 
 function [Ta,Triver,deltaT,dTpinch,dTapproach,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles)
 Ta = str2double(get(handles.Ta_ET,'string'));

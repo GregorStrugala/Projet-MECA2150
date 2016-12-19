@@ -22,7 +22,7 @@ function varargout = combined3PGUI(varargin)
 
 % Edit the above text to modify the response to help combined3PGUI
 
-% Last Modified by GUIDE v2.5 19-Dec-2016 15:46:36
+% Last Modified by GUIDE v2.5 19-Dec-2016 22:29:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -414,6 +414,35 @@ function exPieGT_PB_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 [Ta,Triver,deltaT,dTpinch,dTapproach,xOturbineLP,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
 combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,r,PeGT,{},{'ExPie'})
+
+
+% --- Executes on button press in dispFlowRates_PB.
+function dispFlowRates_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to dispFlowRates_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Ta,Triver,deltaT,dTpinch,dTapproach,xOturbineLP,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles);
+[~,~,msLP,msIP,msHP,msTot,mg,ma,mc] = combinedCyclePowerPlant3P(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,xOturbineLP,Ta,Tf,fuel,r,PeGT,{},{});
+set(handles.ma_ST,'string',[num2str(ma) ' kg/s']);
+set(handles.mc_ST,'string',[num2str(mc) ' kg/s']);
+set(handles.mg_ST,'string',[num2str(mg) ' kg/s']);
+set(handles.msLP_ST,'string',[num2str(msLP) ' kg/s']);
+set(handles.msIP_ST,'string',[num2str(msIP) ' kg/s']);
+set(handles.msHP_ST,'string',[num2str(msHP) ' kg/s']);
+set(handles.msTot_ST,'string',[num2str(msTot) ' kg/s']);
+
+% --- Executes on button press in clearFlowRates_PB.
+function clearFlowRates_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to clearFlowRates_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.ma_ST,'string','-');
+set(handles.mc_ST,'string','-');
+set(handles.mg_ST,'string','-');
+set(handles.msLP_ST,'string','-');
+set(handles.msIP_ST,'string','-');
+set(handles.msHP_ST,'string','-');
+set(handles.msTot_ST,'string','-');
 
 function [Ta,Triver,deltaT,dTpinch,dTapproach,xOturbineLP,Tf,PeGT,HPsteamPressure,r,fuel] = inputArgs(hObject,eventdata,handles)
 Ta = str2double(get(handles.Ta_ET,'string'));
