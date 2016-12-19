@@ -62,6 +62,8 @@ for index=1:nF
         %state that correspond to the out of the valve. There is no valve so we put this equals to 0
         state(6+2*nR,indexDeaerator).h=0;%necessaire pour bleedFraction
         state(6+2*nR,indexDeaerator).e=0;%necessaire pour heatLossEx
+        state(6+2*nR,indexDeaerator).s=nan;
+        state(6+2*nR,indexDeaerator).T=nan;
     else
         %condensation of the bled steam in the heater : exchange with the fluid
         %coming from the extracting pump

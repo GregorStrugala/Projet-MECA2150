@@ -1,6 +1,5 @@
-function [ ] = hs_diagramSteam(state1,state2,state3,state4,eta_siP, eta_siT)
+function [ ] = hs_diagramSteam(state,eta_siP,eta_siT,nF,nR,deaeratorON,indexDeaerator)
 %function
-global state
 T=0.01:0.1:373.945;
 %Preallocation
 sv_t=zeros(1,length(T));
@@ -20,129 +19,422 @@ end
 figure;
 % diagram h-s
 %plot(sl_t,h_psl,sv_t,h_psv)
-plot([sl_t fliplr(sv_t)], [h_psl fliplr(h_psv)])%no hole
-%% feedPumpCompression plot
-%CODE A VERIFIER !!!!! OK VALABLE QUE LORSQUE LE TITRE EST DEFINI CAD
-%LORSQUE L ETAT 4 EST DANS LA CLOCHE --> a modifier
-hold on
-plot(state1.s,state1.h,'o')
-
-
-%eta_siP=0.8;
-p_pump=state1.p:abs((state2.p-state1.p))*0.1:state2.p;
-hs_pump=zeros(1,length(p_pump));
-h_pump=zeros(1,length(p_pump));
-s_pump=zeros(1,length(p_pump));
-T_pump=zeros(1,length(p_pump));
-for i=1:length(p_pump)
-    if i == 1
-        hs_pump(i)=state1.h;%XSteam('h_ps',p_pump(i),state.s(1));
-        h_pump(i)=state1.h;
-        s_pump(i)=state1.s;
-        T_pump(i)=state1.T;
-        
-    elseif i==length(p_pump)
-        h_pump(i)=state2.h;
-        s_pump(i)=state2.s;
-        T_pump(i)=state2.T;
-    else
-        hs_pump(i)=XSteam('h_ps',p_pump(i),state1.s);
-        h_pump(i)=((hs_pump(i)-state1.h))/eta_siP+state1.h;
-        s_pump(i)=XSteam('s_ph',p_pump(i),h_pump(i));
-        T_pump(i)=XSteam('T_ps',p_pump(i),s_pump(i));
-    end
-end
-hold on
-plot(s_pump,h_pump)
-
-
-%% steamGenerator Plot
-hold on
-plot(state2.s,state2.h,'o')
-
-%part1
-%Tsat_Gen=XSteam('Tsat_p',state.p(3));
-sl_p=XSteam('sl_p',state2.p);
-s_Gen1=state2.s:(sl_p-state2.s)*0.01:sl_p-0.01;
-h_Gen1=zeros(1,length(s_Gen1));
-for i=1:length(s_Gen1)
-    h_Gen1(i)=XSteam('h_ps',state3.p,s_Gen1(i));
-end
-
-hold on
-plot(s_Gen1,h_Gen1)
-
-%part2
-sv_pGen=XSteam('sv_p',state3.p);
-sl_pGen=XSteam('sl_p',state3.p);
-sGen2=sl_pGen:abs(sv_pGen-sl_pGen)*0.01:sv_pGen;
-hGen2=zeros(1,length(sGen2));
-for i=1:length(sGen2)
-    hGen2(i)=XSteam('h_ps',state2.p,sGen2(i));
-end
-hold on
-plot(sGen2,hGen2)
-
-%part3
-%s_sur_Gen2=XSteam('T_ps',state.p(3),state.s(3));
-sGen3=sv_pGen:(state3.s-sv_pGen)*0.01:state3.s;
-hGen3=zeros(1,length(sGen3));
-
-for i=1:length(sGen3)
-    hGen3(i)=XSteam('h_ps',state3.p,sGen3(i));
-end
-
-hold on
-plot(sGen3,hGen3)
-
-%% Turbine plot
-hold on
-plot(state3.s,state3.h,'o')
-
-%eta_siT=0.6;
-p_turb=state4.p:abs((state3.p-state4.p))*0.0001:state3.p;
-p_turb = fliplr(p_turb);
-hs_turb=zeros(1,length(p_turb));
-h_turb=zeros(1,length(p_turb));
-s_turb=zeros(1,length(p_turb));
-T_turb=zeros(1,length(p_turb));
-for i=1:length(p_turb)
-    if i == 1
-        hs_turb(i)=state4.h;%XSteam('h_ps',p_pump(i),state.s(1));
-        h_turb(i)=state3.h;
-        s_turb(i)=state3.s;
-        T_turb(i)=state3.T;
-        
-    elseif i==length(p_turb)
-        h_turb(i)=state4.h;
-        s_turb(i)=state4.s;
-        T_turb(i)=state4.T;
-    else
-        hs_turb(i)=XSteam('h_ps',p_turb(i),state3.s);
-        h_turb(i)=-((state3.h)-hs_turb(i))*eta_siT+state3.h;
-        s_turb(i)=XSteam('s_ph',p_turb(i),h_turb(i));
-        T_turb(i)=XSteam('T_ps',p_turb(i),s_turb(i));
-    end
-end
-hold on
-plot(s_turb,h_turb)
-
-%% Condenser
-hold on
-plot(state4.s,state4.h,'o')
-if isnan(state4.x)
+plot([sl_t fliplr(sv_t)], [h_psl fliplr(h_psv)],'Color','g','LineStyle','-','LineWidth',1.5)%no hole
+%% %%%%%%%%%%%%%%%%%%%%%%%%%% RANKINE-HIRN CYCLE %%%%%%%%%%%%%%%%%%%%%%%%%%%
+if nF == 0 && nR == 0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % PLOT : compression in the feed pump
+    %CODE A VERIFIER !!!!! OK VALABLE QUE LORSQUE LE TITRE EST DEFINI CAD
+    %LORSQUE L ETAT 4 EST DANS LA CLOCHE --> a modifier
+    hold on
+    plot(state(1).s,state(1).h,'o')
+    text(state(1).s,state(1).h,'1')
     
-    %To be done
-else
-    s_cond=state1.s:abs((state4.s-state1.s))*0.01:state4.s;
-    s_cond = fliplr(s_cond);
-    p_cond=state4.p;
-    h_cond=zeros(1,length(s_cond));
-    for i=1:length(s_cond)
-        h_cond(i)=XSteam('h_ps',p_cond,s_cond(i));
+    [~,sComp,hComp]=CompressionExpansionPlot(state(1),state(2),eta_siP,1,0);
+    hold on
+    plot(sComp,hComp,'Color','r','LineStyle','-','LineWidth',1.5)
+    
+    
+    % PLOT : vaporization in the steam generator
+    
+    hold on
+    plot(state(2).s,state(2).h,'o')
+    text(state(2).s,state(2).h,'2')
+    
+    [~,sVap1,hVap1]=vaporizationCondensationPlot(state(2),state(3));
+    hold on
+    plot(sVap1,hVap1,'Color','r','LineStyle','-','LineWidth',1.5)
+    
+    % PLOT : Expansion in the turbine
+    hold on
+    plot(state(3).s,state(3).h,'o')
+    text(state(3).s,state(3).h,'3')
+    
+    [~,s_turb,h_turb]=CompressionExpansionPlot(state(3),state(4),eta_siT,0,1);
+    hold on
+    plot(s_turb,h_turb,'Color','r','LineStyle','-','LineWidth',1.5)
+    
+    % PLOT : condensation in the condenser
+    hold on
+    plot(state(4).s,state(4).h,'o')
+    text(state(4).s,state(4).h,'4')
+    if isnan(state(4).x)
+        
+        %To be done
+    else  %case without feedHeating and reHeating
+        plot([state(4).s,state(1).s],[state(4).h,state(1).h],'Color','r','LineStyle','-','LineWidth',1.5)
     end
-    plot(s_cond,h_cond)
-end
+    
+    %%    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% FEEDHEATING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+elseif nF > 0 %&& reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
+    
+    %% PLOT : compression in the feed pump
+    %CODE A VERIFIER !!!!! OK VALABLE QUE LORSQUE LE TITRE EST DEFINI CAD
+    %LORSQUE L ETAT 4 EST DANS LA CLOCHE --> a modifier
+    hold on
+    plot(state(1).s,state(1).h,'o')
+    text(state(1).s,state(1).h,'1')    
+    [~,sComp,hComp]=CompressionExpansionPlot(state(1),state(2),eta_siP,1,0);
+    hold on
+    plot(sComp,hComp,'Color','r','LineStyle','-','LineWidth',1.5)
+    
+    
+    % PLOT : vaporization in the steam generator
+    hold on
+    plot(state(2).s,state(2).h,'o')
+    text(state(2).s,state(2).h,'2')
+    
+    [~,sVap1,hVap1]=vaporizationCondensationPlot(state(2),state(3));
+    hold on
+    plot(sVap1,hVap1,'Color','r','LineStyle','-','LineWidth',1.5)
+    % PLOT : Expansion in the turbine
+    hold on
+    plot(state(3).s,state(3).h,'o')
+    text(state(3).s,state(3).h,'3')
+    
+    if nR == 0
+        hold on
+        plot(state(8).s,state(8).h,'o')
+        text(state(8).s,state(8).h,'8')
+        [~,s_turb,h_turb]=CompressionExpansionPlot(state(3),state(8),eta_siT,0,1);
+        hold on
+        plot(s_turb,h_turb,'Color','r','LineStyle','-','LineWidth',1.5)
+    else
+        hold on
+        plot(state(4,1).s,state(4,1).h,'o')
+        text(state(4,1).s,state(4,1).h,'4.1')
+        [~,s_turb1,h_turb1]=CompressionExpansionPlot(state(3),state(4,2),eta_siT,0,1);
+        hold on
+        plot(s_turb1,h_turb1,'Color','m','LineStyle','-.','LineWidth',1.5)
+        
+        hold on
+        plot(state(4,2).s,state(4,2).h,'o')
+        text(state(4,2).s,state(4,2).h,'4.2')
+        [~,s_turb,h_turb]=CompressionExpansionPlot(state(3),state(4,1),eta_siT,0,1);
+        hold on
+        plot(s_turb,h_turb,'Color','r','LineStyle','-','LineWidth',1.5)
+        
+        %         [Tvap2,sVap2,~]=vaporizationCondensationPlot(state(2),state(5));
+        %         hold on
+        %         plot(sVap2,Tvap2,'Color','m','LineStyle','-.','LineWidth',1.5)
+        
+        hold on
+        plot(state(5).s,state(5).h,'o')
+        text(state(5).s,state(5).h,'5')
+        T1=state(4,1).T:abs(state(5).T-state(4,1).T)*0.01:state(5).T;
+        sR=zeros(1,length(T1));
+        hR=zeros(1,length(T1));
+        for i=1:length(T1)
+            sR(i)=XSteam('s_pt',state(5).p,T1(i));
+            hR(i)=XSteam('h_pt',state(5).p,T1(i)); 
+        end
+        
+        outTurbine = 8+2*nR;
+        hold on
+        plot(state(8+2*nR).s,state(8+2*nR).h,'o')
+        text(state(8+2*nR).s,state(8+2*nR).h,num2str(outTurbine))
+        
+        hold on
+        plot(sR,hR,'Color','r','LineStyle','-','LineWidth',1.5)
+        [~,s_turb,h_turb]=CompressionExpansionPlot(state(5),state(8+2*nR),eta_siT,0,1);
+        hold on
+        plot(s_turb,h_turb,'Color','r','LineStyle','-','LineWidth',1.5)
+        
+        
+    end
+    % PLOT : condensation in the condenser
+    %     hold on
+    %
+    %     plot(state(8+2*nR).s,state(8+2*nR).T,'o')
+    %     text(state(8+2*nR).s,state(8+2*nR).T,'8')
+    hold on
+    outCondenser = 9+2*nR;
+    plot(state(9+2*nR).s,state(9+2*nR).h,'o')
+    text(state(9+2*nR).s,state(9+2*nR).h,num2str(outCondenser))
+    plot([state(8+2*nR).s,state(9+2*nR).s],[state(8+2*nR).h,state(9+2*nR).h],'Color','r','LineStyle','-','LineWidth',1.5)
+    
+    % PLOT : reheating in the different heater
+    if deaeratorON && indexDeaerator>0
+        %reheat in the heaters before the deaerator
+        hold on
+        outDeaerator=5+2*nR;
+        plot(state(5+2*nR,indexDeaerator).s,state(5+2*nR,indexDeaerator).h,'*');
+        text(state(5+2*nR,indexDeaerator).s,state(5+2*nR,indexDeaerator).h,num2str(outDeaerator));
+        
+        T1=state(10+2*nR).T:abs(state(5+2*nR,indexDeaerator).T-state(10+2*nR).T)*0.01:state(5+2*nR,indexDeaerator).T;
+        sBeforeDeaerator=zeros(1,length(T1));
+        hBeforeDeaerator=zeros(1,length(T1));
+        for i=1:length(T1)
+            if i==length(T1)
+                sBeforeDeaerator(i)=state(5+2*nR,indexDeaerator).s;
+                hBeforeDeaerator(i)=state(5+2*nR,indexDeaerator).h;
+            elseif i==1
+                sBeforeDeaerator(i)=state(10+2*nR).s;
+                hBeforeDeaerator(i)=state(10+2*nR).h;
+            else
+                sBeforeDeaerator(i)=XSteam('s_pt',state(5+2*nR,indexDeaerator).p,T1(i));
+                hBeforeDeaerator(i)=XSteam('h_pt',state(5+2*nR,indexDeaerator).p,T1(i));
+            end
+        end
+        hold on
+        plot(sBeforeDeaerator,hBeforeDeaerator,'Color','r','LineStyle','-','LineWidth',1.5)
+        
+        %compression in the extracting pump
+        hold on
+        outExtractingPump=(11+2*nR)*10+indexDeaerator;
+        plot(state(11+2*nR,indexDeaerator+1).s,state(11+2*nR,indexDeaerator+1).h,'o');
+        text(state(11+2*nR,indexDeaerator+1).s,state(11+2*nR,indexDeaerator+1).h,num2str(outExtractingPump));
+        [~,sDeaePump,hDeaePump]=CompressionExpansionPlot(state(5+2*nR,indexDeaerator),state(11+2*nR,indexDeaerator+1),eta_siP,1,0);
+        hold on
+        plot(sDeaePump,hDeaePump,'Color','r','LineStyle','-','LineWidth',1.5)
+        
+        %reheat in the heater after the deaerator until the inlet of the
+        %pump
+        T2=state(11+2*nR,indexDeaerator+1).T:abs(state(1).T-state(11+2*nR,indexDeaerator+1).T)*0.001:state(1).T;
+        sAfterDeaerator=zeros(1,length(T2));
+        hAfterDeaerator=zeros(1,length(T2));
+        for i=1:length(T2)
+            if i==length(T2)
+                sAfterDeaerator(i)=state(1).s;
+                hAfterDeaerator(i)=state(1).h;
+            end
+            sAfterDeaerator(i)=XSteam('s_pt',state(1).p,T2(i));
+            hAfterDeaerator(i)=XSteam('h_pt',state(1).p,T2(i));
+        end
+        hold on
+        plot(sAfterDeaerator,hAfterDeaerator,'Color','r','LineStyle','-','LineWidth',1.5)
+    else
+        T1=state(10+2*nR).T:abs(state(1).T-state(10+2*nR).T)*0.01:state(1).T;
+        sR=zeros(1,length(T1));
+        hR=zeros(1,length(T1));
+        for i=1:length(T1)
+            sR(i)=XSteam('s_pt',state(1).p,T1(i));
+            hR(i)=XSteam('h_pt',state(1).p,T1(i));
+        end
+        hold on
+        plot(sR,hR,'Color','r','LineStyle','-','LineWidth',1.5)
+    end
+    
+    for index=1:nF
+        % PLOT : bleed steam in the turbine, condensation in the heater and the subcooler
+        hold on
+        feedHeat=zeros(1,nF);
+        feedHeat(index)=(4+2*nR)*10+index; %ok for nF<10
+        plot(state(4+2*nR,index).s,state(4+2*nR,index).h,'o')
+        text(state(4+2*nR,index).s,state(4+2*nR,index).h,num2str(feedHeat(index)))
+        hold on
+        plot(state(5+2*nR,index).s,state(5+2*nR,index).h,'o')
+        hold on
+        if index == 1
+            [~,sCond,hCond]=vaporizationCondensationPlot(state(6+2*nR,index),state(4+2*nR,index));
+        else
+            [~,sCond,hCond]=vaporizationCondensationPlot(state(5+2*nR,index),state(4+2*nR,index));
+        end
+        hold on
+        plot(sCond,hCond,'Color','b','LineStyle','--','LineWidth',1.5)
+        
+        % PLOT : isenthalpic expansion in the valve
+        hold on
+        outSubcooler=7+2*nR;
+        plot(state(7+2*nR).s,state(7+2*nR).h,'o')
+        text(state(7+2*nR).s,state(7+2*nR).h,num2str(outSubcooler))
+        hold on
+         hold on
+        outValve=(6+2*nR)*10+index;
+        %state(6+2*nR,index).h
+        state(6+2*nR,index).s
+        plot(state(6+2*nR,index).s,state(6+2*nR,index).h,'o')
+        text(state(6+2*nR,index).s,state(6+2*nR,index).h,num2str(outValve))
+        hold on
+        outHeater=(5+2*nR)*10+index;
+        plot(state(5+2*nR,index).s,state(5+2*nR,index).h,'o')
+        text(state(5+2*nR,index).s,state(5+2*nR,index).h,num2str(outHeater),'Position',[state(5+2*nR,index).s,state(5+2*nR,index).h])
+        if index == 1
+            [~,sExp,hExp] = isenthalpicExpansion(state(7+2*nR,index),state(6+2*nR,index));
+            hold on
+            plot(sExp,hExp,'Color','b','LineStyle','--','LineWidth',1.5)
+        elseif index==indexDeaerator
+            %...do nothing
+        else
+            [~,sExp,hExp] = isenthalpicExpansion(state(6+2*nR,index),state(5+2*nR,index));
+            hold on
+            plot(sExp,hExp,'Color','b','LineStyle','--','LineWidth',1.5)
+        end
+        
+        % PLOT : compression in the extracting pump
+        hold on
+        outExtractPump=10+2*nR;
+        plot(state(10+2*nR).s,state(10+2*nR).h,'o')
+        text(state(10+2*nR).s,state(10+2*nR).h,num2str(outExtractPump),'Position',[state(10+2*nR).s,state(10+2*nR).h])
+        
+        [~,sComp2,hComp2]=CompressionExpansionPlot(state(9+2*nR),state(10+2*nR),eta_siP,1,0);
+        hold on
+        plot(sComp2,hComp2,'Color','r','LineStyle','-','LineWidth',1.5)
+    end
+    %==============================================================================
+    %FOR TEST
+    %     hold on
+    %     plot(state(1).s,state(1).T,'o')
+    %     text(state(1).s,state(1).T,'1')
+    %     hold on
+    %     plot(state(2).s,state(2).T,'o')
+    %     text(state(2).s,state(2).T,'2')
+    %     hold on
+    %     plot(state(3).s,state(3).T,'o')
+    %     text(state(3).s,state(3).T,'3')
+    %     hold on
+    %     plot(state(4,1).s,state(4,1).T,'o')
+    %     text(state(4,1).s,state(4,1).T,'4.1')
+    %     hold on
+    %     plot(state(4,2).s,state(4,2).T,'o')
+    %     text(state(4,2).s,state(4,2).T,'4.2')
+    %     hold on
+    %     plot(state(4,3).s,state(4,3).T,'o')
+    %     text(state(4,3).s,state(4,3).T,'4.3')
+    %     hold on
+    %     plot(state(4,4).s,state(4,4).T,'o')
+    %     text(state(4,4).s,state(4,4).T,'4.4')
+    %     hold on
+    %     plot(state(5,1).s,state(5,1).T,'o')
+    %     text(state(5,1).s,state(5,1).T,'5.1')
+    %     hold on
+    %     plot(state(5,2).s,state(5,2).T,'o')
+    %     text(state(5,2).s,state(5,2).T,'5.2')
+    %     hold on
+    %     plot(state(5,3).s,state(5,3).T,'o')
+    %     text(state(5,3).s,state(5,3).T,'5.3')
+    %     hold on
+    %     plot(state(5,4).s,state(5,4).T,'o')
+    %     text(state(5,4).s,state(5,4).T,'5.4')
+    %     hold on
+    %     plot(state(6,1).s,state(6,1).T,'o')
+    %     text(state(6,1).s,state(6,1).T,'6.1')
+    %     hold on
+    %     plot(state(6,2).s,state(6,2).T,'o')
+    %     text(state(6,2).s,state(6,2).T,'6.2')
+    %     hold on
+    %     plot(state(6,3).s,state(6,3).T,'o')
+    %     text(state(6,3).s,state(6,3).T,'6.3')
+    %     hold on
+    %     plot(state(6,4).s,state(6,4).T,'o')
+    %     text(state(6,4).s,state(6,4).T,'6.4')
+    %     hold on
+    %     plot(state(7).s,state(7).T,'o')
+    %     text(state(7).s,state(7).T,'7')
+    %     hold on
+    %     plot(state(8).s,state(8).T,'o')
+    %     text(state(8).s,state(8).T,'8')
+    %      hold on
+    %     plot(state(9).s,state(9).T,'o')
+    %     text(state(9).s,state(9).T,'9')
+    %      hold on
+    %     plot(state(10).s,state(10).T,'o')
+    %     text(state(10).s,state(10).T,'10')
+    %     hold on
+    %     plot(state(11,1).s,state(11,1).T,'o')
+    %     text(state(11,1).s,state(11,1).T,'11.1')
+    %     hold on
+    %     plot(state(11,2).s,state(11,2).T,'o')
+    %     text(state(11,2).s,state(11,2).T,'11.2')
+    %     hold on
+    %     plot(state(11,3).s,state(11,3).T,'o')
+    %     text(state(11,3).s,state(11,3).T,'11.3')
+    %     hold on
+    %     plot(state(11,4).s,state(11,4).T,'*')
+    %     text(state(11,4).s,state(11,4).T,'11.4')
+    
+    %%    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% REHEATING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+elseif nR > 0 && nF == 0 %%%%%%%%%%%%%%%%%%%
+    % PLOT : compression in the feed pump
+    %CODE A VERIFIER !!!!! OK VALABLE QUE LORSQUE LE TITRE EST DEFINI CAD
+    %LORSQUE L ETAT 4 EST DANS LA CLOCHE --> a modifier
+    hold on
+    plot(state(1).s,state(1).h,'o')
+    text(state(1).s,state(1).h,'1')
+    
+    [~,sComp,hComp]=CompressionExpansionPlot(state(1),state(2),eta_siP,1,0);
+    hold on
+    plot(sComp,hComp,'Color','r','LineStyle','-','LineWidth',1.5)
+    
+    % PLOT : vaporization in the steam generator
+    hold on
+    plot(state(2).s,state(2).h,'o')
+    text(state(2).s,state(2).h,'2')
+    
+    [~,sVap1,hVap1]=vaporizationCondensationPlot(state(2),state(3));
+    hold on
+    plot(sVap1,hVap1,'Color','r','LineStyle','-','LineWidth',1.5)
+    [~,sVap2,hVap2]=vaporizationCondensationPlot(state(2),state(5));
+    hold on
+    plot(sVap2,hVap2,'Color','m','LineStyle','-.','LineWidth',1.5)
+    
+    % PLOT : Expansion in the turbine
+    hold on
+    plot(state(3).s,state(3).h,'o')
+    text(state(3).s,state(3).h,'3')
+    hold on
+    plot(state(4,1).s,state(4,1).h,'o')
+    text(state(4,1).s,state(4,1).h,'4.1')
+    hold on
+    plot(state(4,2).s,state(4,2).h,'o')
+    text(state(4,2).s,state(4,2).h,'4.2')
+    hold on
+    plot(state(5).s,state(5).h,'o')
+    text(state(5).s,state(5).h,'5')
+    
+    [~,s_turb1,h_turb1]=CompressionExpansionPlot(state(3),state(4,2),eta_siT,0,1);
+    hold on
+    plot(s_turb1,h_turb1,'Color','b','LineStyle','--','LineWidth',1.5)
+    
+    [~,s_turb2,h_turb2]=CompressionExpansionPlot(state(3),state(4,1),eta_siT,0,1);
+    hold on
+    plot(s_turb2,h_turb2,'Color','r','LineStyle','-','LineWidth',1.5)
+    
+    [~,s_turb3,h_turb3]=CompressionExpansionPlot(state(5),state(6),eta_siT,0,1);
+    hold on
+    plot(s_turb3,h_turb3,'Color','r','LineStyle','-','LineWidth',1.5)
+    
+    T1=state(4,1).T:abs(state(5).T-state(4,1).T)*0.01:state(5).T;
+    sR=zeros(1,length(T1));
+    hR=zeros(1,length(T1));
+    for i=1:length(T1)
+        sR(i)=XSteam('s_pt',state(5).p,T1(i));
+        hR(i)=XSteam('h_pt',state(5).p,T1(i));
+    end
+    hold on
+    plot(sR,hR,'Color','r','LineStyle','-','LineWidth',1.5)
+    
+    % PLOT : condensation in the condenser
+    
+    hold on
+    plot(state(6).s,state(6).h,'o')
+    text(state(6).s,state(6).h,'6')
+    if isnan(state(6).x)
+        %To be done
+    else  %case without feedHeating and reHeating
+        plot([state(6).s,state(1).s],[state(6).h,state(1).h],'Color','r','LineStyle','-','LineWidth',1.5)
+    end
+    hold on
+    plot(state(3).s,state(3).h,'o')
+    text(state(3).s,state(3).h,'3')
+    hold on
+    plot(state(4,1).s,state(4,1).h,'o')
+    text(state(4,1).s,state(4,1).h,'4.1')
+    hold on
+    plot(state(4,2).s,state(4,2).h,'o')
+    text(state(4,2).s,state(4,2).h,'4.2')
+    
+    hold on
+    plot(state(5).s,state(5).h,'o')
+    text(state(5).s,state(5).h,'5')
+    hold on
+    plot(state(6).s,state(6).h,'o')
+    text(state(6).s,state(6).h,'6')
+    hold on
+    plot(state(1).s,state(1).h,'o')
+    text(state(1).s,state(1).h,'1')
+    hold on
+    plot(state(2).s,state(2).h,'o')
+    text(state(2).s,state(2).h,'2')
 
 end
-
+end
