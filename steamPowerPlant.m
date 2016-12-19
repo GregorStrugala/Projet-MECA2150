@@ -1,4 +1,4 @@
-function[]=steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deaeratorON,fuel,excessAir,TflueGas,Tambiant,diagrams)
+function [state,mVapourBleed,mVapourSteamGen,mVapourCond,mFlueGas,negFlowRate] = steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deaeratorON,fuel,excessAir,TflueGas,Tambiant,diagrams)
 %close all;
 %NEWSTRUCT
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
@@ -43,6 +43,7 @@ switch nargin % Check for correct inputs, set efficiency to 1 if none is specifi
         baseException = MException(msgID,msg);
         throw(baseException)
 end
+negFlowRate = 0;
 
 % State calculations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 indexDeaerator=0;
@@ -226,6 +227,12 @@ else
     elseif isnan(state(8+2*nR).x)
          warning('Warning. The quality must be x < 1 to have a better efficiency. You should increase the steam pressure at the inlet of the turbine.')
          diagrams={'[]'};
+    elseif state(1).s>4
+        warning('Warning. The fluid has already condensed, you should decrease the number of feed-heating or increase the steam pressure.')
+        diagrams={'[]'};
+        warndlg('The fluid has already condensed, you should decrease the number of feed-heating or increase the steam pressure.','Warning')
+        beep
+        negFlowRate = 1;
     end
     
     if indexDeaerator~=0
@@ -279,7 +286,7 @@ if nR==0 && nF==0
 elseif nR~=0 && nF==0
     mVapourBleed=0;
     mVapourSteamGen=Pe/abs(eta_mec*Wmcy);
-     mVapourCond=mVapourSteamGen;
+    mVapourCond=mVapourSteamGen;
     [eta_combex,eta_gen,mFuel,eExh,eFuel,eFlueGas,LHV]=combustion(fuel,excessAir,TflueGas+273.15,Tambiant+273.15,0.01,mVapourSteamGen*((state(3).h-state(2).h)+state(5).h-state(4,1).h));
     er=0.04;
     mFlueGas=eta_combex*mFuel*eFuel/(eFlueGas-er);
@@ -410,13 +417,13 @@ end
 
 % (T,s) Diagram
 if any(ismember('ts',diagrams))||all
-    %figure
+    figure
     Ts_diagramSteam(state,eta_siP,eta_siT,nF,nR,deaeratorON,indexDeaerator)
 end
 
 % (h,s) Diagram
 if any(ismember('hs',diagrams))||all
-    %figure
+    figure
     hs_diagramSteam(state,eta_siP,eta_siT,nF,nR,deaeratorON,indexDeaerator)
 end
 

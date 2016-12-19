@@ -22,7 +22,7 @@ function varargout = steamGUI(varargin)
 
 % Edit the above text to modify the response to help steamGUI
 
-% Last Modified by GUIDE v2.5 16-Dec-2016 15:50:07
+% Last Modified by GUIDE v2.5 19-Dec-2016 18:46:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -377,7 +377,7 @@ function ts_PB_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 [Tambiant,Triver,deltaT,Tmax,dTpinch,TflueGas,Pe,nF,nR,deGazing,steamPressure,fuel,lambda] = inputArgs(hObject,eventdata,handles);
-steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,{'ts'})
+steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,{'ts'});
 
 
 % --- Executes on button press in enPie_PB.
@@ -386,7 +386,7 @@ function enPie_PB_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 [Tambiant,Triver,deltaT,Tmax,dTpinch,TflueGas,Pe,nF,nR,deGazing,steamPressure,fuel,lambda] = inputArgs(hObject,eventdata,handles);
-steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,{'EnPie'})
+steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,{'EnPie'});
 
 
 % --- Executes on button press in cycleSelection_PB.
@@ -396,3 +396,58 @@ function cycleSelection_PB_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 main
 close steamGUI
+
+
+% --- Executes on button press in hs_PB.
+function hs_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to hs_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Tambiant,Triver,deltaT,Tmax,dTpinch,TflueGas,Pe,nF,nR,deGazing,steamPressure,fuel,lambda] = inputArgs(hObject,eventdata,handles);
+steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,{'hs'});
+
+
+% --- Executes on button press in exPie_PB.
+function exPie_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to exPie_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Tambiant,Triver,deltaT,Tmax,dTpinch,TflueGas,Pe,nF,nR,deGazing,steamPressure,fuel,lambda] = inputArgs(hObject,eventdata,handles);
+steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,{'ExPie'});
+
+
+% --- Executes on button press in dispFlowRates_PB.
+function dispFlowRates_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to dispFlowRates_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Tambiant,Triver,deltaT,Tmax,dTpinch,TflueGas,Pe,nF,nR,deGazing,steamPressure,fuel,lambda] = inputArgs(hObject,eventdata,handles);
+[~,BleedFlows,SteamGenFlow,CondFlow,FGflow,negFlowRate] = steamPowerPlant(deltaT,Triver,Tmax,steamPressure,Pe,nF,nR,dTpinch,deGazing,fuel,lambda,TflueGas,Tambiant,{});
+if ~negFlowRate
+set(handles.steamGenFlow_ST,'string',[num2str(SteamGenFlow) ' kg/s']);
+set(handles.condenserFlow_ST,'string',[num2str(CondFlow) ' kg/s']);
+set(handles.flueGasFlow_ST,'string',[num2str(FGflow) ' kg/s']);
+if nF ~= 0
+    n=1:nF;
+    axes(handles.bleedFlows_Ax)
+    bar(BleedFlows,0.4)
+    xlabel('Bleed number')
+    ylabel('Mass flow rate [kg/s]')
+    text(n,BleedFlows,num2str(BleedFlows,'%0.2f'),...
+    'HorizontalAlignment','center',...
+    'VerticalAlignment','bottom') 
+    guidata(hObject,handles);
+end
+end
+
+
+% --- Executes on button press in clearFlowRates_PB.
+function clearFlowRates_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to clearFlowRates_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.steamGenFlow_ST,'string','-');
+set(handles.condenserFlow_ST,'string','-');
+set(handles.flueGasFlow_ST,'string','-');
+cla(handles.bleedFlows_Ax,'reset')
+guidata(hObject,handles)
