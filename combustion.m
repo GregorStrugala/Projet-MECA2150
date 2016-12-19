@@ -133,7 +133,7 @@ switch fuel
         nN2 = 66.74*lambda;
         x = 0;
         y = 23/12;
-        LHV = 49869.18;
+        LHV = 43330.18; % https://gcep.stanford.edu/pdfs/CTlSZRP4nww_77Shjd-A2g/Chris_Edwards_Symposium2009.pdf
         ec = 45800;
     otherwise
         msgID = 'COMBUSTION:Invalidfuel';

@@ -66,7 +66,7 @@ switch fuel % the parameters depending on lambda are assigned in a function that
         nH2O = 11.5;
         x = 0;
         y = 23/12;
-        LHV = 49869.18;
+        LHV = 43330.18;
         ec = 45800;
     otherwise
         msgID = 'COMBUSTION:Invalidfuel';
