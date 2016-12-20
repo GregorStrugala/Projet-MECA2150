@@ -22,7 +22,7 @@ function varargout = gasTurbineGUI(varargin)
 
 % Edit the above text to modify the response to help gasTurbineGUI
 
-% Last Modified by GUIDE v2.5 19-Dec-2016 21:07:48
+% Last Modified by GUIDE v2.5 20-Dec-2016 21:02:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -352,3 +352,22 @@ function clearFlowRates_PB_Callback(hObject, eventdata, handles)
 set(handles.ma_ST,'string','-');
 set(handles.mc_ST,'string','-');
 set(handles.mg_ST,'string','-');
+
+
+% --- Executes on button press in dispState_PB.
+function dispState_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to dispState_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,fuel] = inputArgs(handles);
+state = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,{},fuel);
+Array = (reshape(struct2array(state),5,4))';
+set(handles.stateTable, 'Data', Array, 'ColumnName', {'p [bar]', 'T [°C]', 'h [kJ/kg]', 's [kJ/(kgK)]', 'e [kJ/kg]'});
+
+
+% --- Executes on button press in clearState_PB.
+function clearState_PB_Callback(hObject, eventdata, handles)
+% hObject    handle to clearState_PB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.stateTable, 'Data', cell(size(get(handles.stateTable,'Data'))));
