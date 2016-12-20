@@ -130,6 +130,9 @@ stateO.e = eO;
             case 'CO' % CO + 0.5L(O2 + 3.76N2) -> CO2 + 0.5(L-1)O2 + 1.88L N2
                 nO2 = 0.5*(lambda-1);
                 nN2 = 1.88*lambda;
+            case 'C12H23' % C12H23 + 17.75L(O2 + 3.76N2) -> 12 CO2 + 11.5 H2O + 17.75(L-1)O2 + 66.74L N2
+                nO2 = 17.75*(lambda-1);
+                nN2 = 66.74*lambda;
         end
     end
     function base = hsBase(prop,T)% if size(T) = 1 x n, then size(base) = n x 4. 
