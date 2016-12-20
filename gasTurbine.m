@@ -150,6 +150,8 @@ if any(ismember('ts',diagrams))||all
     plot(s1,Tc1,'o',s2,Tc2,'o',s3,Tc3,'o',s4,Tc4,'o')
     str = {'1','2','3','4'};
     text([s1 s2 s3 s4],[Tc1 Tc2 Tc3 Tc4],str,'HorizontalAlignment','right')
+    xlabel('s [kJkg^{-1}K^{-1}]')
+    ylabel('T [°C]')
     hold off
 end
 
@@ -170,6 +172,8 @@ if any(ismember('hs',diagrams))||all
     plot(s1,h1,'o',s2,h2,'o',s3,h3,'o',s4,h4,'o')
     str = {'1','2','3','4'};
     text([s1 s2 s3 s4],[h1 h2 h3 h4],str,'HorizontalAlignment','right')
+    xlabel('s [kJkg^{-1}K^{-1}]')
+    ylabel('h [kJ/kg]')
     hold off
 end
 
