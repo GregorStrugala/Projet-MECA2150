@@ -10,6 +10,7 @@ function [etaCombex,etaGen,fuelFlowRate,eExh,ec,ef,LHV] = combustion(fuel,lambda
 %       |   C3H8    |
 %       |   H2      |
 %       |   CO      |
+%       |   C12H23  |
 %       +-----------+
 %   lambda is the air excess coefficient. If no lambda is specified, its
 %   default value is set to 1. Additionnaly, if no fuel is specified, the
@@ -125,6 +126,15 @@ switch fuel
         y = 0;
         LHV = 10085;
         ec = 9845;
+    case 'C12H23' % C12H23 + 17.75L(O2 + 3.76N2) -> 12 CO2 + 11.5 H2O + 17.75(L-1)O2 + 66.74L N2
+        nCO2 = 12;
+        nH2O = 11.5;
+        nO2 = 17.75*(lambda-1);
+        nN2 = 66.74*lambda;
+        x = 0;
+        y = 23/12;
+        LHV = 43330.18; % https://gcep.stanford.edu/pdfs/CTlSZRP4nww_77Shjd-A2g/Chris_Edwards_Symposium2009.pdf
+        ec = 45800;
     otherwise
         msgID = 'COMBUSTION:Invalidfuel';
         msg = 'The chemical formula of the fuel burnt must be one of those indicated in the documentation.';

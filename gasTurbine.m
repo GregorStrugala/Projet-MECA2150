@@ -1,4 +1,4 @@
-function [stateCelsius,mg,nM,MecLoss,CombLoss,CompLoss,TurbLoss] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,diagrams,fuel)
+function [stateCelsius,mg,nM,MecLoss,CombLoss,CompLoss,TurbLoss,ma,mc] = gasTurbine(Pe,Ta,Tf,r,kcc,etaC,etaT,kmec,diagrams,fuel)
 %GASTURBINE characterises a power cycle that uses a gas turbine.
 %   stateCelsius,mg,nM,MecLoss,ComLoss,CompLoss,TurbLoss = GASTURBINE(Pe,Ta,Tf,r,kcc,etaC,etaT) displays state, energy
 %   and exergy charts for the given parameters.
@@ -150,23 +150,34 @@ if any(ismember('ts',diagrams))||all
     plot(s1,Tc1,'o',s2,Tc2,'o',s3,Tc3,'o',s4,Tc4,'o')
     str = {'1','2','3','4'};
     text([s1 s2 s3 s4],[Tc1 Tc2 Tc3 Tc4],str,'HorizontalAlignment','right')
+    xlabel('s [kJkg^{-1}K^{-1}]')
+    ylabel('T [°C]')
     hold off
 end
 
+h1 = state(1).h; % outside of if clause because used also for energetic analysis
+h2 = state(2).h;
+h3 = state(3).h;
+h4 = state(4).h;
 % (h,s) Diagram
 if any(ismember('hs',diagrams))||all
     figure
     h12 = AirProp('h',T12) - AirProp('h',273.15);
     h23 = nM*(hsBase('h',T23) - hsBase('h',273.15*ones(size(T23))))';
     h34 = nM*(hsBase('h',T34) - hsBase('h',273.15*ones(size(T34))))';
+    h12(end) = h2;
+    h23(1) = h2;
     plot(s12,h12,s23,h23,s34,h34)
+    hold on
+    plot(s1,h1,'o',s2,h2,'o',s3,h3,'o',s4,h4,'o')
+    str = {'1','2','3','4'};
+    text([s1 s2 s3 s4],[h1 h2 h3 h4],str,'HorizontalAlignment','right')
+    xlabel('s [kJkg^{-1}K^{-1}]')
+    ylabel('h [kJ/kg]')
+    hold off
 end
 
 %% Energetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-h1 = state(1).h;
-h2 = state(2).h;
-h3 = state(3).h;
-h4 = state(4).h;
 Wmov = h3 - h4;
 Wop = h2 - h1;
 ma = Pe/( (1 - kmec)*Wmov*(h2 + LHV/(lambda*ma1))/h3 - (1 + kmec)*Wop ); % CHECK
@@ -178,7 +189,11 @@ MecLoss = kmec*(ma*Wop + mg*Wmov);
 % Energy pie chart
 if any(ismember('EnPie',diagrams))||all
     figure
-    pie([Pe MecLoss Qexh])
+    labels = {['Pe' char(10) num2str(abs(Pe/1000)) ' MW' char(10)]; ...
+        ['Meca' char(10) num2str(abs(MecLoss/1000)) ' MW' char(10)]; ...
+        ['Exhaust' char(10) num2str(abs(Qexh/1000)) ' MW' char(10)]};
+    pie(abs([Pe MecLoss Qexh]),labels)
+    title(['Primary energy flux: ' num2str(abs(Pprim/1000)) ' MW'])
 end
 
 %% Exergetic Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -193,7 +208,13 @@ Eexh = mg*e4 - ma*e1;
 % Exergy pie chart
 if any(ismember('ExPie',diagrams))||all
     figure
-    pie([Pe MecLoss CompLoss+TurbLoss Eexh CombLoss])
+    labels = {['Pe' char(10) num2str(abs(Pe/1000)) ' MW' char(10)]; ...
+        ['Meca' char(10) num2str(abs(MecLoss/1000)) ' MW' char(10)]; ...
+        ['C & T irrev.' char(10) num2str(abs((CompLoss+TurbLoss))/1000) ' MW' char(10)]; ...
+        ['Exhaust' char(10) num2str(abs(Eexh/1000)) ' MW' char(10)]; ...
+        ['Combustion' char(10) num2str(abs(CombLoss/1000)) ' MW' char(10)]};
+    pie(abs([Pe MecLoss CompLoss+TurbLoss Eexh CombLoss]),labels)
+    title(['Primary exergy flux: ' num2str(abs(mc*ec/1000)) ' MW'])
 end
 
     function base = hsBase(prop,T)% if size(T) = 1 x n, then size(base) = n x 4.

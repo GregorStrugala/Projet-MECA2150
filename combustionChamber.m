@@ -61,6 +61,13 @@ switch fuel % the parameters depending on lambda are assigned in a function that
         y = 0;
         LHV = 10085;
         ec = 9845;
+    case 'C12H23' % C12H23 + 17.75L(O2 + 3.76N2) -> 12 CO2 + 11.5 H2O + 17.75(L-1)O2 + 66.74L N2
+        nCO2 = 12;
+        nH2O = 11.5;
+        x = 0;
+        y = 23/12;
+        LHV = 43330.18;
+        ec = 45800;
     otherwise
         msgID = 'COMBUSTION:Invalidfuel';
         msg = 'The chemical formula of the fuel burnt must be one of those indicated in the documentation.';
@@ -123,6 +130,9 @@ stateO.e = eO;
             case 'CO' % CO + 0.5L(O2 + 3.76N2) -> CO2 + 0.5(L-1)O2 + 1.88L N2
                 nO2 = 0.5*(lambda-1);
                 nN2 = 1.88*lambda;
+            case 'C12H23' % C12H23 + 17.75L(O2 + 3.76N2) -> 12 CO2 + 11.5 H2O + 17.75(L-1)O2 + 66.74L N2
+                nO2 = 17.75*(lambda-1);
+                nN2 = 66.74*lambda;
         end
     end
     function base = hsBase(prop,T)% if size(T) = 1 x n, then size(base) = n x 4. 

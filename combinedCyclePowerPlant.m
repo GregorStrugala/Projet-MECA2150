@@ -1,4 +1,4 @@
-function [] = combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,Ta,Tf,fuel,r,PeGT,steamDiagrams,gasDiagrams)
+function [stateSteam,stateGas,mSteamLP,mSteamHP,mSteamTot,mGas,ma,mc] = combinedCyclePowerPlant(deltaT,Triver,HPsteamPressure,dTpinch,dTapproach,Ta,Tf,fuel,r,PeGT,steamDiagrams,gasDiagrams)
 %close all;
 %STEAMPOWERPLANT characterises a steam power plant using Rankine cycle.
 %   STEAMPOWERPLANT(deltaT, Triver, Tmax, steamPressure, Pe, n) displays a table
@@ -54,7 +54,7 @@ kcc=0.95;
 kmec=0.015;
 %fuel='CH4';
 %call to the gasTurbine function:
-[stateGas,mGas,nM,gasTurbMecLoss,gasTurbCombLossEx,gasTurbCompLossEx,gasTurbLossEx] = gasTurbine(PeGT,Ta,Tf,r,kcc,etaC,etaT,kmec,gasDiagrams,fuel);
+[stateGas,mGas,nM,gasTurbMecLoss,gasTurbCombLossEx,gasTurbCompLossEx,gasTurbLossEx,ma,mc] = gasTurbine(PeGT,Ta,Tf,r,kcc,etaC,etaT,kmec,gasDiagrams,fuel);
 
 %efficiencies
 eta_mec=0.98;
