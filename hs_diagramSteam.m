@@ -1,6 +1,6 @@
 function [ ] = hs_diagramSteam(state,eta_siP,eta_siT,nF,nR,deaeratorON,indexDeaerator)
 %function
-T=0.01:0.1:373.945;
+T=0.01:10:373.945;
 %Preallocation
 sv_t=zeros(1,length(T));
 sl_t=zeros(1,length(T));
@@ -20,6 +20,8 @@ figure;
 % diagram h-s
 %plot(sl_t,h_psl,sv_t,h_psv)
 plot([sl_t fliplr(sv_t)], [h_psl fliplr(h_psv)],'Color','g','LineStyle','-','LineWidth',1.5)%no hole
+xlabel('s [kJ/(kg K)]')
+ylabel('h [kJ/kg]')
 %% %%%%%%%%%%%%%%%%%%%%%%%%%% RANKINE-HIRN CYCLE %%%%%%%%%%%%%%%%%%%%%%%%%%%
 if nF == 0 && nR == 0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % PLOT : compression in the feed pump
@@ -27,7 +29,7 @@ if nF == 0 && nR == 0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %LORSQUE L ETAT 4 EST DANS LA CLOCHE --> a modifier
     hold on
     plot(state(1).s,state(1).h,'o')
-    text(state(1).s,state(1).h,'1')
+    text(state(1).s,state(1).h,'1','Position',[state(1).s-0.3,state(1).h])
     
     [~,sComp,hComp]=CompressionExpansionPlot(state(1),state(2),eta_siP,1,0);
     hold on
@@ -38,7 +40,7 @@ if nF == 0 && nR == 0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     hold on
     plot(state(2).s,state(2).h,'o')
-    text(state(2).s,state(2).h,'2')
+    text(state(2).s,state(2).h,'2','Position',[state(2).s,state(2).h+120])
     
     [~,sVap1,hVap1]=vaporizationCondensationPlot(state(2),state(3));
     hold on
@@ -47,7 +49,7 @@ if nF == 0 && nR == 0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % PLOT : Expansion in the turbine
     hold on
     plot(state(3).s,state(3).h,'o')
-    text(state(3).s,state(3).h,'3')
+    text(state(3).s,state(3).h,'3','Position',[state(3).s+0.2,state(3).h])
     
     [~,s_turb,h_turb]=CompressionExpansionPlot(state(3),state(4),eta_siT,0,1);
     hold on
@@ -56,7 +58,7 @@ if nF == 0 && nR == 0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % PLOT : condensation in the condenser
     hold on
     plot(state(4).s,state(4).h,'o')
-    text(state(4).s,state(4).h,'4')
+    text(state(4).s,state(4).h,'4','Position',[state(4).s+0.2,state(4).h])
     if isnan(state(4).x)
         
         %To be done
@@ -72,7 +74,7 @@ elseif nF > 0 %&& reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
     %LORSQUE L ETAT 4 EST DANS LA CLOCHE --> a modifier
     hold on
     plot(state(1).s,state(1).h,'o')
-    text(state(1).s,state(1).h,'1')    
+    text(state(1).s,state(1).h,'1','Position',[state(1).s-0.3,state(1).h])    
     [~,sComp,hComp]=CompressionExpansionPlot(state(1),state(2),eta_siP,1,0);
     hold on
     plot(sComp,hComp,'Color','r','LineStyle','-','LineWidth',1.5)
@@ -81,7 +83,7 @@ elseif nF > 0 %&& reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
     % PLOT : vaporization in the steam generator
     hold on
     plot(state(2).s,state(2).h,'o')
-    text(state(2).s,state(2).h,'2')
+    text(state(2).s,state(2).h,'2','Position',[state(2).s,state(2).h+120])
     
     [~,sVap1,hVap1]=vaporizationCondensationPlot(state(2),state(3));
     hold on
@@ -89,7 +91,7 @@ elseif nF > 0 %&& reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
     % PLOT : Expansion in the turbine
     hold on
     plot(state(3).s,state(3).h,'o')
-    text(state(3).s,state(3).h,'3')
+    text(state(3).s,state(3).h,'3','Position',[state(3).s+0.2,state(3).h])
     
     if nR == 0
         hold on
@@ -101,14 +103,14 @@ elseif nF > 0 %&& reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
     else
         hold on
         plot(state(4,1).s,state(4,1).h,'o')
-        text(state(4,1).s,state(4,1).h,'4.1')
+        text(state(4,1).s,state(4,1).h,'4.1','Position',[state(4,1).s+0.1,state(4,1).h-20])
         [~,s_turb1,h_turb1]=CompressionExpansionPlot(state(3),state(4,2),eta_siT,0,1);
         hold on
         plot(s_turb1,h_turb1,'Color','m','LineStyle','-.','LineWidth',1.5)
         
         hold on
         plot(state(4,2).s,state(4,2).h,'o')
-        text(state(4,2).s,state(4,2).h,'4.2')
+        text(state(4,2).s,state(4,2).h,'4.2','Position',[state(4,2).s+0.1,state(4,2).h-20])
         [~,s_turb,h_turb]=CompressionExpansionPlot(state(3),state(4,1),eta_siT,0,1);
         hold on
         plot(s_turb,h_turb,'Color','r','LineStyle','-','LineWidth',1.5)
@@ -220,7 +222,7 @@ elseif nF > 0 %&& reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
         feedHeat=zeros(1,nF);
         feedHeat(index)=(4+2*nR)*10+index; %ok for nF<10
         plot(state(4+2*nR,index).s,state(4+2*nR,index).h,'o')
-        text(state(4+2*nR,index).s,state(4+2*nR,index).h,num2str(feedHeat(index)))
+        text(state(4+2*nR,index).s,state(4+2*nR,index).h,num2str(feedHeat(index)),'Position',[state(4+2*nR,index).s+0.1,state(4+2*nR,index).h])
         hold on
         plot(state(5+2*nR,index).s,state(5+2*nR,index).h,'o')
         hold on
@@ -349,7 +351,7 @@ elseif nR > 0 && nF == 0 %%%%%%%%%%%%%%%%%%%
     %LORSQUE L ETAT 4 EST DANS LA CLOCHE --> a modifier
     hold on
     plot(state(1).s,state(1).h,'o')
-    text(state(1).s,state(1).h,'1')
+    text(state(1).s,state(1).h,'1','Position',[state(1).s-0.3,state(1).h])
     
     [~,sComp,hComp]=CompressionExpansionPlot(state(1),state(2),eta_siP,1,0);
     hold on
@@ -358,7 +360,7 @@ elseif nR > 0 && nF == 0 %%%%%%%%%%%%%%%%%%%
     % PLOT : vaporization in the steam generator
     hold on
     plot(state(2).s,state(2).h,'o')
-    text(state(2).s,state(2).h,'2')
+    text(state(2).s,state(2).h,'2','Position',[state(2).s,state(2).h+120])
     
     [~,sVap1,hVap1]=vaporizationCondensationPlot(state(2),state(3));
     hold on
@@ -370,16 +372,16 @@ elseif nR > 0 && nF == 0 %%%%%%%%%%%%%%%%%%%
     % PLOT : Expansion in the turbine
     hold on
     plot(state(3).s,state(3).h,'o')
-    text(state(3).s,state(3).h,'3')
+    text(state(3).s,state(3).h,'3','Position',[state(3).s+0.2,state(3).h])
     hold on
     plot(state(4,1).s,state(4,1).h,'o')
-    text(state(4,1).s,state(4,1).h,'4.1')
+    text(state(4,1).s,state(4,1).h,'4.1','Position',[state(4,1).s+0.2,state(4,1).h-50])
     hold on
     plot(state(4,2).s,state(4,2).h,'o')
-    text(state(4,2).s,state(4,2).h,'4.2')
+    text(state(4,2).s,state(4,2).h,'4.2','Position',[state(4,2).s+0.2,state(4,2).h-50])
     hold on
     plot(state(5).s,state(5).h,'o')
-    text(state(5).s,state(5).h,'5')
+    text(state(5).s,state(5).h,'5','Position',[state(5).s+0.2,state(5).h])
     
     [~,s_turb1,h_turb1]=CompressionExpansionPlot(state(3),state(4,2),eta_siT,0,1);
     hold on
@@ -407,34 +409,11 @@ elseif nR > 0 && nF == 0 %%%%%%%%%%%%%%%%%%%
     
     hold on
     plot(state(6).s,state(6).h,'o')
-    text(state(6).s,state(6).h,'6')
+    text(state(6).s,state(6).h,'6','Position',[state(6).s+0.2,state(6).h])
     if isnan(state(6).x)
         %To be done
     else  %case without feedHeating and reHeating
         plot([state(6).s,state(1).s],[state(6).h,state(1).h],'Color','r','LineStyle','-','LineWidth',1.5)
     end
-    hold on
-    plot(state(3).s,state(3).h,'o')
-    text(state(3).s,state(3).h,'3')
-    hold on
-    plot(state(4,1).s,state(4,1).h,'o')
-    text(state(4,1).s,state(4,1).h,'4.1')
-    hold on
-    plot(state(4,2).s,state(4,2).h,'o')
-    text(state(4,2).s,state(4,2).h,'4.2')
-    
-    hold on
-    plot(state(5).s,state(5).h,'o')
-    text(state(5).s,state(5).h,'5')
-    hold on
-    plot(state(6).s,state(6).h,'o')
-    text(state(6).s,state(6).h,'6')
-    hold on
-    plot(state(1).s,state(1).h,'o')
-    text(state(1).s,state(1).h,'1')
-    hold on
-    plot(state(2).s,state(2).h,'o')
-    text(state(2).s,state(2).h,'2')
-
 end
 end

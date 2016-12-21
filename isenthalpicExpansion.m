@@ -1,6 +1,6 @@
 function[T,s,h] = isenthalpicExpansion(stateLP,stateHP)
 
-T=stateLP.T:abs(stateLP.T-stateHP.T)*0.001:stateHP.T;
+T=stateLP.T:abs(stateLP.T-stateHP.T)*0.1:stateHP.T;
 p=linspace(stateLP.p,stateHP.p,length(T));
 p=fliplr(p);
 T=fliplr(T);

@@ -73,7 +73,7 @@ kmec=0.015;
 %efficiencies
 eta_mec=0.954;
 eta_gen=0.945;
-eta_siT=0.88;
+eta_siT=0.9;
 eta_siP=0.85;
 
 %temperature of condensation
@@ -303,8 +303,8 @@ while abs(r) > 0.01 && n<nmax
     end
     n=n+1;
 end
-TgExhaust=Tguess;
-%sGexhaust = fgProp('s',TgExhaust+273.15,nM);
+TgExhaust=Tguess
+sGexhaust = fgProp('s',TgExhaust+273.15,nM);
 eGexhaust=fgProp('e',TgExhaust+273.15,nM);
 
 %% Table & Diagrams %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -340,10 +340,14 @@ HRSGt=[stateSteam(3).T, stateSteam(10,3).T, stateSteam(10,2).T,stateSteam(9,3).T
 if any(ismember('tq',steamDiagrams))||all
     %normalized T-Q diagram
     figure
-    plot(QsteamTransfer/QsteamTot, HRSGt);
+    plot(QsteamTransfer/QsteamTot, HRSGt,'Color','b');
+    %hold on
+    %plot(QsteamTransfer(1:3)/QsteamTot,HRSGt(1:3),'Color','r')
     hold on
-    plot([0,QsteamTransfer(3)/QsteamTot, QsteamTransfer(5)/QsteamTot,QsteamTransfer(7)/QsteamTot,1],Tgas);
-    
+    plot([0,QsteamTransfer(3)/QsteamTot, QsteamTransfer(5)/QsteamTot,QsteamTransfer(7)/QsteamTot,1],Tgas,'Color','r');
+    xlabel('transferred heat fraction Q/Q_{tot}')
+    ylabel('T [°C]')
+    legend('Vapour','Gas')
     %no normalized T-Q diagram
     % plot(QsteamTransfer, HRSGt);
     % hold on

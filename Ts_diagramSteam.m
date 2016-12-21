@@ -4,7 +4,7 @@ function [ ] = Ts_diagramSteam(state,eta_siP,eta_siT,nF,nR,deaeratorON,indexDeae
 %Faire un beau graphe !
 %global state
 
-Tvap=0.1:0.1:373.9459;
+Tvap=0.1:5:373.9459;
 
 %Preallocation
 sv_t=zeros(1,length(Tvap));
@@ -24,7 +24,8 @@ figure;
 % diagram T-s
 %plot(sl_t,T,sv_t,T)
 plot([sl_t fliplr(sv_t)], [Tvap fliplr(Tvap)],'Color','g','LineStyle','-','LineWidth',1.5)% no hole
-
+xlabel('s [kJ/(kg K)]')
+ylabel('T [°C]')
 
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%% RANKINE-HIRN CYCLE %%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -34,7 +35,7 @@ if nF == 0 && nR == 0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %LORSQUE L ETAT 4 EST DANS LA CLOCHE --> a modifier
     hold on
     plot(state(1).s,state(1).T,'o')
-    text(state(1).s,state(1).T,'1')
+    text(state(1).s,state(1).T,'1','Position',[state(1).s-0.3,state(1).T])
     
     [Tcomp,sComp,~]=CompressionExpansionPlot(state(1),state(2),eta_siP,1,0);
     hold on
@@ -45,7 +46,7 @@ if nF == 0 && nR == 0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     hold on
     plot(state(2).s,state(2).T,'o')
-    text(state(2).s,state(2).T,'2')
+    text(state(2).s,state(2).T,'2','Position',[state(2).s,state(2).T+20])
     
     [Tvap,sVap1,~]=vaporizationCondensationPlot(state(2),state(3));
     hold on
@@ -54,7 +55,7 @@ if nF == 0 && nR == 0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % PLOT : Expansion in the turbine
     hold on
     plot(state(3).s,state(3).T,'o')
-    text(state(3).s,state(3).T,'3')
+    text(state(3).s,state(3).T,'3','Position',[state(3).s+0.2,state(3).T])
     
     [T_turb,s_turb,~]=CompressionExpansionPlot(state(3),state(4),eta_siT,0,1);
     hold on
@@ -63,7 +64,7 @@ if nF == 0 && nR == 0; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % PLOT : condensation in the condenser
     hold on
     plot(state(4).s,state(4).T,'o')
-    text(state(4).s,state(4).T,'4')
+    text(state(4).s,state(4).T,'4','Position',[state(4).s+0.2,state(4).T])
     if isnan(state(4).x)
         
         %To be done
@@ -168,7 +169,7 @@ elseif nF > 0 %&& reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
         plot(state(5+2*nR,indexDeaerator).s,state(5+2*nR,indexDeaerator).T,'*');
         text(state(5+2*nR,indexDeaerator).s,state(5+2*nR,indexDeaerator).T,num2str(outDeaerator));
         
-        T1=state(10+2*nR).T:abs(state(5+2*nR,indexDeaerator).T-state(10+2*nR).T)*0.01:state(5+2*nR,indexDeaerator).T;
+        T1=state(10+2*nR).T:abs(state(5+2*nR,indexDeaerator).T-state(10+2*nR).T)*0.1:state(5+2*nR,indexDeaerator).T;
         sBeforeDeaerator=zeros(1,length(T1));
         for i=1:length(T1)
             if i==length(T1)
@@ -193,7 +194,7 @@ elseif nF > 0 %&& reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
         
         %reheat in the heater after the deaerator until the inlet of the
         %pump
-        T2=state(11+2*nR,indexDeaerator+1).T:abs(state(1).T-state(11+2*nR,indexDeaerator+1).T)*0.001:state(1).T;
+        T2=state(11+2*nR,indexDeaerator+1).T:abs(state(1).T-state(11+2*nR,indexDeaerator+1).T)*0.1:state(1).T;
         sAfterDeaerator=zeros(1,length(T2));
         for i=1:length(T2)
             if i==length(T2)
@@ -204,7 +205,7 @@ elseif nF > 0 %&& reHeat == 0 && nR == 0%%%%%%%%%%%%%%%%%%%
         hold on
         plot(sAfterDeaerator,T2,'Color','r','LineStyle','-','LineWidth',1.5)
     else
-        T1=state(10+2*nR).T:abs(state(1).T-state(10+2*nR).T)*0.01:state(1).T;
+        T1=state(10+2*nR).T:abs(state(1).T-state(10+2*nR).T)*0.1:state(1).T;
         sR=zeros(1,length(T1));
         for i=1:length(T1)
             sR(i)=XSteam('s_pt',state(1).p,T1(i));

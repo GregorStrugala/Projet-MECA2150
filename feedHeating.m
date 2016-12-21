@@ -14,7 +14,7 @@ turbineLossEx=zeros(1,nF);
 extractPumpLossEn=zeros(1,2);
 extractPumpLossEx=zeros(1,2);
 
-dPfeedPump=0.5;
+dPfeedPump=0.535;
 
 for index=1:nF
     if nR==0  %no reheating
@@ -64,6 +64,8 @@ for index=1:nF
         state(6+2*nR,indexDeaerator).e=0;%necessaire pour heatLossEx
         state(6+2*nR,indexDeaerator).s=nan;
         state(6+2*nR,indexDeaerator).T=nan;
+        state(6+2*nR,indexDeaerator).p=nan;
+        state(6+2*nR,indexDeaerator).x=nan;
     else
         %condensation of the bled steam in the heater : exchange with the fluid
         %coming from the extracting pump

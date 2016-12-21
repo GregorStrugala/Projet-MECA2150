@@ -59,7 +59,7 @@ kmec=0.015;
 %efficiencies
 eta_mec=0.98;
 %eta_gen=0.945;
-eta_siT=0.85;
+eta_siT=0.9;
 eta_siP=0.85;
 
 %temperature of condensation
@@ -243,9 +243,47 @@ Tgas=[stateGas(4).T,TgEcoHP,TgEcoLP,TgExhaust];
 HRSGt=[stateSteam(3).T, stateSteam(6,3).T, stateSteam(6,2).T,stateSteam(2,3).T, stateSteam(2,2).T,stateSteam(2,1).T];
 if any(ismember('tq',steamDiagrams))||all
     figure
-    plot(QsteamTransfer/QsteamTot, HRSGt);
+    plot(QsteamTransfer/QsteamTot, HRSGt,'Color','b');
     hold on
-    plot([0,QsteamTransfer(3)/QsteamTot, QsteamTransfer(5)/QsteamTot,1],Tgas);
+    plot([0,QsteamTransfer(3)/QsteamTot, QsteamTransfer(5)/QsteamTot,1],Tgas,'Color', 'r');
+    hold on
+    plot(QsteamTransfer(1)/QsteamTot,HRSGt(1),'o')
+    text(QsteamTransfer(1)/QsteamTot,HRSGt(1),'3')
+    hold on
+    plot(QsteamTransfer(2)/QsteamTot,HRSGt(2),'o')
+    text(QsteamTransfer(2)/QsteamTot,HRSGt(2),'6''''')
+    hold on
+    plot(QsteamTransfer(3)/QsteamTot,HRSGt(3),'o')
+    text(QsteamTransfer(3)/QsteamTot,HRSGt(3),'6''')
+    hold on
+    plot(QsteamTransfer(4)/QsteamTot,HRSGt(4),'o')
+    text(QsteamTransfer(4)/QsteamTot,HRSGt(4),'2''''')
+    hold on
+    plot(QsteamTransfer(5)/QsteamTot,HRSGt(5),'o')
+    text(QsteamTransfer(5)/QsteamTot,HRSGt(5),'2''')
+    hold on
+    plot(QsteamTransfer(5)/QsteamTot,HRSGt(5),'o')
+    text(QsteamTransfer(5)/QsteamTot,HRSGt(5),'6','Position',[QsteamTransfer(5)/QsteamTot,HRSGt(5)-40])
+    hold on
+    plot(QsteamTransfer(6)/QsteamTot,HRSGt(6),'o')
+    text(QsteamTransfer(6)/QsteamTot,HRSGt(6),'2')
+    hold on
+    plot(QsteamTransfer(1)/QsteamTot,stateGas(4).T,'o')
+    text(QsteamTransfer(1)/QsteamTot,stateGas(4).T,'4_g')
+    hold on
+    plot(QsteamTransfer(3)/QsteamTot,TgEcoHP,'o')
+    text(QsteamTransfer(3)/QsteamTot,TgEcoHP,'5_{HP}')
+    hold on
+    plot(QsteamTransfer(5)/QsteamTot,TgEcoLP,'o')
+    text(QsteamTransfer(5)/QsteamTot,TgEcoLP,'5_{BP}')
+    hold on
+    plot(QsteamTransfer(6)/QsteamTot,TgExhaust,'o')
+    text(QsteamTransfer(6)/QsteamTot,TgExhaust,'5_{g}')
+    %hold on
+    %plot(QsteamTransfer(end-1:end)/QsteamTot, HRSGt(end-1:end),'Color','m');
+    %hold on 
+    %plot(QsteamTransfer(end-2:end-1)/QsteamTot, HRSGt(end-2:end-1),'Color','r');
+    hold off
 end
 
 % T-S Diagram

@@ -4,7 +4,7 @@ function [ ] = hs_diagramCombined(state,eta_siP,eta_siT,pressureLevel)
 %Faire un beau graphe !
 %global state
 
-Tvap=0.1:0.1:373.9459;
+Tvap=0.1:10:373.9459;
 
 %Preallocation
 sv_t=zeros(1,length(Tvap));
@@ -24,6 +24,10 @@ figure;
 % diagram h-s
 %plot(sl_t,h_psl,sv_t,h_psv)
 plot([sl_t fliplr(sv_t)], [h_psl fliplr(h_psv)],'Color','g','LineStyle','-','LineWidth',1.5)%no hole
+plot([sl_t fliplr(sv_t)], [h_psl fliplr(h_psv)],'Color','g','LineStyle','-','LineWidth',1.5)%no hole
+xlabel('s [kJ/(kg K)]')
+ylabel('h [kJ/kg]')
+
 
 switch pressureLevel
     %% %%%%%%%%%%%%%%%%%%% COMBINED CYCLE POWER PLANT (2P) %%%%%%%%%%%%%%%%%%%%
@@ -86,11 +90,11 @@ switch pressureLevel
         
         hold on
         plot(state(2,2).s,state(2,2).h,'o')
-        text(state(2,2).s,state(2,2).h,'2p')
+        text(state(2,2).s,state(2,2).h,'2''')
         
         hold on
         plot(state(2,3).s,state(2,3).h,'o')
-        text(state(2,3).s,state(2,3).h,'2"')
+        text(state(2,3).s,state(2,3).h,'2''''')
         
         hold on
         plot(state(3).s,state(3).h,'o')
@@ -110,11 +114,11 @@ switch pressureLevel
         
         hold on
         plot(state(6,2).s,state(6,2).h,'o')
-        text(state(6,2).s,state(6,2).h,'9p')
+        text(state(6,2).s,state(6,2).h,'9''')
         
         hold on
         plot(state(6,3).s,state(6,3).h,'o')
-        text(state(6,3).s,state(6,3).h,'9"')
+        text(state(6,3).s,state(6,3).h,'9''''')
         
         
         
@@ -132,7 +136,7 @@ switch pressureLevel
         
         hold on
         plot(state(2,2).s,state(2,2).h,'o')
-        text(state(2,2).s,state(2,2).h,'2p')
+        text(state(2,2).s,state(2,2).h,'2''')
         
         hold on
         plot(state(2,3).s,state(2,3).h,'o')
