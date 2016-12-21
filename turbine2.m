@@ -55,7 +55,7 @@ hfI = hI + hsBase('h',273.15)*(nM)';
 Tinf = 273;
 Tsup = Ti;
 To = (Tinf + Tsup)/2;
-precision = 1e-4; % three significant figures.
+precision = 1e-7; % three significant figures.
 while Tsup-Tinf > precision
     a = log(To/Ti)/log(rKcc) + Rg*etaT*(Ti - To)/( hfI - hsBase('h',To)*(nM)' );
     if a < 0

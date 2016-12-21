@@ -37,7 +37,7 @@ Ra = R/Mair; % gas constant of the air
 Tinf = Ti;
 Tsup = 3000;
 To = (Tinf + Tsup)/2;
-precision = 1e-4; % three significant figures.
+precision = 1e-7; % three significant figures.
 a = 1 + precision;
 while abs(a) > precision
     a = log(To/Ti)/log(r) - Ra*(To-Ti)/(etaC*( AirProp('h',To) - haI ));
