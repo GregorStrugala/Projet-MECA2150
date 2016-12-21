@@ -4,7 +4,7 @@ function [ ] = hs_diagramCombined(state,eta_siP,eta_siT,pressureLevel)
 %Faire un beau graphe !
 %global state
 
-Tvap=0.1:0.1:373.9459;
+Tvap=0.1:10:373.9459;
 
 %Preallocation
 sv_t=zeros(1,length(Tvap));
@@ -24,6 +24,10 @@ figure;
 % diagram h-s
 %plot(sl_t,h_psl,sv_t,h_psv)
 plot([sl_t fliplr(sv_t)], [h_psl fliplr(h_psv)],'Color','g','LineStyle','-','LineWidth',1.5)%no hole
+plot([sl_t fliplr(sv_t)], [h_psl fliplr(h_psv)],'Color','g','LineStyle','-','LineWidth',1.5)%no hole
+xlabel('s [kJ/(kg K)]')
+ylabel('h [kJ/kg]')
+
 
 switch pressureLevel
     %% %%%%%%%%%%%%%%%%%%% COMBINED CYCLE POWER PLANT (2P) %%%%%%%%%%%%%%%%%%%%

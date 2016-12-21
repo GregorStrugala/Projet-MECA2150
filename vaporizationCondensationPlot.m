@@ -22,7 +22,7 @@ if isnan(sV_p)
     end
 else
     Tsat=XSteam('Tsat_p',stateHT.p);
-    Tpart1=stateLT.T:(Tsat-stateLT.T)*0.01:Tsat-0.01;
+    Tpart1=stateLT.T:(Tsat-stateLT.T)*0.1:Tsat-0.01;
     sPart1=zeros(1,length(Tpart1));
     hPart1=zeros(1,length(Tpart1));
     for i=1:length(Tpart1)
@@ -48,7 +48,7 @@ else
         
         %part3
         Tsur=XSteam('T_ps',stateHT.p,stateHT.s);
-        Tpart3=Tsat+0.01:(Tsur-Tsat)*0.01:Tsur;
+        Tpart3=Tsat+0.01:(Tsur-Tsat)*0.1:Tsur;
         sPart3=zeros(1,length(Tpart3));
         hPart3=zeros(1,length(Tpart3));
         

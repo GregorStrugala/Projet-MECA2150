@@ -32,7 +32,7 @@ if compression == 1
     end
     
 elseif expansion == 1
-    p=stateO.p:abs((stateI.p-stateO.p))*0.0001:stateI.p;
+    p=stateO.p:abs((stateI.p-stateO.p))*0.1:stateI.p;
     p = fliplr(p);
     hs=zeros(1,length(p));
     h=zeros(1,length(p));
