@@ -303,8 +303,8 @@ while abs(r) > 0.01 && n<nmax
     end
     n=n+1;
 end
-TgExhaust=Tguess;
-%sGexhaust = fgProp('s',TgExhaust+273.15,nM);
+TgExhaust=Tguess
+sGexhaust = fgProp('s',TgExhaust+273.15,nM);
 eGexhaust=fgProp('e',TgExhaust+273.15,nM);
 
 %% Table & Diagrams %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

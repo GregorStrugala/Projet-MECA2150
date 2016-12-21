@@ -90,11 +90,11 @@ switch pressureLevel
         
         hold on
         plot(state(2,2).s,state(2,2).h,'o')
-        text(state(2,2).s,state(2,2).h,'2p')
+        text(state(2,2).s,state(2,2).h,'2''')
         
         hold on
         plot(state(2,3).s,state(2,3).h,'o')
-        text(state(2,3).s,state(2,3).h,'2"')
+        text(state(2,3).s,state(2,3).h,'2''''')
         
         hold on
         plot(state(3).s,state(3).h,'o')
@@ -114,11 +114,11 @@ switch pressureLevel
         
         hold on
         plot(state(6,2).s,state(6,2).h,'o')
-        text(state(6,2).s,state(6,2).h,'9p')
+        text(state(6,2).s,state(6,2).h,'9''')
         
         hold on
         plot(state(6,3).s,state(6,3).h,'o')
-        text(state(6,3).s,state(6,3).h,'9"')
+        text(state(6,3).s,state(6,3).h,'9''''')
         
         
         
@@ -136,7 +136,7 @@ switch pressureLevel
         
         hold on
         plot(state(2,2).s,state(2,2).h,'o')
-        text(state(2,2).s,state(2,2).h,'2p')
+        text(state(2,2).s,state(2,2).h,'2''')
         
         hold on
         plot(state(2,3).s,state(2,3).h,'o')

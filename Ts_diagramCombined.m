@@ -135,11 +135,11 @@ switch pressureLevel
         
         hold on
         plot(state(2,2).s,state(2,2).T,'o')
-        text(state(2,2).s,state(2,2).T,'2p')
+        text(state(2,2).s,state(2,2).T,'2''')
         
         hold on
         plot(state(2,3).s,state(2,3).T,'o')
-        text(state(2,3).s,state(2,3).T,'2"')
+        text(state(2,3).s,state(2,3).T,'2''''')
         
         hold on
         plot(state(3).s,state(3).T,'o')
